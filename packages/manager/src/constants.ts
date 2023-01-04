@@ -25,7 +25,7 @@ export const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 export const DOCS_BASE_URL = 'https://linode.com';
 export const COMMUNITY_BASE_URL = 'https://linode.com/community/';
 export const DOCS_SEARCH_URL =
-  'https://linode.com/docs/search/?sections=guides&q=';
+  'https://www.linode.com/docs/topresults/?docType=products%2Cguides%2Capi%2Creference-architecture&lndq=';
 export const COMMUNITY_SEARCH_URL =
   'https://linode.com/community/questions/search?query=';
 export const ALGOLIA_APPLICATION_ID =
@@ -333,6 +333,11 @@ export const MOCK_SERVICE_WORKER =
 
 // Maximum payment methods
 export const MAXIMUM_PAYMENT_METHODS = 6;
+
+// Default payment limits of Braintree payments in USD ($)
+export const PAYMENT_MIN = 5;
+export const PAYMENT_SOFT_MAX = 2_000;
+export const PAYMENT_HARD_MAX = 50_000;
 
 // Price of LKE's High Availability offering in USD
 export const HIGH_AVAILABILITY_PRICE =
