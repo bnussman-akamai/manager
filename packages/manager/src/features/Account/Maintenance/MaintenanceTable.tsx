@@ -127,7 +127,7 @@ export const MaintenanceTable = ({ type }: Props) => {
 
     if (data?.results === 0) {
       return (
-        <TableRowEmptyState message={`No ${type} maintenance.`} colSpan={7} />
+        <TableRowEmptyState message={`No account maintenance.`} colSpan={7} />
       );
     }
 
