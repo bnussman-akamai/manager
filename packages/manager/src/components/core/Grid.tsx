@@ -257,5 +257,5 @@ const Grid = React.forwardRef<any, GridProps>(function Grid(
 // @ts-ignore 😣
 const StyledGrid = withStyles(styles, { name: 'MuiGrid' })(Grid);
 
-export { GridProps };
+export type { GridProps };
 export default StyledGrid;

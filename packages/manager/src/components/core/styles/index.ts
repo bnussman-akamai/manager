@@ -50,6 +50,6 @@ interface Theme extends _Theme {
   status: any;
 }
 
-export { Theme };
+export type { Theme };
 
 export { default as useMediaQuery } from '@mui/material/useMediaQuery';

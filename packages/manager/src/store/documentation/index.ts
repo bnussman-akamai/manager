@@ -1,6 +1,7 @@
 import { Action, Reducer } from 'redux';
+import { Doc } from 'src/types/Documentation';
 
-export type State = Linode.Doc[];
+export type State = Doc[];
 
 interface ClearType extends Action {
   type: typeof CLEAR;
@@ -8,7 +9,7 @@ interface ClearType extends Action {
 
 interface SetType extends Action {
   type: typeof SET;
-  payload: Linode.Doc[];
+  payload: Doc[];
 }
 
 const CLEAR = '@@manager/documentation/CLEAR';
@@ -18,12 +19,12 @@ export const clearDocs = (): ClearType => ({
   type: CLEAR,
 });
 
-export const setDocs = (docs: Linode.Doc[]): SetType => ({
+export const setDocs = (docs: Doc[]): SetType => ({
   type: SET,
   payload: docs,
 });
 
-export const defaultState: Linode.Doc[] = [];
+export const defaultState: Doc[] = [];
 
 const documentation: Reducer<State> = (
   state = defaultState,

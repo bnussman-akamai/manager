@@ -2,30 +2,29 @@
   "compilerOptions": {
     /* Language and Environment */
     "jsx": "react",
-    "lib": ["dom", "es2017"],
+    "lib": [
+      "dom",
+      "es2017"
+    ],
     "target": "es5",
-
     /* Modules */
     "baseUrl": ".",
-    "moduleResolution": "node",
+    "isolatedModules": true,
+    "moduleResolution": "Node",
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": [
+        "src/*"
+      ]
     },
     "resolveJsonModule": true,
-    "rootDir": "src",
-
     /* JavaScript Support */
     "allowJs": false,
-
     /* Emit */
-    "downlevelIteration": true,
     "outDir": "build/dist",
     "sourceMap": true,
-
     /* Interop Constraints */
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-
     /* Type Checking */
     "allowUnreachableCode": false,
     "module": "esnext",
@@ -35,22 +34,11 @@
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-
     /* Completeness */
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "exclude": [
-    "acceptance-tests",
-    "build",
-    "config",
-    "cypress.config.ts",
-    "cypress",
-    "e2e",
-    "jest",
-    "node_modules",
-    "scripts",
-    "src/components/Storyshots.test.tsx",
-    "src/setupTests.ts",
-    "webpack"
+  "include": [
+    "src",
+    "package.json",
   ]
 }

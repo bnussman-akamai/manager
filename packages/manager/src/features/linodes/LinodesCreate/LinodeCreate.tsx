@@ -73,6 +73,7 @@ import Button from 'src/components/Button';
 import Box from 'src/components/core/Box';
 import DocsLink from 'src/components/DocsLink';
 import { sendEvent } from 'src/utilities/ga';
+import { Doc } from 'src/types/Documentation';
 
 type ClassNames =
   | 'form'
@@ -771,7 +772,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, CombinedProps> = (
 });
 
 interface StateProps {
-  documentation: Linode.Doc[];
+  documentation: Doc[];
 }
 
 const mapStateToProps: MapStateToProps<

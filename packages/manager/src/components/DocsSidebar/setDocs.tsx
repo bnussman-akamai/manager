@@ -5,17 +5,17 @@ import {
   clearDocs as _clearDocs,
   setDocs as _setDocs,
 } from 'src/store/documentation';
+import { Doc } from 'src/types/Documentation';
 
 export type SetDocsProps = DispatchProps;
 
-type RequestDocs = (ownProps: any) => Linode.Doc[];
+type RequestDocs = (ownProps: any) => Doc[];
 
 type UpdateCond = (prevProps: any, nextProps: any) => boolean;
 
-const setDocsHOC = (
-  docs: Linode.Doc[] | RequestDocs,
-  updateCond?: UpdateCond
-) => <OriginalProps extends {}>(
+const setDocsHOC = (docs: Doc[] | RequestDocs, updateCond?: UpdateCond) => <
+  OriginalProps extends {}
+>(
   Component: React.ComponentType<OriginalProps>
 ) => {
   class SetDocumentation extends React.Component<
@@ -51,7 +51,7 @@ const setDocsHOC = (
   const mapDispatchToProps: MapDispatchToProps<DispatchProps, OriginalProps> = (
     dispatch
   ) => ({
-    setDocs: (d: Linode.Doc[]) => dispatch(_setDocs(d)),
+    setDocs: (d: Doc[]) => dispatch(_setDocs(d)),
     clearDocs: () => dispatch(_clearDocs()),
   });
 
@@ -63,7 +63,7 @@ const setDocsHOC = (
 };
 
 interface DispatchProps {
-  setDocs: (d: Linode.Doc[]) => void;
+  setDocs: (d: Doc[]) => void;
   clearDocs: () => void;
 }
 

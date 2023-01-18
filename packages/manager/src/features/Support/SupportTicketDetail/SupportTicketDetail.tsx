@@ -30,6 +30,7 @@ import ErrorState from 'src/components/ErrorState';
 import Grid from 'src/components/Grid';
 import Notice from 'src/components/Notice';
 import withProfile, { ProfileProps } from 'src/components/withProfile';
+import { Doc } from 'src/types/Documentation';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 import formatDate from 'src/utilities/formatDate';
 import { getLinkTargets } from 'src/utilities/getEventsActionLink';
@@ -130,7 +131,7 @@ export class SupportTicketDetail extends React.Component<CombinedProps, State> {
     ),
   };
 
-  static docs: Linode.Doc[] = [
+  static docs: Doc[] = [
     {
       title: 'Linode Support',
       src: 'https://linode.com/docs/platform/billing-and-support/support/',

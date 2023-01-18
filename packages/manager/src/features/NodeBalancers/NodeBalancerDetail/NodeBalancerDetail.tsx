@@ -49,6 +49,7 @@ import { NodeBalancerProvider } from './context';
 import NodeBalancerConfigurations from './NodeBalancerConfigurations';
 import NodeBalancerSettings from './NodeBalancerSettings';
 import NodeBalancerSummary from './NodeBalancerSummary';
+import { Doc } from 'src/types/Documentation';
 
 type RouteProps = RouteComponentProps<{ nodeBalancerId?: string }>;
 
@@ -221,7 +222,7 @@ class NodeBalancerDetail extends React.Component<CombinedProps, State> {
       : undefined;
   };
 
-  static docs: Linode.Doc[] = [
+  static docs: Doc[] = [
     {
       title: 'Getting Started with NodeBalancers',
       src:

@@ -36,6 +36,7 @@ import Paper from 'src/components/core/Paper';
 import Typography from 'src/components/core/Typography';
 import { oneClickApps, AppCategory } from 'src/features/OneClickApps/FakeSpec';
 import { sendMarketplaceSearchEvent } from 'src/utilities/ga';
+import { Doc } from 'src/types/Documentation';
 
 type ClassNames = 'main' | 'sidebar' | 'searchAndFilter' | 'search' | 'filter';
 
@@ -410,7 +411,7 @@ class FromAppsContent extends React.Component<CombinedProps, State> {
 const styled = withStyles(styles);
 
 interface StateProps {
-  documentation: Linode.Doc[];
+  documentation: Doc[];
 }
 
 const mapStateToProps: MapStateToProps<

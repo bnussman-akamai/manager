@@ -34,6 +34,7 @@ import GoTo from './GoTo';
 import { databaseEventsHandler } from './queries/databases';
 import { domainEventsHandler } from './queries/domains';
 import { volumeEventsHandler } from './queries/volumes';
+import { Doc } from './types/Documentation';
 
 interface Props {
   toggleTheme: () => void;
@@ -234,7 +235,7 @@ interface StateProps {
   images?: Image[];
   types?: string[];
   regions?: Region[];
-  documentation: Linode.Doc[];
+  documentation: Doc[];
   isLoggedInAsCustomer: boolean;
   linodesLoading: boolean;
   linodesError?: APIError[];
