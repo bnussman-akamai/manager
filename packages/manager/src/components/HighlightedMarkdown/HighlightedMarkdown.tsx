@@ -10,13 +10,13 @@ import { unsafe_MarkdownIt } from 'src/utilities/markdown';
 import sanitize from 'sanitize-html';
 import apache from 'highlight.js/lib/languages/apache';
 import bash from 'highlight.js/lib/languages/bash';
-import js from 'highlight.js/lib/languages/javascript';
+import javascript from 'highlight.js/lib/languages/javascript';
 import nginx from 'highlight.js/lib/languages/nginx';
 import yaml from 'highlight.js/lib/languages/yaml';
 
 hljs.registerLanguage('apache', apache);
 hljs.registerLanguage('bash', bash);
-hljs.registerLanguage('javascript', js);
+hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('nginx', nginx);
 hljs.registerLanguage('yaml', yaml);
 
@@ -34,18 +34,19 @@ export type SupportedLanguage =
   | 'bash'
   | 'javascript'
   | 'nginx'
-  | 'yaml';
+  | 'yaml'
+  | 'shell';
 
 export interface HighlightedMarkdownProps {
+  className?: string;
   textOrMarkdown: string;
   language?: SupportedLanguage;
   sanitizeOptions?: sanitize.IOptions;
-  className?: string;
 }
 
 export const HighlightedMarkdown = (props: HighlightedMarkdownProps) => {
   const classes = useStyles();
-  const { language, textOrMarkdown, sanitizeOptions, className } = props;
+  const { className, language, textOrMarkdown, sanitizeOptions } = props;
   const rootRef = React.useRef<HTMLDivElement>(null);
 
   /**
