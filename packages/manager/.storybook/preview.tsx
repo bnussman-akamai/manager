@@ -1,40 +1,41 @@
-// .storybook/preview.js
-import { StyledEngineProvider } from '@mui/material/styles';
-import { select, withKnobs } from '@storybook/addon-knobs';
-import { MINIMAL_VIEWPORTS } from '@storybook/addon-viewport';
 import React from 'react';
-import '../public/fonts/fonts.css';
-import CssBaseline from '../src/components/core/CssBaseline';
-import { ThemeProvider } from '../src/components/core/styles';
-import '../src/index.css';
+import { MINIMAL_VIEWPORTS } from '@storybook/addon-viewport';
 import { dark, light } from '../src/themes';
-import { wrapWithTheme } from '../src/utilities/testHelpers';
-
-const options = {
-  dark,
-  light,
-};
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { StyledEngineProvider } from '@mui/material/styles';
+import { Provider } from 'react-redux';
+import { Provider as LDProvider } from 'launchdarkly-react-client-sdk/lib/context';
+import { ThemeProvider } from '../src/components/core/styles';
+import { SnackbarProvider } from 'notistack';
+import { MemoryRouter } from 'react-router-dom';
+import store from '../src/store';
+import '../src/index.css';
+import '../public/fonts/fonts.css';
 
 export const decorators = [
-  withKnobs,
   (Story) => {
-    const _key = select('theme', ['light', 'dark'], 'light');
-
-    return wrapWithTheme(
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={options[_key]}>
-          <CssBaseline />
-          {/* Keep this in case we want to change the background color based on the mode */}
-          {/* <div
-          style={{
-            backgroundColor: options[_key]().bg.app,
-          }}
-        > */}
-          <Story />
-          {/* </div> */}
-        </ThemeProvider>
-      </StyledEngineProvider>
-    );
+    return (
+      // <Provider store={store}>
+        <QueryClientProvider client={new QueryClient()}>
+          <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={light}>
+              <LDProvider
+                value={{
+                  flags: {},
+                  flagKeyMap: {},
+                }}
+              >
+                <SnackbarProvider>
+                  <MemoryRouter>
+                    <Story />
+                  </MemoryRouter>
+                </SnackbarProvider>
+              </LDProvider>
+            </ThemeProvider>
+          </StyledEngineProvider>
+        </QueryClientProvider>
+      // </Provider>
+   );
   },
 ];
 
