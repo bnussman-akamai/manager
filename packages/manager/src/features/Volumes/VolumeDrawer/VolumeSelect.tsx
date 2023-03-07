@@ -44,16 +44,14 @@ class VolumeSelect extends React.Component<CombinedProps, State> {
     }
   }
 
-  getSelectedVolume = (linodeId?: number) => {
-    if (!linodeId) {
-      return -1;
+  getSelectedVolume = (id: number | undefined) => {
+    if (!id) {
+      return undefined;
     }
 
-    const { volumes } = this.state;
-    const idx = volumes.findIndex(
-      (linode) => Number(linodeId) === Number(linode.value)
+    return this.state.volumes.find(
+      (option) => Number(id) === Number(option.value)
     );
-    return idx > -1 ? volumes[idx] : -1;
   };
 
   setSelectedVolume = (selected: Item<number>) => {

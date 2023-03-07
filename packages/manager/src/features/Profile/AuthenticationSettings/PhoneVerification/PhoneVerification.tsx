@@ -244,6 +244,7 @@ export const PhoneVerification = () => {
                 })}
               >
                 <Select
+                  label="Phone Number"
                   onFocus={() => setIsPhoneInputFocused(true)}
                   onBlur={() => setIsPhoneInputFocused(false)}
                   styles={customStyles}

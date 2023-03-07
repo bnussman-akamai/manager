@@ -437,9 +437,10 @@ class UpdateContactInformationForm extends React.Component<
                   fields.state
                     ? value === fields.state
                     : value === account.state
-                ) ?? ''
+                ) ?? null
               }
               textFieldProps={{
+                // @ts-expect-error sorry 🤷🏽‍♂️
                 'data-qa-contact-state-province': true,
               }}
             />

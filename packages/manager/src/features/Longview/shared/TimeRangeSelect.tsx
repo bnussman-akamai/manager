@@ -112,6 +112,8 @@ const TimeRangeSelect: React.FC<Props> = (props) => {
 
   return (
     <Select
+      label="Time Range"
+      hideLabel
       {...restOfSelectProps}
       small
       onChange={handleChange}

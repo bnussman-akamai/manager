@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IndicatorProps } from 'react-select';
+import { LoadingIconProps } from 'react-select/src/components/indicators';
 import CircularProgress from 'src/components/core/CircularProgress';
 import {
   createStyles,
@@ -18,7 +18,7 @@ const styles = (theme: Theme) =>
     },
   });
 
-interface Props extends IndicatorProps<any, any> {}
+interface Props extends LoadingIconProps<any, any> {}
 
 type CombinedProps = Props & WithStyles<ClassNames>;
 

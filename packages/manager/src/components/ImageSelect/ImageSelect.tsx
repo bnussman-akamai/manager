@@ -189,7 +189,7 @@ export const ImageSelect: React.FC<Props> = (props) => {
                   selectedImageID || '',
                   options
                 )}
-                errorText={error || imageError}
+                errorText={error?.[0]?.reason || imageError}
                 components={{ Option: ImageOption, SingleValue }}
                 {...reactSelectProps}
                 className={classNames}

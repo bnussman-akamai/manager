@@ -177,7 +177,6 @@ const GoTo: React.FC<CombinedProps> = (props) => {
           openMenuOnClick={false}
           isClearable={false}
           isMulti={false}
-          value={false}
           menuIsOpen={true}
         />
       </div>

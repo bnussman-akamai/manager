@@ -80,7 +80,7 @@ export const LinodeMultiSelect: React.FC<Props> = (props) => {
         );
         return {
           value: thisLinodeID,
-          label: thisLinode?.label ?? thisLinodeID,
+          label: thisLinode?.label ?? String(thisLinodeID),
         };
       })
     : undefined;

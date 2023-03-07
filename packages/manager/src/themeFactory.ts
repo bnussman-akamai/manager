@@ -6,7 +6,7 @@ type ThemeName = 'lightTheme' | 'darkTheme';
 
 type Fonts = typeof primaryFonts;
 
-type MergeTypes<A, B> = Omit<A, keyof B> &
+export type MergeTypes<A, B> = Omit<A, keyof B> &
   Omit<B, keyof A> &
   { [K in keyof A & keyof B]: A[K] | B[K] };
 

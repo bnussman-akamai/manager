@@ -88,7 +88,9 @@ const TagsInput: React.FC<Props> = (props) => {
     : labelError ||
       tagError ||
       generalError ||
-      (accountTagsError !== null && 'There was an error retrieving your tags.');
+      (accountTagsError !== null
+        ? 'There was an error retrieving your tags.'
+        : undefined);
 
   return (
     <Select
