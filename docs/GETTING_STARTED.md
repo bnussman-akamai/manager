@@ -50,7 +50,7 @@ Since Cloud Manager was generated using Create React App, `yarn build` can be us
 
     yarn install:all
 
-    yarn workspace linode-manager build
+    pnpm --filter \"linode-manager\" build
 
 ```
 

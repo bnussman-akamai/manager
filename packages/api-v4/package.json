@@ -46,7 +46,7 @@
     "yup": "^0.32.9"
   },
   "scripts": {
-    "start": "concurrently --raw \"tsc -w --preserveWatchOutput\" \"tsup --watch\"",
+    "dev": "concurrently --raw \"tsc -w --preserveWatchOutput\" \"tsup --watch\"",
     "build": "concurrently --raw \"tsc\" \"tsup\"",
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",

@@ -38,7 +38,7 @@ yarn test linode
 To run a test in debug mode, add a `debugger` breakpoint inside one of the test cases, then run:
 
 ```
-yarn workspace linode-manager run test:debug
+pnpm --filter \"linode-manager\" run test:debug
 ```
 
 Test execution will stop at the debugger statement, and you will be able to use Chrome's normal debugger to step through the tests (open `chrome://inspect/#devices` in Chrome).
