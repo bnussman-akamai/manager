@@ -1,7 +1,7 @@
 import { AccountMaintenance } from '@linode/api-v4/lib/account';
 import { getAccountMaintenance } from '@linode/api-v4/lib/account/maintenance';
 import { APIError, ResourcePage } from '@linode/api-v4/lib/types';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getAll } from 'src/utilities/getAll';
 import { queryPresets } from './base';
 

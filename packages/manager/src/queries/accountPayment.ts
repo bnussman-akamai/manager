@@ -5,7 +5,7 @@ import {
   PaymentMethod,
 } from '@linode/api-v4/lib/account';
 import { APIError, ResourcePage } from '@linode/api-v4/lib/types';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useGrants } from 'src/queries/profile';
 import { getAll } from 'src/utilities/getAll';
 import { queryPresets } from './base';

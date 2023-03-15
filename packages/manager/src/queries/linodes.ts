@@ -1,6 +1,6 @@
 import { NetworkTransfer } from '@linode/api-v4/lib/account/types';
 import { APIError, ResourcePage } from '@linode/api-v4/lib/types';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getAll } from 'src/utilities/getAll';
 import { listToItemsByID, queryPresets } from './base';
 import { parseAPIDate } from 'src/utilities/date';
