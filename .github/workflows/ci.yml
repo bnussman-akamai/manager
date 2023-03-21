@@ -275,7 +275,7 @@ jobs:
           name: packages-api-v4-lib
           path: packages/api-v4
       - run: yarn --frozen-lockfile
-      - run: yarn workspace linode-manager run build-storybook
+      - run: NODE_OPTIONS=--max_old_space_size=4096 yarn workspace linode-manager run build-storybook
       - uses: actions/upload-artifact@v3
         with:
           name: storybook-build
