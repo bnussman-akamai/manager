@@ -17,7 +17,6 @@ import {
   useQueryClient,
 } from 'react-query';
 
-
 const queryKey = 'events';
 
 export const useEventsPolling = (
@@ -32,13 +31,33 @@ export const useEventsPolling = (
     async () => {
       const events = await getEvents(
         { page_size: 25 },
+        // {
+        //   read: false,
+        //   created: {
+        //     '+gte': DateTime.fromMillis(mountTime, {
+        //       zone: 'utc',
+        //     }).toFormat(ISO_DATETIME_NO_TZ_FORMAT),
+        //   },
+        // }
         {
           read: false,
-          created: {
-            '+gte': DateTime.fromMillis(mountTime, { zone: 'utc' }).toFormat(
-              ISO_DATETIME_NO_TZ_FORMAT
-            ),
-          },
+          '+or': [
+            {
+              created: {
+                '+gte': DateTime.fromMillis(mountTime, {
+                  zone: 'utc',
+                }).toFormat(ISO_DATETIME_NO_TZ_FORMAT),
+              },
+            },
+            {
+              created: {
+                '+lt': DateTime.fromMillis(mountTime, {
+                  zone: 'utc',
+                }).toFormat(ISO_DATETIME_NO_TZ_FORMAT),
+              },
+              status: { '+or': ['scheduled, started'] },
+            },
+          ],
         }
       );
       setIntervalMultiplier(Math.min(intervalMultiplier + 1, 16));

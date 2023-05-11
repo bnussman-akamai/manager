@@ -28,6 +28,7 @@ import { useHistory } from 'react-router-dom';
 import { useLinodesQuery } from 'src/queries/linodes/linodes';
 import { useOrder } from 'src/hooks/useOrder';
 import { usePagination } from 'src/hooks/usePagination';
+import { useEventsPolling } from 'src/queries/events';
 
 export interface LinodeHandlers {
   onOpenPowerDialog: (action: Action) => void;
@@ -50,6 +51,8 @@ export const LinodesLanding = () => {
   const [rescueDialogOpen, setRescueDialogOpen] = React.useState(false);
   const [linodeResizeOpen, setResizeDialogOpen] = React.useState(false);
   const [linodeMigrateOpen, setMigrateDialogOpen] = React.useState(false);
+
+  const { data: events } = useEventsPolling();
 
   const [selectedLinodeId, setSelectedLinodeId] = React.useState<
     number | undefined
@@ -132,6 +135,7 @@ export const LinodesLanding = () => {
         onButtonClick={() => history.push('/linodes/create')}
         docsLink="https://www.linode.com/docs/platform/billing-and-support/linode-beginners-guide/"
       />
+      <pre>{JSON.stringify(events, null, 2)}</pre>
       <Table>
         <TableHead>
           <TableRow>

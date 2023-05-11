@@ -14,7 +14,7 @@ import {
   WithQueryClientProps,
   withQueryClient,
 } from 'src/containers/withQueryClient.container';
-import { startEventsInterval } from 'src/events';
+// import { startEventsInterval } from 'src/events';
 import { queryKey as accountQueryKey } from 'src/queries/account';
 import { redirectToLogin } from 'src/session';
 import { ApplicationState } from 'src/store';
