@@ -1,7 +1,12 @@
+import React from 'react';
+import { EventWithStore } from 'src/events';
+import { DateTime } from 'luxon';
 import { Event, getEvents, markEventRead } from '@linode/api-v4/lib/account';
 import { APIError, Filter, ResourcePage } from '@linode/api-v4/lib/types';
-import { DateTime } from 'luxon';
-import React from 'react';
+import { INTERVAL, ISO_DATETIME_NO_TZ_FORMAT } from 'src/constants';
+import { linodeEventsHandler } from './linodes/events';
+import { domainEventsHandler } from './domains';
+import { volumeEventsHandler } from './volumes';
 import {
   InfiniteData,
   QueryClient,
@@ -11,10 +16,7 @@ import {
   useQuery,
   useQueryClient,
 } from 'react-query';
-import { INTERVAL, ISO_DATETIME_NO_TZ_FORMAT } from 'src/constants';
-import { linodeEventsHandler } from './linodes/events';
-import { volumeEventsHandler } from './volumes';
-import { databaseEventsHandler } from './databases';
+
 
 const queryKey = 'events';
 
@@ -56,15 +58,16 @@ export const useEventsPolling = (
 
         if (options?.isMainPolling) {
           for (const event of inProgressEvents) {
+            // Mark event as read if it isn *not* considered "in progress"
             if (!['scheduled', 'started'].includes(event.status)) {
               markEventRead(event.id);
             }
 
+            // Keep other Events queries up to date
             updateEventsCache(queryClient, [queryKey, 'infinite'], event);
 
-            linodeEventsHandler({ event, queryClient });
-            volumeEventsHandler({ event, queryClient });
-            databaseEventsHandler({ event, queryClient });
+            // Call per-entity event handlers
+            invokeEventHandlers({ event, queryClient });
           }
         }
       },
@@ -122,3 +125,15 @@ const updateEventsCache = (
     }
   }
 };
+
+function invokeEventHandlers({ event, queryClient }: EventWithStore) {
+  if (event.action.startsWith('linode')) {
+    linodeEventsHandler({ event, queryClient });
+  }
+  if (event.action.startsWith('domain')) {
+    domainEventsHandler({ event, queryClient });
+  }
+  if (event.action.startsWith('volume')) {
+    volumeEventsHandler({ event, queryClient });
+  }
+}
