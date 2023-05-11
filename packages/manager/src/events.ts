@@ -26,7 +26,7 @@ import { ApplicationStore } from './store';
 
 export interface EventWithStore {
   event: Event;
-  store: ApplicationStore;
+  store?: ApplicationStore;
   queryClient: QueryClient;
 }
 

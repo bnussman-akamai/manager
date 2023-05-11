@@ -25,11 +25,11 @@ import { SxProps } from '@mui/system';
 import { useNotificationsQuery } from 'src/queries/accountNotifications';
 import { LinodeHandlers } from '../LinodesLanding';
 import { useTypeQuery } from 'src/queries/types';
-import useEvents from 'src/hooks/useEvents';
 import { useStyles } from './LinodeRow.style';
 import { useAllAccountMaintenanceQuery } from 'src/queries/accountMaintenance';
 import { useNotificationContext } from 'src/features/NotificationCenter/NotificationContext';
 import { BackupStatus } from 'src/components/BackupStatus/BackupStatus';
+import { useEventsPolling } from 'src/queries/events';
 
 type Props = Linode & { handlers: LinodeHandlers };
 
@@ -58,9 +58,9 @@ export const LinodeRow = (props: Props) => {
 
   const { data: linodeType } = useTypeQuery(type ?? '', type !== null);
 
-  const { events } = useEvents();
+  const { data: inProgressEvents } = useEventsPolling();
 
-  const recentEvent = events.find(
+  const recentEvent = inProgressEvents?.find(
     (e) => e.entity?.id === id && e.entity.type === 'linode'
   );
 

@@ -35,6 +35,7 @@ import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
 import { complianceUpdateContext } from './context/complianceUpdateContext';
 import { FlagSet } from './featureFlags';
 import { ManagerPreferences } from 'src/types/ManagerPreferences';
+import { useEventsPolling } from './queries/events';
 
 const useStyles = makeStyles((theme: Theme) => ({
   appFrame: {
@@ -190,6 +191,8 @@ const MainContent: React.FC<CombinedProps> = (props) => {
   const { account, profile, _isManagedAccount } = useAccountManagement();
 
   const username = profile?.username || '';
+
+  useEventsPolling({ isMainPolling: true });
 
   const [bannerDismissed, setBannerDismissed] = React.useState<boolean>(false);
 

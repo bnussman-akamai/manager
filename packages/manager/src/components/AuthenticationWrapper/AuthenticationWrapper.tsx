@@ -85,7 +85,7 @@ export class AuthenticationWrapper extends React.Component<CombinedProps> {
     ];
 
     // Start events polling
-    startEventsInterval(this.props.store, this.props.queryClient);
+    // startEventsInterval(this.props.store, this.props.queryClient);
 
     try {
       await Promise.all(dataFetchingPromises);
