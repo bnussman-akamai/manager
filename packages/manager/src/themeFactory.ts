@@ -824,13 +824,17 @@ export const base: ThemeOptions = {
     },
     MuiIconButton: {
       styleOverrides: {
-        root: {
+        root: ({ theme, ownerState }) => ({
           padding: 12,
+          color:
+            ownerState.color === 'default'
+              ? theme.palette.primary.main
+              : ownerState.color,
           '&:hover': {
-            color: primaryColors.main,
+            color: theme.palette.primary.main,
             backgroundColor: 'transparent',
           },
-        },
+        }),
         edgeEnd: {
           marginRight: 0,
         },
