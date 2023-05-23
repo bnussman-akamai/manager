@@ -382,6 +382,20 @@ const darkThemeOptions: ThemeOptions = {
         },
       },
     },
+    MuiIconButton: {
+      styleOverrides: {
+        root: ({ theme, ownerState }) => ({
+          color:
+            ownerState.color === 'default'
+              ? theme.palette.primary.light
+              : ownerState.color,
+          '&:hover': {
+            color: theme.palette.primary.light,
+            backgroundColor: 'transparent',
+          },
+        }),
+      },
+    },
     MuiInput: {
       styleOverrides: {
         input: {
