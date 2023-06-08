@@ -1,5 +1,4 @@
 import { StackScript, UserDefinedField } from '@linode/api-v4/lib/stackscripts';
-import { decode } from 'he';
 import * as React from 'react';
 import Divider from 'src/components/core/Divider';
 import { styled } from '@mui/material/styles';
@@ -50,7 +49,7 @@ export const AppPanelSection: React.FC<Props> = (props) => {
       {apps.length > 0 ? (
         <AppPanelGrid container spacing={2}>
           {apps.map((eachApp) => {
-            const decodedLabel = decode(eachApp.label);
+            const decodedLabel = decodeURIComponent(eachApp.label);
             const isCluster =
               decodedLabel.endsWith('Cluster ') &&
               eachApp.user_defined_fields.some(
