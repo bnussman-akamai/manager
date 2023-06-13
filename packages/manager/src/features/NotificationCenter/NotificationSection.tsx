@@ -10,7 +10,6 @@ import { ExtendedAccordion } from 'src/components/ExtendedAccordion/ExtendedAcco
 import Box from 'src/components/core/Box';
 import Hidden from 'src/components/core/Hidden';
 import Typography from 'src/components/core/Typography';
-import { menuLinkStyle } from 'src/features/TopMenu/UserMenu/UserMenu';
 import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -25,7 +24,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
     },
   },
   menuItemLink: {
-    ...menuLinkStyle(theme.textColors.linkActiveLight),
   },
   showMore: {
     fontSize: 14,

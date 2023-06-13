@@ -1,12 +1,5 @@
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import {
-  Menu as ReachMenu,
-  MenuButton,
-  MenuItems,
-  MenuLink,
-  MenuPopover,
-} from '@reach/menu-button';
-import { positionRight } from '@reach/popover';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -18,6 +11,10 @@ import Typography from 'src/components/core/Typography';
 import { GravatarByEmail } from 'src/components/GravatarByEmail';
 import useAccountManagement from 'src/hooks/useAccountManagement';
 import { useGrants } from 'src/queries/profile';
+import Popover from '@mui/material/Popover';
+import Button from 'src/components/Button/Button';
+import Stack from '@mui/material/Stack';
+import Box from 'src/components/core/Box';
 
 interface MenuLink {
   display: string;
@@ -25,35 +22,10 @@ interface MenuLink {
   hide?: boolean;
 }
 
-export const menuLinkStyle = (linkColor: string) => ({
-  lineHeight: 1,
-  '&[data-reach-menu-item]': {
-    display: 'flex',
-    alignItems: 'center',
-    color: linkColor,
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    padding: '8px 24px',
-    '&:focus, &:hover': {
-      backgroundColor: 'transparent',
-      color: linkColor,
-    },
-    '&[data-reach-menu-item][data-selected]:not(:hover)': {
-      backgroundColor: 'transparent',
-      color: linkColor,
-      outline: 'dotted 1px #c1c1c0',
-    },
-  },
-});
-
 const useStyles = makeStyles((theme: Theme) => ({
-  menu: {
-    transform: `translateY(${theme.spacing(1)})`,
-  },
   button: {
-    borderRadius: 30,
+    height: '100%',
     order: 4,
-    padding: theme.spacing(1),
     '&:hover, &.active': {
       '& $username': {
         color: theme.palette.primary.main,
@@ -98,10 +70,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     textOverflow: 'ellipsis',
     transition: theme.transitions.create(['color']),
     whiteSpace: 'nowrap',
-    // Hides username as soon as things start to scroll
-    [theme.breakpoints.down(1345)]: {
-      ...theme.visually.hidden,
-    },
   },
   menuItem: {
     fontFamily: 'LatoWeb',
@@ -115,57 +83,21 @@ const useStyles = makeStyles((theme: Theme) => ({
     ...theme.visually.hidden,
   },
   menuButton: {
+    height: '100%',
     display: 'flex',
     alignItems: 'center',
     lineHeight: 1,
-    paddingRight: 10,
     [theme.breakpoints.up('sm')]: {
       paddingLeft: 12,
     },
     [theme.breakpoints.down(360)]: {
       paddingLeft: 3,
     },
-    '&[data-reach-menu-button]': {
-      backgroundColor: 'transparent',
-      border: 'none',
-      borderRadius: 0,
-      color: '#c9c7c7',
-      cursor: 'pointer',
-      fontSize: '1rem',
-      height: 50,
-      textTransform: 'inherit',
-      '&[aria-expanded="true"]': {
-        background: theme.bg.app,
-        '& $caret': {
-          color: '#0683E3',
-          marginTop: 4,
-          transform: 'rotate(180deg)',
-        },
-      },
-      [theme.breakpoints.down('md')]: {
-        paddingRight: 12,
-        paddingLeft: 12,
-      },
-      [theme.breakpoints.down(360)]: {
-        paddingRight: theme.spacing(),
-        paddingLeft: theme.spacing(),
-      },
-    },
   },
   gravatar: {
     height: 30,
     width: 30,
     borderRadius: '50%',
-  },
-  menuPopover: {
-    '&[data-reach-menu], &[data-reach-menu-popover]': {
-      position: 'absolute',
-      top: 50,
-      zIndex: 3000,
-      [theme.breakpoints.down('lg')]: {
-        left: 0,
-      },
-    },
   },
   caret: {
     color: '#9ea4ae',
@@ -174,16 +106,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginLeft: 2,
     [theme.breakpoints.down('md')]: {
       display: 'none',
-    },
-  },
-  menuItemList: {
-    boxShadow: '0 2px 3px 3px rgba(0, 0, 0, 0.1)',
-    '&[data-reach-menu-items]': {
-      backgroundColor: theme.bg.bgPaper,
-      border: 'none',
-      padding: 0,
-      paddingBottom: theme.spacing(1.5),
-      width: 300,
     },
   },
   inlineUserName: {
@@ -195,14 +117,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.textColors.headlineStatic,
     fontSize: '.75rem',
     letterSpacing: 1.875,
-    marginBottom: theme.spacing(),
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(3),
-    padding: '16px 0 8px',
     textTransform: 'uppercase',
+    marginBottom: theme.spacing(),
+    lineHeight: 2,
   },
   profileWrapper: {
-    marginBottom: theme.spacing(2),
     '& > div': {
       whiteSpace: 'normal',
     },
@@ -211,14 +130,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     whiteSpace: 'normal',
     width: '100%',
   },
-  menuItemLink: menuLinkStyle(theme.textColors.linkActiveLight),
+  menuItemLink: {
+    ...theme.applyLinkStyles,
+    fontSize: '0.875rem',
+  },
   userName: {
     color: theme.textColors.headlineStatic,
     fontSize: '1.1rem',
-    marginTop: -1,
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(3),
-    paddingTop: theme.spacing(2),
   },
 }));
 
@@ -240,7 +158,7 @@ const profileLinks: MenuLink[] = [
   { display: 'Log Out', href: '/logout' },
 ];
 
-export const UserMenu: React.FC<{}> = () => {
+export const UserMenu = () => {
   const classes = useStyles();
 
   const {
@@ -253,6 +171,21 @@ export const UserMenu: React.FC<{}> = () => {
 
   const hasFullAccountAccess =
     grants?.global?.account_access === 'read_write' || !_isRestrictedUser;
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
 
   const accountLinks: MenuLink[] = React.useMemo(
     () => [
@@ -291,53 +224,71 @@ export const UserMenu: React.FC<{}> = () => {
   const renderLink = (menuLink: MenuLink) =>
     menuLink.hide ? null : (
       <Grid xs={12} key={menuLink.display}>
-        <MenuLink
-          as={Link}
+        <Link
           to={menuLink.href}
           className={classes.menuItemLink}
           data-testid={`menu-item-${menuLink.display}`}
+          style={{
+            display: 'flex',
+            paddingTop: 6,
+            paddingBottom: 6,
+          }}
         >
           {menuLink.display}
-        </MenuLink>
+        </Link>
       </Grid>
     );
 
   return (
-    <div>
-      <ReachMenu>
-        <Tooltip
-          title={'Profile & Account'}
-          disableTouchListener
-          enterDelay={500}
-          leaveDelay={0}
+    <>
+      <Tooltip
+        title="Profile & Account"
+        disableTouchListener
+        enterDelay={500}
+        leaveDelay={0}
+      >
+        <Button
+          aria-describedby={id}
+          variant="contained"
+          onClick={handleClick}
+          className={classes.menuButton}
         >
-          <MenuButton
-            className={classes.menuButton}
-            data-testid="nav-group-profile"
-          >
-            <GravatarByEmail
-              email={profile?.email ?? ''}
-              className={classes.userWrapper}
-            />
-            <Hidden mdDown>
-              <Typography className={classes.inlineUserName}>
-                {userName}
-              </Typography>
-            </Hidden>
+          <GravatarByEmail
+            email={profile?.email ?? ''}
+            className={classes.userWrapper}
+          />
+          <Hidden mdDown>
+            <Typography className={classes.inlineUserName}>
+              {userName}
+            </Typography>
+          </Hidden>
+          {open ? (
+            <KeyboardArrowUp className={classes.caret} />
+          ) : (
             <KeyboardArrowDown className={classes.caret} />
-          </MenuButton>
-        </Tooltip>
-        <MenuPopover
-          className={classes.menuPopover}
-          position={positionRight}
-          data-qa-user-menu
-        >
-          <MenuItems className={classes.menuItemList}>
+          )}
+        </Button>
+      </Tooltip>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        data-qa-user-menu
+      >
+        <Stack spacing={2} paddingY={2} paddingX={3}>
+          <Box>
             <div className={classes.userName}>
               <strong>{userName}</strong>
             </div>
+          </Box>
+          <Box>
             <div className={classes.menuHeader}>My Profile</div>
-            <Grid container>
+            <Grid container columnGap={3} flexWrap="nowrap">
               <Grid
                 xs={6}
                 wrap="nowrap"
@@ -355,32 +306,31 @@ export const UserMenu: React.FC<{}> = () => {
                 {profileLinks.slice(4).map(renderLink)}
               </Grid>
             </Grid>
+          </Box>
+          <Box>
             {_hasAccountAccess ? (
               <>
                 <div className={classes.menuHeader}>Account</div>
-                <Grid container>
-                  <Grid className={classes.accountColumn}>
-                    {accountLinks.map((menuLink) =>
-                      menuLink.hide ? null : (
-                        <MenuLink
-                          key={menuLink.display}
-                          as={Link}
-                          to={menuLink.href}
-                          className={classes.menuItemLink}
-                          data-testid={`menu-item-${menuLink.display}`}
-                        >
-                          {menuLink.display}
-                        </MenuLink>
-                      )
-                    )}
-                  </Grid>
-                </Grid>
+                <Stack spacing={1.5} paddingTop={1}>
+                  {accountLinks.map((menuLink) =>
+                    menuLink.hide ? null : (
+                      <Link
+                        key={menuLink.display}
+                        to={menuLink.href}
+                        className={classes.menuItemLink}
+                        data-testid={`menu-item-${menuLink.display}`}
+                      >
+                        {menuLink.display}
+                      </Link>
+                    )
+                  )}
+                </Stack>
               </>
             ) : null}
-          </MenuItems>
-        </MenuPopover>
-      </ReachMenu>
-    </div>
+          </Box>
+        </Stack>
+      </Popover>
+    </>
   );
 };
 
