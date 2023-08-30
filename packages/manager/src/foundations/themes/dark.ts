@@ -353,8 +353,6 @@ export const darkTheme: ThemeOptions = {
             borderColor: primaryColors.main,
             boxShadow: '0 0 2px 1px #222',
           },
-          backgroundColor: '#444',
-          border: '1px solid #222',
           color: primaryColors.text,
         },
       },
@@ -366,6 +364,14 @@ export const darkTheme: ThemeOptions = {
             color: '#eee',
           },
           color: '#eee',
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#444',
+          border: '1px solid #222',
         },
       },
     },

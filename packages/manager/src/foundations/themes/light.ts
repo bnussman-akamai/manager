@@ -719,8 +719,6 @@ export const lightTheme: ThemeOptions = {
             borderColor: '#00b159',
           },
           alignItems: 'center',
-          backgroundColor: '#fff',
-          border: '1px solid #ccc',
           boxSizing: 'border-box',
           [breakpoints.down('xs')]: {
             maxWidth: '100%',
@@ -763,10 +761,20 @@ export const lightTheme: ThemeOptions = {
             opacity: 0.42,
           },
           height: 'auto',
+          padding: '8px !important',
+        },
+        root: {
+          backgroundColor: '#fff',
+          border: '1px solid #ccc',
+          borderRadius: '0 !important',
         },
       },
     },
     MuiInputLabel: {
+      defaultProps: {
+        disableAnimation: true,
+        shrink: true,
+      },
       styleOverrides: {
         formControl: {
           position: 'relative',
@@ -839,6 +847,7 @@ export const lightTheme: ThemeOptions = {
     },
     MuiMenu: {
       defaultProps: {
+        marginThreshold: 0,
         slotProps: {
           backdrop: {
             invisible: true,
@@ -856,8 +865,8 @@ export const lightTheme: ThemeOptions = {
             [breakpoints.down('xs')]: {
               minWidth: 200,
             },
-            maxWidth: 200,
             maxHeight: 250,
+            maxWidth: 200,
             overflowX: 'hidden',
             overflowY: 'auto',
             padding: 4,
@@ -975,6 +984,9 @@ export const lightTheme: ThemeOptions = {
       },
     },
     MuiSelect: {
+      defaultProps: {
+        notched: false,
+      },
       styleOverrides: {
         disabled: {},
         icon: {
@@ -985,11 +997,6 @@ export const lightTheme: ThemeOptions = {
           opacity: 0.5,
           transition: 'color 225ms ease-in-out',
           width: 28,
-        },
-        select: {
-          '&:focus': {
-            backgroundColor: 'transparent',
-          },
         },
       },
     },
