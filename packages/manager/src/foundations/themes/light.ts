@@ -767,6 +767,10 @@ export const lightTheme: ThemeOptions = {
       },
     },
     MuiInputLabel: {
+      defaultProps: {
+        disableAnimation: true,
+        shrink: true,
+      },
       styleOverrides: {
         formControl: {
           position: 'relative',

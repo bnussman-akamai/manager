@@ -222,9 +222,6 @@ const Select = <
       */
       textFieldProps={{
         ...textFieldProps,
-        InputLabelProps: {
-          shrink: true,
-        },
         className: classNames(
           {
             [classes.inline]: inline,

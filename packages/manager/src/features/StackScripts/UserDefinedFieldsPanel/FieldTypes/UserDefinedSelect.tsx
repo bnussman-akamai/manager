@@ -1,4 +1,5 @@
 import { UserDefinedField } from '@linode/api-v4/lib/stackscripts';
+import TextField from '@mui/material/TextField';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import * as React from 'react';
@@ -8,7 +9,6 @@ import { InputLabel } from 'src/components/InputLabel';
 import { WrapperMenuItem } from 'src/components/MenuItem/MenuItem';
 import { Notice } from 'src/components/Notice/Notice';
 import { Radio } from 'src/components/Radio/Radio';
-import { TextField } from 'src/components/TextField';
 
 const useStyles = makeStyles((theme: Theme) => ({
   radioGroupLabel: {
