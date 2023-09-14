@@ -18,12 +18,12 @@ export interface LoadBalancerHandlers {
 }
 
 interface Props {
-  loadBalancer: Loadbalancer;
   handlers: LoadBalancerHandlers;
+  loadBalancer: Loadbalancer;
 }
 
-export const LoadBalancerRow = ({ loadBalancer, handlers }: Props) => {
-  const { id, label, regions } = loadBalancer;
+export const LoadBalancerRow = ({ handlers, loadBalancer }: Props) => {
+  const { id, label, regions, configurations } = loadBalancer;
   const { data: configurations } = useLoadBalancerConfigurationsQuery(id);
   const ports = configurations?.data.map((config) => config.port);
 

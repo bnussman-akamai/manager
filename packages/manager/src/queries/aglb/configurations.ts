@@ -4,6 +4,8 @@ import {
 } from '@linode/api-v4';
 import { useInfiniteQuery, useMutation, useQuery } from 'react-query';
 
+import { getAll } from 'src/utilities/getAll';
+
 import { QUERY_KEY } from './loadbalancers';
 
 import type {
@@ -20,7 +22,15 @@ export const useLoadBalancerConfigurationsQuery = (
   filter?: Filter
 ) => {
   return useQuery<ResourcePage<Configuration>, APIError[]>(
-    [QUERY_KEY, 'aglb', loadbalancerId, 'configurations', params, filter],
+    [
+      QUERY_KEY,
+      'aglb',
+      loadbalancerId,
+      'configurations',
+      'paginated',
+      params,
+      filter,
+    ],
     () => getLoadbalancerConfigurations(loadbalancerId, params, filter),
     { keepPreviousData: true }
   );
@@ -56,3 +66,35 @@ export const useLoadBalancerConfigurationMutation = (
       updateLoadbalancerConfiguration(loadbalancerId, configurationId, data)
   );
 };
+
+export const useAllLoadBalancerConfigurationsQuery = (
+  loadbalancerId: number,
+  params?: Params,
+  filter?: Filter
+) => {
+  return useQuery<Configuration[], APIError[]>(
+    [
+      QUERY_KEY,
+      'aglb',
+      loadbalancerId,
+      'configurations',
+      'all',
+      params,
+      filter,
+    ],
+    () => getAllConfigurations(loadbalancerId, params, filter),
+  );
+};
+
+const getAllConfigurations = (
+  id: number,
+  passedParams: Params = {},
+  passedFilter: Filter = {}
+) =>
+  getAll<Configuration>((params, filter) =>
+    getLoadbalancerConfigurations(
+      id,
+      { ...params, ...passedParams },
+      { ...filter, ...passedFilter }
+    )
+  )().then((data) => data.data);
