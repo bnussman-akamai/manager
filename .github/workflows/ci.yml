@@ -16,12 +16,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
+      - uses: oven-sh/setup-bun@v1
         with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
+          bun-version: latest
+      - run: bun install --yarn
       - run: yarn workspace @linode/validation run build
       - uses: actions/upload-artifact@v3
         with:
@@ -66,12 +64,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
+      - uses: oven-sh/setup-bun@v1
         with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
+          bun-version: latest
+      - run: bun install --yarn
       - uses: actions/download-artifact@v3
         with:
           name: packages-validation-lib
@@ -87,16 +83,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
       - uses: actions/download-artifact@v3
         with:
           name: packages-validation-lib
           path: packages/validation
-      - run: yarn --frozen-lockfile
       - run: yarn workspace @linode/api-v4 run build
       - uses: actions/upload-artifact@v3
         with:
@@ -151,11 +142,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
+      - uses: oven-sh/setup-bun@v1
         with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          bun-version: latest
+      - run: bun install --yarn
       - uses: actions/download-artifact@v3
         with:
           name: packages-validation-lib
@@ -164,7 +154,6 @@ jobs:
         with:
           name: packages-api-v4-lib
           path: packages/api-v4
-      - run: yarn --frozen-lockfile
       - run: yarn workspace linode-manager run test
 
   typecheck-manager:
@@ -176,11 +165,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - uses: actions/download-artifact@v3
         with:
           name: packages-validation-lib
@@ -189,7 +173,10 @@ jobs:
         with:
           name: packages-api-v4-lib
           path: packages/api-v4
-      - run: yarn --frozen-lockfile
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --yarn
       - run: yarn workspace linode-manager run typecheck
 
   build-manager:
@@ -202,11 +189,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - uses: actions/download-artifact@v3
         with:
           name: packages-validation-lib
@@ -215,7 +197,10 @@ jobs:
         with:
           name: packages-api-v4-lib
           path: packages/api-v4
-      - run: yarn --frozen-lockfile
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --yarn
       - run: yarn workspace linode-manager run build
       - uses: actions/upload-artifact@v3
         with:
@@ -264,11 +249,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.14"
-      - uses: actions/cache@v3
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - uses: actions/download-artifact@v3
         with:
           name: packages-validation-lib
@@ -277,7 +257,10 @@ jobs:
         with:
           name: packages-api-v4-lib
           path: packages/api-v4
-      - run: yarn --frozen-lockfile
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --yarn
       - run: yarn workspace linode-manager run build-storybook
       - uses: actions/upload-artifact@v3
         with:
