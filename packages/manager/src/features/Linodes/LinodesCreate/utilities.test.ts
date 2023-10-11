@@ -150,10 +150,6 @@ describe('filterOneClickApps', () => {
 });
 
 describe('handleAppLabel', () => {
-  jest.mock('he', () => ({
-    decode: jest.fn(),
-  }));
-
   it('should decode the label and remove "Cluster" when cluster_size is present', () => {
     const stackScript = stackScriptFactory.build({
       label: 'My StackScript Cluster ',

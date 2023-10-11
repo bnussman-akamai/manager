@@ -225,7 +225,7 @@ export interface Kernel {
   label: string;
   version: string;
   kvm: boolean;
-  xen: boolean;
+  // xen: boolean;
   architecture: KernelArchitecture;
   pvops: boolean;
   deprecated: boolean;

@@ -8,7 +8,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
 afterAll(() => server.close());
 afterEach(() => server.resetHandlers());
 
-require('@testing-library/jest-dom/extend-expect');
+import '@testing-library/jest-dom';
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -28,13 +28,13 @@ HTMLCanvasElement.prototype.getContext = () => {
  * have Refs.
  */
 
-jest.mock('chart.js', () => ({
+vi.mock('chart.js', () => ({
   _adapters: {
     _date: {
-      override: jest.fn(),
+      override: vi.fn(),
     },
   },
-  Chart: jest.fn(),
+  Chart: vi.fn(),
   defaults: {
     global: {
       defaultFontFamily: '',
@@ -44,10 +44,31 @@ jest.mock('chart.js', () => ({
   },
 }));
 
-jest.mock('highlight.js/lib/highlight', () => ({
+vi.mock('highlight.js/lib/highlight', () => ({
   default: {
-    configure: jest.fn(),
-    highlightBlock: jest.fn(),
-    registerLanguage: jest.fn(),
+    configure: vi.fn(),
+    highlightBlock: vi.fn(),
+    registerLanguage: vi.fn(),
   },
 }));
+
+const localStorageMock = (function () {
+  // eslint-disable-line wrap-iife
+  let store = {};
+  return {
+    clear() {
+      store = {};
+    },
+    getItem(key: string) {
+      return store[key];
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    setItem(key: string, value: any) {
+      store[key] = value?.toString() || '';
+    },
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });

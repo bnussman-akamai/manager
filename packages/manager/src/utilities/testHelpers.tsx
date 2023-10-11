@@ -30,13 +30,13 @@ import {
 } from 'src/store';
 
 export const mockMatchMedia = (matches: boolean = true) => {
-  window.matchMedia = jest.fn().mockImplementation((query) => {
+  window.matchMedia = vi.fn().mockImplementation((query) => {
     return {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
       matches,
       media: query,
       onchange: null,
-      removeListener: jest.fn(),
+      removeListener: vi.fn(),
     };
   });
 };
@@ -44,14 +44,14 @@ export const mockMatchMedia = (matches: boolean = true) => {
 const createMatchMedia = (width: number) => {
   return (query: string) => {
     return {
-      addEventListener: () => jest.fn(),
-      addListener: () => jest.fn(),
+      addEventListener: () => vi.fn(),
+      addListener: () => vi.fn(),
       dispatchEvent: () => true,
       matches: mediaQuery.match(query, { width }),
       media: '',
-      onchange: () => jest.fn(),
-      removeEventListener: () => jest.fn(),
-      removeListener: () => jest.fn(),
+      onchange: () => vi.fn(),
+      removeEventListener: () => vi.fn(),
+      removeListener: () => vi.fn(),
     };
   };
 };

@@ -2,6 +2,7 @@ import { Kernel } from '@linode/api-v4/lib/linodes/types';
 import { screen } from '@testing-library/react';
 import * as React from 'react';
 
+import cachedKernelData from 'src/cachedData/kernels.json';
 import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import {
@@ -11,18 +12,16 @@ import {
   sortCurrentKernels,
 } from './KernelSelect';
 
-const cachedKernelRequest = require('src/cachedData/kernels.json');
-
-const kernels = cachedKernelRequest.data.filter(
-  (thisKernel: Kernel) => thisKernel.kvm
-);
+const kernels = cachedKernelData.data.filter(
+  (thisKernel) => thisKernel.kvm
+) as Kernel[];
 
 const props: KernelSelectProps = {
   kernels,
-  onChange: jest.fn(),
+  onChange: vi.fn(),
 };
 
-jest.mock('src/components/EnhancedSelect/Select');
+vi.mock('src/components/EnhancedSelect/Select');
 
 describe('Kernel Select component', () => {
   it('should render a select with the correct number of options', () => {

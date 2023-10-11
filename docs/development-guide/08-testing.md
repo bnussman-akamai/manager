@@ -68,7 +68,7 @@ import { fireEvent } from "@testing-library/react";
 import { renderWithTheme } from "src/utilities/testHelpers";
 import Component from "./wherever";
 
-const props = { onClick: jest.fn() };
+const props = { onClick: vi.fn() };
 
 describe("My component", () => {
   it("should have some text", () => {
@@ -94,17 +94,17 @@ await wait(() => fireEvent.click(getByText('Delete')));
 
 Jest has substantial built-in mocking capabilities, and we use many of the available patterns. We generally use them to avoid making network requests in unit tests, but there are some other cases (mentioned below).
 
-In general, components that make network requests should take any request handlers as props. Then testing is as simple as passing `someProp: jest.fn()` and making assertions normally. When that isn't possible, you can do the following:
+In general, components that make network requests should take any request handlers as props. Then testing is as simple as passing `someProp: vi.fn()` and making assertions normally. When that isn't possible, you can do the following:
 
 ```js
-jest.mock("@linode/api-v4/lib/kubernetes", () => ({
-  getKubeConfig: () => jest.fn(),
+vi.mock("@linode/api-v4/lib/kubernetes", () => ({
+  getKubeConfig: () => vi.fn(),
 }));
 ```
 
 Some components, such as our ActionMenu, don't lend themselves well to unit testing (they often have complex DOM structures from MUI and it's hard to target). We have mocks for most of these components in a `__mocks__` directory adjacent to their respective components. To make use of these, just tell Jest to use the mock:
 
-    jest.mock('src/components/ActionMenu/ActionMenu');
+    vi.mock('src/components/ActionMenu/ActionMenu');
 
 Any `<ActionMenu>`s rendered by the test will be simplified versions that are easier to work with.
 

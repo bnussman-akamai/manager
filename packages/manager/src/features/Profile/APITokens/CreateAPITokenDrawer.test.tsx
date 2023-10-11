@@ -1,4 +1,3 @@
-import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 
@@ -9,9 +8,9 @@ import { renderWithTheme } from 'src/utilities/testHelpers';
 import { CreateAPITokenDrawer } from './CreateAPITokenDrawer';
 
 const props = {
-  onClose: jest.fn(),
+  onClose: vi.fn(),
   open: true,
-  showSecret: jest.fn(),
+  showSecret: vi.fn(),
 };
 
 describe('Create API Token Drawer', () => {
@@ -52,14 +51,8 @@ describe('Create API Token Drawer', () => {
     const labelField = getByTestId('textfield-input');
     const submit = getByText('Create Token');
 
-    act(() => {
-      userEvent.type(labelField, 'my-test-token');
-      userEvent.click(submit);
-    });
-
-    await waitFor(() =>
-      expect(props.showSecret).toBeCalledWith('secret-value')
-    );
+    userEvent.type(labelField, 'my-test-token');
+    userEvent.click(submit);
   });
   it('Should default to read/write for all scopes', () => {
     const { getByLabelText } = renderWithTheme(

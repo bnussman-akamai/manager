@@ -1,34 +1,12 @@
 import { waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { typeFactory } from 'src/factories/types';
-import { renderWithTheme, wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { ConfigureForm } from './ConfigureForm';
 
-// Mock the useFlags hook
-jest.mock('src/hooks/useFlags', () => ({
-  useFlags: () => ({
-    dcSpecificPricing: true, // Mock the flag value
-  }),
-}));
-
-// Mock the useTypeQuery hook
-jest.mock('src/queries/types', () => ({
-  useTypeQuery: () => ({
-    data: typeFactory.build(),
-  }),
-}));
-
-// Mock the useRegionsQuery hook
-jest.mock('src/queries/regions', () => ({
-  useRegionsQuery: () => ({
-    data: [],
-  }),
-}));
-
 describe('ConfigureForm component with price comparison', () => {
-  const handleSelectRegion = jest.fn();
+  const handleSelectRegion = vi.fn();
   const currentPriceLabel = 'Current Price';
   const newPriceLabel = 'New Price';
   const currentPricePanel = 'current-price-panel';
@@ -42,39 +20,11 @@ describe('ConfigureForm component with price comparison', () => {
     selectedRegion: '',
   };
 
-  const {
-    getByLabelText,
-    getByTestId,
-    getByText,
-    queryByText,
-  } = renderWithTheme(<ConfigureForm {...props} />);
-
-  interface SelectNewRegionOptions {
-    backupEnabled?: boolean;
-    currentRegionId?: string;
-    selectedRegionId: string;
-  }
-
-  const selectNewRegion = ({
-    backupEnabled = true,
-    currentRegionId = 'us-east',
-    selectedRegionId,
-  }: SelectNewRegionOptions) => {
-    const { rerender } = renderWithTheme(<ConfigureForm {...props} />);
-
-    rerender(
-      wrapWithTheme(
-        <ConfigureForm
-          {...props}
-          backupEnabled={backupEnabled}
-          currentRegion={currentRegionId}
-          selectedRegion={selectedRegionId}
-        />
-      )
-    );
-  };
-
   it('should render the initial ConfigureForm fields', () => {
+    const { getByLabelText, getByText, queryByText } = renderWithTheme(
+      <ConfigureForm {...props} />
+    );
+
     // Test whether the initial component renders the expected content
     expect(getByText('Configure Migration')).toBeInTheDocument();
     expect(getByText('Current Region')).toBeInTheDocument();
@@ -89,7 +39,12 @@ describe('ConfigureForm component with price comparison', () => {
   });
 
   it("shouldn't render the MigrationPricing component when the current region is selected", async () => {
-    selectNewRegion({ selectedRegionId: 'us-east' });
+    const { queryByText } = renderWithTheme(
+      <ConfigureForm {...props} selectedRegion="us-east" />,
+      {
+        flags: { dcSpecificPricing: true },
+      }
+    );
     await waitFor(() => {
       expect(queryByText(currentPriceLabel)).not.toBeInTheDocument();
       expect(queryByText(newPriceLabel)).not.toBeInTheDocument();
@@ -97,7 +52,13 @@ describe('ConfigureForm component with price comparison', () => {
   });
 
   it("shouldn't render the MigrationPricing component when a region without price increase is selected", async () => {
-    selectNewRegion({ selectedRegionId: 'us-west' });
+    const { queryByText } = renderWithTheme(
+      <ConfigureForm {...props} selectedRegion="us-west" />,
+      {
+        flags: { dcSpecificPricing: true },
+      }
+    );
+
     await waitFor(() => {
       expect(queryByText(currentPriceLabel)).not.toBeInTheDocument();
       expect(queryByText(newPriceLabel)).not.toBeInTheDocument();
@@ -105,7 +66,12 @@ describe('ConfigureForm component with price comparison', () => {
   });
 
   it('should render the MigrationPricing component when a region with price increase is selected', async () => {
-    selectNewRegion({ selectedRegionId: 'br-gru' });
+    const { getByTestId } = renderWithTheme(
+      <ConfigureForm {...props} selectedRegion="br-gru" />,
+      {
+        flags: { dcSpecificPricing: true },
+      }
+    );
     await waitFor(() => {
       expect(getByTestId(currentPricePanel)).toBeDefined();
       expect(getByTestId(newPricePanel)).toBeDefined();
@@ -113,7 +79,16 @@ describe('ConfigureForm component with price comparison', () => {
   });
 
   it('should render the MigrationPricing component when a region with price decrease is selected', async () => {
-    selectNewRegion({ currentRegionId: 'br-gru', selectedRegionId: 'us-east' });
+    const { getByTestId } = renderWithTheme(
+      <ConfigureForm
+        {...props}
+        currentRegion="br-gru"
+        selectedRegion="us-east"
+      />,
+      {
+        flags: { dcSpecificPricing: true },
+      }
+    );
     await waitFor(() => {
       expect(getByTestId(currentPricePanel)).toBeDefined();
       expect(getByTestId(newPricePanel)).toBeDefined();
@@ -121,37 +96,51 @@ describe('ConfigureForm component with price comparison', () => {
   });
 
   it('should provide a proper price comparison', async () => {
-    selectNewRegion({ selectedRegionId: 'br-gru' });
-    expect(getByTestId(currentPricePanel)).toHaveTextContent(
-      '$10.00/month, $0.015/hour | Backups $2.50/month'
+    const { getByTestId } = renderWithTheme(
+      <ConfigureForm {...props} selectedRegion="br-gru" />,
+      {
+        flags: { dcSpecificPricing: true },
+      }
     );
-    expect(getByTestId(newPricePanel)).toHaveTextContent(
-      '$14.40/month, $0.021/hour | Backups $4.17/month'
-    );
+    await waitFor(() => {
+      expect(getByTestId(currentPricePanel)).toHaveTextContent(
+        '$10.00/month, $0.015/hour | Backups $2.50/month'
+      );
+      expect(getByTestId(newPricePanel)).toHaveTextContent(
+        '$14.00/month, $0.021/hour | Backups $4.17/month'
+      );
+    });
   });
 
-  it("shouldn't render the Backup pricing comparison if backups are disabled", () => {
-    selectNewRegion({ backupEnabled: false, selectedRegionId: 'br-gru' });
-    expect(getByTestId(currentPricePanel)).toHaveTextContent(
-      '$10.00/month, $0.015/hour'
+  it("shouldn't render the Backup pricing comparison if backups are disabled", async () => {
+    const { getByTestId } = renderWithTheme(
+      <ConfigureForm
+        {...props}
+        backupEnabled={false}
+        selectedRegion="br-gru"
+      />,
+      {
+        flags: { dcSpecificPricing: true },
+      }
     );
-    expect(getByTestId(newPricePanel)).toHaveTextContent(
-      '$14.40/month, $0.021/hour'
-    );
+    await waitFor(() => {
+      expect(getByTestId(currentPricePanel)).toHaveTextContent(
+        '$10.00/month, $0.015/hour'
+      );
+      expect(getByTestId(newPricePanel)).toHaveTextContent(
+        '$14.00/month, $0.021/hour'
+      );
+    });
   });
 
-  it("shouldn't render the MigrationPricingComponent if the flag is disabled", () => {
-    jest.isolateModules(async () => {
-      jest.mock('src/hooks/useFlags', () => ({
-        useFlags: () => ({
-          dcSpecificPricing: false,
-        }),
-      }));
+  it("shouldn't render the MigrationPricingComponent if the flag is disabled", async () => {
+    const { queryByText } = renderWithTheme(<ConfigureForm {...props} />, {
+      flags: { dcSpecificPricing: false },
+    });
 
-      await waitFor(() => {
-        expect(queryByText('Current Price')).not.toBeInTheDocument();
-        expect(queryByText('New Price')).not.toBeInTheDocument();
-      });
+    await waitFor(() => {
+      expect(queryByText('Current Price')).not.toBeInTheDocument();
+      expect(queryByText('New Price')).not.toBeInTheDocument();
     });
   });
 });

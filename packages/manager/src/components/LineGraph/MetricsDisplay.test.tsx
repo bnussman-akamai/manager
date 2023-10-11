@@ -9,46 +9,70 @@ import { Typography } from 'src/components/Typography';
 import { light } from 'src/foundations/themes';
 import { formatPercentage } from 'src/utilities/statMetrics';
 
+const mockMetrics = {
+  average: 5.5,
+  last: 7.75,
+  length: 3,
+  max: 10,
+  total: 40,
+};
+
 describe('CPUMetrics', () => {
-  const mockMetrics = {
-    average: 5.5,
-    last: 7.75,
-    length: 3,
-    max: 10,
-    total: 40,
-  };
-
-  const wrapper = shallow(
-    <MetricsDisplay
-      classes={{
-        blue: 'blue',
-        darkGreen: '',
-        green: '',
-        legend: '',
-        lightGreen: '',
-        red: '',
-        root: '',
-        tableHeadInner: '',
-        text: '',
-        yellow: '',
-      }}
-      rows={[
-        {
-          data: mockMetrics,
-          format: formatPercentage,
-          legendColor: 'blue',
-          legendTitle: 'Legend Title',
-        },
-      ]}
-      theme={light}
-    />
-  );
-
   it('renders a table', () => {
+    const wrapper = shallow(
+      <MetricsDisplay
+        classes={{
+          blue: 'blue',
+          darkGreen: '',
+          green: '',
+          legend: '',
+          lightGreen: '',
+          red: '',
+          root: '',
+          tableHeadInner: '',
+          text: '',
+          yellow: '',
+        }}
+        rows={[
+          {
+            data: mockMetrics,
+            format: formatPercentage,
+            legendColor: 'blue',
+            legendTitle: 'Legend Title',
+          },
+        ]}
+        theme={light}
+      />
+    );
     expect(wrapper.find('Table')).toHaveLength(1);
   });
 
   it('renders Max, Avg, and Last table headers', () => {
+    const wrapper = shallow(
+      <MetricsDisplay
+        classes={{
+          blue: 'blue',
+          darkGreen: '',
+          green: '',
+          legend: '',
+          lightGreen: '',
+          red: '',
+          root: '',
+          tableHeadInner: '',
+          text: '',
+          yellow: '',
+        }}
+        rows={[
+          {
+            data: mockMetrics,
+            format: formatPercentage,
+            legendColor: 'blue',
+            legendTitle: 'Legend Title',
+          },
+        ]}
+        theme={light}
+      />
+    );
     ['Max', 'Avg', 'Last'].forEach((section) => {
       expect(
         wrapper.containsMatchingElement(<Typography>{section}</Typography>)
@@ -57,6 +81,31 @@ describe('CPUMetrics', () => {
   });
 
   it('renders the legend title', () => {
+    const wrapper = shallow(
+      <MetricsDisplay
+        classes={{
+          blue: 'blue',
+          darkGreen: '',
+          green: '',
+          legend: '',
+          lightGreen: '',
+          red: '',
+          root: '',
+          tableHeadInner: '',
+          text: '',
+          yellow: '',
+        }}
+        rows={[
+          {
+            data: mockMetrics,
+            format: formatPercentage,
+            legendColor: 'blue',
+            legendTitle: 'Legend Title',
+          },
+        ]}
+        theme={light}
+      />
+    );
     expect(wrapper.find('[data-qa-legend-title]')).toHaveLength(1);
     expect(wrapper.find('[data-qa-legend-title]').text()).toEqual(
       'Legend Title'
@@ -64,12 +113,62 @@ describe('CPUMetrics', () => {
   });
 
   it('passes legendColor as a className', () => {
+    const wrapper = shallow(
+      <MetricsDisplay
+        classes={{
+          blue: 'blue',
+          darkGreen: '',
+          green: '',
+          legend: '',
+          lightGreen: '',
+          red: '',
+          root: '',
+          tableHeadInner: '',
+          text: '',
+          yellow: '',
+        }}
+        rows={[
+          {
+            data: mockMetrics,
+            format: formatPercentage,
+            legendColor: 'blue',
+            legendTitle: 'Legend Title',
+          },
+        ]}
+        theme={light}
+      />
+    );
     expect(
       wrapper.find('[data-qa-legend-title]').hasClass('blue')
     ).toBeTruthy();
   });
 
   it('renders formatted Max, Avg, and Last values in the table body', () => {
+    const wrapper = shallow(
+      <MetricsDisplay
+        classes={{
+          blue: 'blue',
+          darkGreen: '',
+          green: '',
+          legend: '',
+          lightGreen: '',
+          red: '',
+          root: '',
+          tableHeadInner: '',
+          text: '',
+          yellow: '',
+        }}
+        rows={[
+          {
+            data: mockMetrics,
+            format: formatPercentage,
+            legendColor: 'blue',
+            legendTitle: 'Legend Title',
+          },
+        ]}
+        theme={light}
+      />
+    );
     ['10.00%', '5.50%', '7.75%'].forEach((section) => {
       expect(
         wrapper.containsMatchingElement(<Typography>{section}</Typography>)
@@ -78,6 +177,31 @@ describe('CPUMetrics', () => {
   });
 
   it('renders multiple rows', () => {
+    const wrapper = shallow(
+      <MetricsDisplay
+        classes={{
+          blue: 'blue',
+          darkGreen: '',
+          green: '',
+          legend: '',
+          lightGreen: '',
+          red: '',
+          root: '',
+          tableHeadInner: '',
+          text: '',
+          yellow: '',
+        }}
+        rows={[
+          {
+            data: mockMetrics,
+            format: formatPercentage,
+            legendColor: 'blue',
+            legendTitle: 'Legend Title',
+          },
+        ]}
+        theme={light}
+      />
+    );
     wrapper.setProps({
       rows: [
         {
@@ -99,10 +223,12 @@ describe('CPUMetrics', () => {
 });
 
 describe('metrics by section', () => {
-  const metrics = { average: 5, last: 8, length: 10, max: 10, total: 80 };
-  expect(metricsBySection(metrics)).toHaveLength(3);
-  expect(metricsBySection(metrics)).toBeInstanceOf(Array);
-  expect(metricsBySection(metrics)[0]).toEqual(metrics.max);
-  expect(metricsBySection(metrics)[1]).toEqual(metrics.average);
-  expect(metricsBySection(metrics)[2]).toEqual(metrics.last);
+  it('gets metrics', () => {
+    const metrics = { average: 5, last: 8, length: 10, max: 10, total: 80 };
+    expect(metricsBySection(metrics)).toHaveLength(3);
+    expect(metricsBySection(metrics)).toBeInstanceOf(Array);
+    expect(metricsBySection(metrics)[0]).toEqual(metrics.max);
+    expect(metricsBySection(metrics)[1]).toEqual(metrics.average);
+    expect(metricsBySection(metrics)[2]).toEqual(metrics.last);
+  });
 });

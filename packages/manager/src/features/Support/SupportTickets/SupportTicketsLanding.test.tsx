@@ -5,9 +5,8 @@ import { renderWithTheme } from 'src/utilities/testHelpers';
 import SupportTicketsLanding from './SupportTicketsLanding';
 
 describe('Support Tickets Landing', () => {
-  const { getByText } = renderWithTheme(<SupportTicketsLanding />);
-
   it('should render a header', () => {
+    const { getByText } = renderWithTheme(<SupportTicketsLanding />);
     getByText('Tickets');
   });
 });

@@ -19,14 +19,14 @@ afterEach(() => {
 const props = {
   assignPublicIPv4Address: false,
   autoassignIPv4WithinVPC: true,
-  handleSelectVPC: jest.fn(),
-  handleSubnetChange: jest.fn(),
-  handleVPCIPv4Change: jest.fn(),
+  handleSelectVPC: vi.fn(),
+  handleSubnetChange: vi.fn(),
+  handleVPCIPv4Change: vi.fn(),
   region: 'us-east',
   selectedSubnetId: undefined,
   selectedVPCId: undefined,
-  toggleAssignPublicIPv4Address: jest.fn(),
-  toggleAutoassignIPv4WithinVPCEnabled: jest.fn(),
+  toggleAssignPublicIPv4Address: vi.fn(),
+  toggleAutoassignIPv4WithinVPCEnabled: vi.fn(),
   vpcIPv4AddressOfLinode: undefined,
 };
 

@@ -39,7 +39,9 @@
     "skipLibCheck": true,
 
     /* Optimizations */
-    "incremental": true
+    "incremental": true,
+    
+    "types": ["vitest/globals"]
   },
   "include": [
     "src",
