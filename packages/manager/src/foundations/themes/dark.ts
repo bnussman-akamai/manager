@@ -309,22 +309,6 @@ export const darkTheme: ThemeOptions = {
         },
       },
     },
-    MuiFormLabel: {
-      styleOverrides: {
-        root: {
-          '&$disabled': {
-            color: '#c9cacb',
-          },
-          '&$error': {
-            color: '#c9cacb',
-          },
-          '&.Mui-focused': {
-            color: '#c9cacb',
-          },
-          color: '#c9cacb',
-        },
-      },
-    },
     MuiInput: {
       styleOverrides: {
         disabled: {},

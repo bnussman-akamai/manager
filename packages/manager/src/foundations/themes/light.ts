@@ -625,11 +625,9 @@ export const lightTheme: ThemeOptions = {
     MuiFormHelperText: {
       styleOverrides: {
         root: {
-          '&$error': {
-            color: '#ca0813',
-          },
           fontSize: '0.875rem',
           lineHeight: 1.25,
+          marginLeft: 0,
           maxWidth: 415,
         },
       },
@@ -638,16 +636,8 @@ export const lightTheme: ThemeOptions = {
       styleOverrides: {
         root: {
           '&$disabled': {
-            color: '#555',
             opacity: 0.5,
           },
-          '&$error': {
-            color: '#555',
-          },
-          '&.Mui-focused': {
-            color: '#555',
-          },
-          color: '#555',
           fontFamily: latoWeb.bold,
           fontSize: '.875rem',
           marginBottom: 8,
