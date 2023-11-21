@@ -28,7 +28,7 @@ export const FolderActionMenu = (props: Props) => {
 
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
+    (<>
       {matchesSmDown ? (
         <ActionMenu
           actionsList={actions}
@@ -45,6 +45,6 @@ export const FolderActionMenu = (props: Props) => {
           );
         })
       )}
-    </>
+    </>)
   );
 };

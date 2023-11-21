@@ -74,7 +74,7 @@ export const NotificationSection = (props: NotificationSectionProps) => {
 
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
+    (<>
       {isActualNotificationContainer && content.length === 0 ? null : (
         <>
           <Hidden smDown>
@@ -124,7 +124,7 @@ export const NotificationSection = (props: NotificationSectionProps) => {
           </Hidden>
         </>
       )}
-    </>
+    </>)
   );
 };
 
@@ -158,7 +158,7 @@ const ContentBody = React.memo((props: BodyProps) => {
 
   return _content.length > 0 ? (
     // eslint-disable-next-line
-    <>
+    (<>
       {_content.map((thisItem) => (
         <StyledNotificationItem
           key={`notification-row-${thisItem.id}`}
@@ -188,7 +188,7 @@ const ContentBody = React.memo((props: BodyProps) => {
           </StyledLinkButton>
         </StyledLToggleContainer>
       ) : null}
-    </>
+    </>)
   ) : header === 'Events' ? (
     <StyledEmptyMessage variant="body1">
       {emptyMessage

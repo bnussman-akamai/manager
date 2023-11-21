@@ -261,7 +261,7 @@ const CloneLanding = () => {
   );
   const selectedLinodeRegion = selectedLinode && selectedLinode.region;
   return (
-    <React.Fragment>
+    (<React.Fragment>
       <DocumentTitleSegment segment="Clone" />
       <MutationNotification linodeId={linodeId} />
       <Notifications />
@@ -337,8 +337,7 @@ const CloneLanding = () => {
               selectedDisks={disksInState.filter((disk) => {
                 return (
                   // This disk has been individually selected ...
-                  state.diskSelection[disk.id].isSelected &&
-                  // ... AND it's associated configs are NOT selected
+                  (state.diskSelection[disk.id].isSelected && // ... AND it's associated configs are NOT selected
                   intersection(
                     pathOr(
                       [],
@@ -346,7 +345,7 @@ const CloneLanding = () => {
                       state.diskSelection
                     ),
                     selectedConfigIds
-                  ).length === 0
+                  ).length === 0)
                 );
               })}
               // If a selected disk is associated with a selected config, we
@@ -367,7 +366,7 @@ const CloneLanding = () => {
           </Grid>
         </Grid>
       </Paper>
-    </React.Fragment>
+    </React.Fragment>)
   );
 };
 

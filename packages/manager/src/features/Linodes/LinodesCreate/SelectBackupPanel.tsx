@@ -106,7 +106,7 @@ export const SelectBackupPanel = (props: Props) => {
   };
 
   return (
-    <StyledRootPaper>
+    (<StyledRootPaper>
       {error && <Notice text={error} variant="error" />}
       <Typography variant="h2">Select Backup</Typography>
       <StyledWrapperGrid alignItems="center" container spacing={2}>
@@ -114,7 +114,7 @@ export const SelectBackupPanel = (props: Props) => {
           <CircleProgress />
         ) : selectedLinodeID ? (
           // eslint-disable-next-line react/jsx-no-useless-fragment
-          <React.Fragment>
+          (<React.Fragment>
             {aggregatedBackups.length !== 0 ? (
               <StyledTypography component="div">
                 <Grid container spacing={2}>
@@ -126,12 +126,12 @@ export const SelectBackupPanel = (props: Props) => {
             ) : (
               <Typography variant="body1">No backup available</Typography>
             )}
-          </React.Fragment>
+          </React.Fragment>)
         ) : (
           <Typography variant="body1">First, select a Linode</Typography>
         )}
       </StyledWrapperGrid>
-    </StyledRootPaper>
+    </StyledRootPaper>)
   );
 };
 

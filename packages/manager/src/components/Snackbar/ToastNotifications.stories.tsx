@@ -79,7 +79,7 @@ function Example() {
     );
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
+    (<>
       {variants.map((eachVariant) => {
         // map over each variant and show a button for each
         return (
@@ -93,6 +93,6 @@ function Example() {
           />
         );
       })}
-    </>
+    </>)
   );
 }

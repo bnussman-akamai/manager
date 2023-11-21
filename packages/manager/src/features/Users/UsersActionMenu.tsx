@@ -49,7 +49,7 @@ export const UsersActionMenu = ({ onDelete, username }: Props) => {
 
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
+    (<>
       {matchesSmDown ? (
         <ActionMenu
           actionsList={actions}
@@ -67,6 +67,6 @@ export const UsersActionMenu = ({ onDelete, username }: Props) => {
           );
         })
       )}
-    </>
+    </>)
   );
 };

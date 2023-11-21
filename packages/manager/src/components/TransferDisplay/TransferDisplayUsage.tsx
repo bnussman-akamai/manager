@@ -18,44 +18,42 @@ export const TransferDisplayUsage = React.memo(
     // Don't display usage, quota, or bar percent if the network transfer pool is empty (e.g. account has no resources).
     const isEmptyPool = quota === 0;
 
-    return (
-      <>
-        <Grid
-          container
-          justifyContent="space-between"
-          spacing={2}
-          sx={{ marginBottom: 0 }}
-        >
-          <Grid style={{ marginRight: 10 }}>
-            {!isEmptyPool ? (
-              <Typography>
-                {used} GB Used ({formatPoolUsagePct(pullUsagePct)})
-              </Typography>
-            ) : (
-              <Typography>
-                Your monthly network transfer will be shown when you create a
-                resource.
-              </Typography>
-            )}
-          </Grid>
-          <Grid>
-            {!isEmptyPool && (
-              <Typography>
-                {quota >= used ? (
-                  <span>{quota - used} GB Available</span>
-                ) : (
-                  <span>
-                    {(quota - used).toString().replace(/\-/, '')} GB Over Quota
-                  </span>
-                )}
-              </Typography>
-            )}
-          </Grid>
+    return (<>
+      <Grid
+        container
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ marginBottom: 0 }}
+      >
+        <Grid style={{ marginRight: 10 }}>
+          {!isEmptyPool ? (
+            <Typography>
+              {used} GB Used ({formatPoolUsagePct(pullUsagePct)})
+            </Typography>
+          ) : (
+            <Typography>
+              Your monthly network transfer will be shown when you create a
+              resource.
+            </Typography>
+          )}
         </Grid>
-        {!isEmptyPool && (
-          <BarPercent max={100} rounded value={Math.ceil(pullUsagePct)} />
-        )}
-      </>
-    );
+        <Grid>
+          {!isEmptyPool && (
+            <Typography>
+              {quota >= used ? (
+                <span>{quota - used} GB Available</span>
+              ) : (
+                <span>
+                  {(quota - used).toString().replace(/\-/, '')} GB Over Quota
+                </span>
+              )}
+            </Typography>
+          )}
+        </Grid>
+      </Grid>
+      {!isEmptyPool && (
+        <BarPercent max={100} rounded value={Math.ceil(pullUsagePct)} />
+      )}
+    </>);
   }
 );

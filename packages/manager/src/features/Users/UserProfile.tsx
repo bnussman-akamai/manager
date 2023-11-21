@@ -212,7 +212,7 @@ export const UserProfile = (props: UserProfileProps) => {
 
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
+    (<>
       {username !== undefined ? (
         <>
           <DocumentTitleSegment segment={`${username} - Profile`} />
@@ -230,6 +230,6 @@ export const UserProfile = (props: UserProfileProps) => {
       ) : (
         <CircleProgress />
       )}
-    </>
+    </>)
   );
 };

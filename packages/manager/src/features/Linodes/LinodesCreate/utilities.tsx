@@ -158,9 +158,7 @@ export const filterOneClickApps = ({
   // Filter out any apps that we don't have info for
   const filteredApps: StackScript[] = queryResults.filter(
     (app: StackScript) => {
-      return (
-        !app.label.match(/helpers/i) && allowedApps.includes(String(app.id))
-      );
+      return (!app.label.match(/helpers/i) && allowedApps.includes(String(app.id)));
     }
   );
   return filteredApps.map((app) => trimOneClickFromLabel(app));

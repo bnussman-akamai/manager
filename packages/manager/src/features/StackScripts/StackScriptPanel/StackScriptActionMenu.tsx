@@ -106,7 +106,7 @@ export const StackScriptActionMenu = (props: Props) => {
 
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
+    (<>
       {category === 'account' || matchesSmDown ? (
         <ActionMenu
           actionsList={actions}
@@ -126,6 +126,6 @@ export const StackScriptActionMenu = (props: Props) => {
           })}
         </Hidden>
       )}
-    </>
+    </>)
   );
 };

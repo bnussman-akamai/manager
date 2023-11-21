@@ -151,23 +151,10 @@ export const AddonsPanel = React.memo((props: AddonsPanelProps) => {
     }
   }, [selectedLinodeID]);
 
-  return (
-    <>
-      {!showVPCs &&
-        showVlans && ( // @TODO VPC: Delete this conditional and AttachVLAN component once VPC is fully rolled out
-          <AttachVLAN
-            handleVLANChange={handleVLANChange}
-            helperText={vlanDisabledReason}
-            ipamAddress={ipamAddress}
-            ipamError={ipamError}
-            labelError={labelError}
-            readOnly={disabled || Boolean(vlanDisabledReason)}
-            region={selectedRegionID}
-            vlanLabel={vlanLabel}
-          />
-        )}
-      {showVPCs && showVlans && (
-        <VLANAccordion
+  return (<>
+    {!showVPCs &&
+      showVlans && ( // @TODO VPC: Delete this conditional and AttachVLAN component once VPC is fully rolled out
+        (<AttachVLAN
           handleVLANChange={handleVLANChange}
           helperText={vlanDisabledReason}
           ipamAddress={ipamAddress}
@@ -176,87 +163,98 @@ export const AddonsPanel = React.memo((props: AddonsPanelProps) => {
           readOnly={disabled || Boolean(vlanDisabledReason)}
           region={selectedRegionID}
           vlanLabel={vlanLabel}
-        />
+        />)
       )}
-      {userData.showUserData && (
-        <UserDataAccordion
-          createType={userData.createType}
-          onChange={userData.onChange}
-          userData={userData.userData}
-        />
-      )}
-      <Paper data-qa-add-ons sx={{ marginTop: theme.spacing(3) }}>
-        <Typography sx={{ marginBottom: theme.spacing(2) }} variant="h2">
-          Add-ons{' '}
-          {backupsDisabledReason && (
-            <TooltipIcon status="help" text={backupsDisabledReason} />
-          )}
-        </Typography>
-        {showBackupsWarning && (
-          <Notice variant="warning">
-            Linodes must have a disk formatted with an ext3 or ext4 file system
-            to use the backup service.
-          </Notice>
+    {showVPCs && showVlans && (
+      <VLANAccordion
+        handleVLANChange={handleVLANChange}
+        helperText={vlanDisabledReason}
+        ipamAddress={ipamAddress}
+        ipamError={ipamError}
+        labelError={labelError}
+        readOnly={disabled || Boolean(vlanDisabledReason)}
+        region={selectedRegionID}
+        vlanLabel={vlanLabel}
+      />
+    )}
+    {userData.showUserData && (
+      <UserDataAccordion
+        createType={userData.createType}
+        onChange={userData.onChange}
+        userData={userData.userData}
+      />
+    )}
+    <Paper data-qa-add-ons sx={{ marginTop: theme.spacing(3) }}>
+      <Typography sx={{ marginBottom: theme.spacing(2) }} variant="h2">
+        Add-ons{' '}
+        {backupsDisabledReason && (
+          <TooltipIcon status="help" text={backupsDisabledReason} />
         )}
-        <StyledFormControlLabel
-          control={
-            <Checkbox
-              data-qa-check-backups={
-                accountBackups ? 'auto backup enabled' : 'auto backup disabled'
-              }
-              checked={accountBackups || props.backups}
-              data-testid="backups"
-              disabled={accountBackups || disabled || isBareMetal}
-              onChange={changeBackups}
-            />
-          }
-          label={
-            <Box display="flex">
-              <Box sx={{ marginRight: 2 }}>Backups</Box>
-              {renderBackupsPrice()}
-            </Box>
-          }
-        />
-        <StyledTypography variant="body1">
-          {accountBackups ? (
-            <React.Fragment>
-              You have enabled automatic backups for your account. This Linode
-              will automatically have backups enabled. To change this setting,{' '}
-              <Link to={'/account/settings'}>click here.</Link>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              Three backup slots are executed and rotated automatically: a daily
-              backup, a 2-7 day old backup, and an 8-14 day old backup. Plans
-              are priced according to the Linode plan selected above.
-            </React.Fragment>
-          )}
+      </Typography>
+      {showBackupsWarning && (
+        <Notice variant="warning">
+          Linodes must have a disk formatted with an ext3 or ext4 file system
+          to use the backup service.
+        </Notice>
+      )}
+      <StyledFormControlLabel
+        control={
+          <Checkbox
+            data-qa-check-backups={
+              accountBackups ? 'auto backup enabled' : 'auto backup disabled'
+            }
+            checked={accountBackups || props.backups}
+            data-testid="backups"
+            disabled={accountBackups || disabled || isBareMetal}
+            onChange={changeBackups}
+          />
+        }
+        label={
+          <Box display="flex">
+            <Box sx={{ marginRight: 2 }}>Backups</Box>
+            {renderBackupsPrice()}
+          </Box>
+        }
+      />
+      <StyledTypography variant="body1">
+        {accountBackups ? (
+          <React.Fragment>
+            You have enabled automatic backups for your account. This Linode
+            will automatically have backups enabled. To change this setting,{' '}
+            <Link to={'/account/settings'}>click here.</Link>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            Three backup slots are executed and rotated automatically: a daily
+            backup, a 2-7 day old backup, and an 8-14 day old backup. Plans
+            are priced according to the Linode plan selected above.
+          </React.Fragment>
+        )}
+      </StyledTypography>
+      <Divider />
+      <StyledFormControlLabel
+        control={
+          <Checkbox
+            checked={isPrivateIPChecked}
+            data-qa-check-private-ip
+            data-testid="private_ip"
+            disabled={disabled}
+            onChange={togglePrivateIP}
+          />
+        }
+        label="Private IP"
+      />
+      {showVPCs && (
+        <StyledTypography
+          data-testid="private-ip-contextual-copy"
+          variant="body1"
+        >
+          Use this for a backend node to a NodeBalancer. Use VPC instead for
+          private communication between your Linodes.
         </StyledTypography>
-        <Divider />
-        <StyledFormControlLabel
-          control={
-            <Checkbox
-              checked={isPrivateIPChecked}
-              data-qa-check-private-ip
-              data-testid="private_ip"
-              disabled={disabled}
-              onChange={togglePrivateIP}
-            />
-          }
-          label="Private IP"
-        />
-        {showVPCs && (
-          <StyledTypography
-            data-testid="private-ip-contextual-copy"
-            variant="body1"
-          >
-            Use this for a backend node to a NodeBalancer. Use VPC instead for
-            private communication between your Linodes.
-          </StyledTypography>
-        )}
-      </Paper>
-    </>
-  );
+      )}
+    </Paper>
+  </>);
 });
 
 const StyledTypography = styled(Typography, { label: 'StyledTypography' })(

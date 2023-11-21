@@ -19,7 +19,7 @@ export const SupportError = (props: Props) => {
   const errorMsg = errors[0].reason.split(supportTextRegex);
 
   return (
-    <Typography
+    (<Typography
       sx={{
         fontFamily: theme.font.bold,
         fontSize: '1rem',
@@ -30,19 +30,19 @@ export const SupportError = (props: Props) => {
         const openTicket = substring.match(supportTextRegex);
         if (openTicket) {
           return (
-            <SupportLink
+            (<SupportLink
               text={
                 substring.match(/^[A-Z]/)
                   ? capitalize(openTicket[0])
                   : openTicket[0]
               }
               key={`${substring}-${idx}`}
-            />
+            />)
           );
         } else {
           return substring;
         }
       })}
-    </Typography>
+    </Typography>)
   );
 };

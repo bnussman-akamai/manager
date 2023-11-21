@@ -100,20 +100,13 @@ export const handleError = (error: AxiosError, store: ApplicationStore) => {
     },
     {
       condition: (e) => {
-        return (
-          !!e.reason.match(/migrations are currently disabled/i) &&
-          !!url.match(/migrate/i)
-        );
+        return (!!e.reason.match(/migrations are currently disabled/i) && !!url.match(/migrate/i));
       },
       replacementText: <MigrateError />,
     },
     {
       condition: (e) => {
-        return (
-          (!!e.reason.match(/.*open a support ticket/i) ||
-            !!e.reason.match(/contact Support/i)) &&
-          !e.field
-        );
+        return ((!!e.reason.match(/.*open a support ticket/i) || !!e.reason.match(/contact Support/i)) && !e.field);
       },
       replacementText: <SupportError errors={errors} />,
     },

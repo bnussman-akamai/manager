@@ -37,6 +37,6 @@ export const RescueDialog = (props: Props) => {
     <BareMetalRescue isOpen={open} linodeId={linodeId} onClose={onClose} />
   ) : (
     /** For normal Linodes, load the standard rescue dialog. */
-    <StandardRescueDialog linodeId={linodeId} onClose={onClose} open={open} />
+    (<StandardRescueDialog linodeId={linodeId} onClose={onClose} open={open} />)
   );
 };
