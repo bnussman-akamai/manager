@@ -86,7 +86,7 @@ export const mutationHandlers = <T, V, E = APIError[]>(
 };
 
 export const simpleMutationHandlers = <T, V, E = APIError[]>(
-  queryKey: string,
+  queryKey: QueryKey,
   queryClient: QueryClient
 ): UseMutationOptions<T, E, V, () => void> => {
   return {

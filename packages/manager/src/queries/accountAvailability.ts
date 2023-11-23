@@ -39,7 +39,7 @@ export const useAccountAvailabilitiesQueryUnpaginated = (
     { enabled, keepPreviousData: true }
   );
 
-const getAllAccountAvailabilitiesRequest = () =>
+export const getAllAccountAvailabilitiesRequest = () =>
   getAll<AccountAvailability>((params, filters) =>
     getAccountAvailabilities(params, filters)
   )().then((data) => data.data);
