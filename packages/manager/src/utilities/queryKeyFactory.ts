@@ -62,26 +62,39 @@
 //     }
 //   : { queryFn: T['queryFn']; queryKey: T['queryKey'] };
 
+// type QueryFunction<T> = T extends (...args: any[]) => {
+//   queryFn: (...args: any[]) => any;
+//   queryKey: any[];
+// }
+//   ? (
+//       ...args: Parameters<T>
+//     ) => {
+//       queryFn: T['queryFn'];
+//       queryKey: T['queryKey'];
+//     }
+//   : { queryFn: T['queryFn']; queryKey: T['queryKey'] };
 
-type QueryFunction<T> = T extends (...args: any[]) => {
+type QueryKeys<T, P extends string[] = []> = {
+  queryKey: [...P];
+} & (T extends (
+  ...args: any[]
+) => {
   queryFn: (...args: any[]) => any;
   queryKey: any[];
 }
   ? (
       ...args: Parameters<T>
     ) => {
-      queryFn: T['queryFn'];
-      queryKey: T['queryKey'];
+      queryFn: ReturnType<T>['queryFn'];
+      queryKey: [...P, ...Parameters<T>];
     }
-  : { queryFn: T['queryFn']; queryKey: T['queryKey'] };
-
-type QueryKeys<T, P extends string[] = []> = {
-  queryKey: [...P];
-} & (T extends (...args: any[]) => {
-  queryFn: (...args: any[]) => any;
-  queryKey: any[];
-}
-  ? (...args: Parameters<T>) => { queryFn: ReturnType<T>['queryFn']; queryKey: [...P, ...Parameters<T>]; }
+  : T extends {
+      queryFn: (...args: any[]) => any;
+      queryKey: any[];
+    } | {
+      queryFn: (...args: any[]) => any;
+    }
+  ? T
   : { [K in keyof T]: QueryKeys<T[K], [...P, K]> });
 
 export function getQueryKeys<T>(input: T): QueryKeys<T> {

@@ -37,7 +37,7 @@ const accountQueries = getQueryKeys({
 
 const key1 = accountQueries.account.avilability.paginated({ page: 1 }, { id: 1}).queryKey;
 const key3 = accountQueries.account.avilability.paginated({}, {}).queryFn;
-const key2 = accountQueries.account.avilability.paginated.queryKey;
+const key2 = accountQueries.account.avilability.all.queryFn;
 
 expect(accountQueries).toBe({
   queryKey: ['account'],
