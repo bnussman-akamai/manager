@@ -1,10 +1,6 @@
 import { getQueryKeys } from '@banksnussman/query-key';
 import {
   Account,
-  AccountAvailability,
-  AccountMaintenance,
-  Invoice,
-  Payment,
   getAccountAgreements,
   getAccountAvailabilities,
   getAccountAvailability,
@@ -14,76 +10,28 @@ import {
   getAccountLogins,
   getAccountMaintenance,
   getAccountSettings,
-  getInvoices,
-  getNotifications,
-  getPayments,
-  Notification,
-  updateAccountInfo,
-  getOAuthClients,
-  PaymentMethod,
-  getPaymentMethods,
   getClientToken,
   getNetworkUtilization,
-  getUsers,
+  getOAuthClients,
+  getPaymentMethods,
   getUser,
+  getUsers,
+  updateAccountInfo,
 } from '@linode/api-v4/lib/account';
 import { APIError, Filter, Params } from '@linode/api-v4/lib/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useProfile } from 'src/queries/profile';
-import { getAll } from 'src/utilities/getAll';
 
+import {
+  getAllAccountAvailabilitiesRequest,
+  getAllAccountInvoices,
+  getAllAccountMaintenance,
+  getAllAccountPayments,
+  getAllNotifications,
+  getAllPaymentMethodsRequest,
+} from './accountRequests';
 import { queryPresets } from './base';
-
-const getAllAccountAvailabilitiesRequest = () =>
-  getAll<AccountAvailability>((params, filters) =>
-    getAccountAvailabilities(params, filters)
-  )().then((data) => data.data);
-
-const getAllAccountInvoices = async (
-  passedParams: Params = {},
-  passedFilter: Filter = {}
-) => {
-  const res = await getAll<Invoice>((params, filter) =>
-    getInvoices({ ...params, ...passedParams }, { ...filter, ...passedFilter })
-  )();
-  return res.data;
-};
-
-const getAllAccountPayments = async (
-  passedParams: Params = {},
-  passedFilter: Filter = {}
-) => {
-  const res = await getAll<Payment>((params, filter) =>
-    getPayments({ ...params, ...passedParams }, { ...filter, ...passedFilter })
-  )();
-  return res.data;
-};
-
-const getAllAccountMaintenance = (
-  passedParams: Params = {},
-  passedFilter: Filter = {}
-) =>
-  getAll<AccountMaintenance>((params, filter) =>
-    getAccountMaintenance(
-      { ...params, ...passedParams },
-      { ...filter, ...passedFilter }
-    )
-  )().then((res) => res.data);
-
-export const getAllNotifications = () =>
-  getAll<Notification>(getNotifications)().then((data) => data.data);
-
-  
-/**
- * This getAll is probably overkill for getting all paginated payment
- * methods, but for now, use it to be safe.
- */
-export const getAllPaymentMethodsRequest = () =>
-  getAll<PaymentMethod>((params) => getPaymentMethods(params))().then(
-    (data) => data.data
-  );
-
 
 export const { account: accountQueries } = getQueryKeys({
   account: {
@@ -138,7 +86,7 @@ export const { account: accountQueries } = getQueryKeys({
     },
     oauthClients: {
       paginated: (params: Params = {}, filter: Filter = {}) => ({
-        queryFn: () => getOAuthClients(params, filter)
+        queryFn: () => getOAuthClients(params, filter),
       }),
     },
     paymentMethods: {
