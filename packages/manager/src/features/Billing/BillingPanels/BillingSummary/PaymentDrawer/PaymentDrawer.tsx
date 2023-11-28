@@ -20,8 +20,7 @@ import { SupportLink } from 'src/components/SupportLink';
 import { TextField } from 'src/components/TextField';
 import { TooltipIcon } from 'src/components/TooltipIcon';
 import { Typography } from 'src/components/Typography';
-import { useAccount } from 'src/queries/account';
-import { queryKey } from 'src/queries/accountBilling';
+import { accountQueries, useAccount } from 'src/queries/account';
 import isCreditCardExpired from 'src/utilities/creditCard';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
@@ -179,7 +178,7 @@ export const PaymentDrawer = (props: Props) => {
           true,
           response.warnings
         );
-        queryClient.invalidateQueries(`${queryKey}-payments`);
+        queryClient.invalidateQueries(accountQueries.payments.queryKey);
       })
       .catch((errorResponse) => {
         setSubmitting(false);

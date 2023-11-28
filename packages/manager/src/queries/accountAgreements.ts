@@ -1,33 +1,25 @@
-import {
-  Agreements,
-  getAccountAgreements,
-  signAgreement,
-} from '@linode/api-v4/lib/account';
+import { Agreements, signAgreement } from '@linode/api-v4/lib/account';
 import { APIError } from '@linode/api-v4/lib/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { reportException } from 'src/exceptionReporting';
 import { useProfile } from 'src/queries/profile';
 
+import { accountQueries } from './account';
 import { queryPresets, simpleMutationHandlers } from './base';
-
-export const accountAgreementsQueryKey = 'account-agreements';
 
 export const useAccountAgreements = (enabled?: boolean) => {
   const { data: profile } = useProfile();
 
-  return useQuery<Agreements, APIError[]>(
-    accountAgreementsQueryKey,
-    getAccountAgreements,
-    {
-      ...queryPresets.oneTimeFetch,
-      ...queryPresets.noRetry,
-      enabled:
-        enabled === undefined
-          ? !profile?.restricted
-          : enabled && !profile?.restricted,
-    }
-  );
+  return useQuery<Agreements, APIError[]>({
+    ...accountQueries.agreements,
+    ...queryPresets.oneTimeFetch,
+    ...queryPresets.noRetry,
+    enabled:
+      enabled === undefined
+        ? !profile?.restricted
+        : enabled && !profile?.restricted,
+  });
 };
 
 export const useMutateAccountAgreements = () => {
@@ -35,7 +27,7 @@ export const useMutateAccountAgreements = () => {
   return useMutation<{}, APIError[], Partial<Agreements>>(
     (data) => signAgreement(data),
     simpleMutationHandlers<Agreements, Partial<Agreements>>(
-      accountAgreementsQueryKey,
+      accountQueries.agreements.queryKey,
       queryClient
     )
   );

@@ -38,10 +38,10 @@ import {
 
 import { manuallySetVPCConfigInterfacesToActive } from 'src/utilities/configs';
 
-import { queryKey as accountNotificationsQueryKey } from '../accountNotifications';
 import { queryPresets } from '../base';
 import { getAllLinodeKernelsRequest, getAllLinodesRequest } from './requests';
 import { profileQueries } from '../profile';
+import { accountQueries } from '../account';
 
 export const queryKey = 'linodes';
 
@@ -291,7 +291,7 @@ export const useLinodeResizeMutation = (id: number) => {
         queryClient.invalidateQueries([queryKey, 'all']);
         queryClient.invalidateQueries([queryKey, 'infinite']);
         queryClient.invalidateQueries([queryKey, 'linode', id, 'details']);
-        queryClient.invalidateQueries(accountNotificationsQueryKey);
+        queryClient.invalidateQueries(accountQueries.notifications.queryKey);
       },
     }
   );

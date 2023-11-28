@@ -32,7 +32,7 @@ import {
 
 import { EventWithStore } from 'src/events';
 
-import { queryKey as accountQueryKey } from './account';
+import { accountQueries } from './account';
 import { queryPresets } from './base';
 
 export const { profile: profileQueries } = getQueryKeys({
@@ -148,7 +148,7 @@ export const useCreateSSHKeyMutation = () => {
     onSuccess() {
       queryClient.invalidateQueries(profileQueries.sshKeys.queryKey);
       // also invalidate the /account/users data because that endpoint returns some SSH key data
-      queryClient.invalidateQueries([accountQueryKey, 'users']);
+      queryClient.invalidateQueries(accountQueries.users.paginated.queryKey);
     },
   });
 };
@@ -160,7 +160,7 @@ export const useUpdateSSHKeyMutation = (id: number) => {
     onSuccess() {
       queryClient.invalidateQueries(profileQueries.sshKeys.queryKey);
       // also invalidate the /account/users data because that endpoint returns some SSH key data
-      queryClient.invalidateQueries([accountQueryKey, 'users']);
+      queryClient.invalidateQueries(accountQueries.users.paginated.queryKey);
     },
   });
 };
@@ -172,7 +172,7 @@ export const useDeleteSSHKeyMutation = (id: number) => {
     onSuccess() {
       queryClient.invalidateQueries(profileQueries.sshKeys.queryKey);
       // also invalidate the /account/users data because that endpoint returns some SSH key data
-      queryClient.invalidateQueries([accountQueryKey, 'users']);
+      queryClient.invalidateQueries(accountQueries.users.paginated.queryKey);
     },
   });
 };
@@ -183,7 +183,7 @@ export const sshKeyEventHandler = (event: EventWithStore) => {
 
   event.queryClient.invalidateQueries(profileQueries.sshKeys.queryKey);
   // also invalidate the /account/users data because that endpoint returns some SSH key data
-  event.queryClient.invalidateQueries([accountQueryKey, 'users']);
+  event.queryClient.invalidateQueries(accountQueries.users.paginated.queryKey);
 };
 
 export const useTrustedDevicesQuery = (params?: Params, filter?: Filter) =>

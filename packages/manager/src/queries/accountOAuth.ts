@@ -6,7 +6,6 @@ import {
   Params,
   createOAuthClient,
   deleteOAuthClient,
-  getOAuthClients,
   resetOAuthClientSecret,
   updateOAuthClient,
 } from '@linode/api-v4';
@@ -14,18 +13,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { EventWithStore } from 'src/events';
 
-import { queryKey as accountQueryKey } from './account';
-
-const queryKey = [accountQueryKey, 'oauth'];
+import { accountQueries } from './account';
 
 export const useOAuthClientsQuery = (params?: Params, filter?: Filter) =>
-  useQuery(
-    [...queryKey, 'paginated', params, filter],
-    () => getOAuthClients(params, filter),
-    {
-      keepPreviousData: true,
-    }
-  );
+  useQuery({
+    ...accountQueries.oauthClients.paginated(params, filter),
+    keepPreviousData: true,
+  });
 
 export const useResetOAuthClientMutation = (id: string) =>
   useMutation<OAuthClient & { secret: string }, APIError[]>(() =>
@@ -36,7 +30,7 @@ export const useDeleteOAuthClientMutation = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation<{}, APIError[]>(() => deleteOAuthClient(id), {
     onSuccess() {
-      queryClient.invalidateQueries(queryKey);
+      queryClient.invalidateQueries(accountQueries.oauthClients.queryKey);
     },
   });
 };
@@ -49,7 +43,7 @@ export const useCreateOAuthClientMutation = () => {
     OAuthClientRequest
   >(createOAuthClient, {
     onSuccess() {
-      queryClient.invalidateQueries(queryKey);
+      queryClient.invalidateQueries(accountQueries.oauthClients.queryKey);
     },
   });
 };
@@ -60,7 +54,7 @@ export const useUpdateOAuthClientMutation = (id: string) => {
     (data) => updateOAuthClient(id, data),
     {
       onSuccess() {
-        queryClient.invalidateQueries(queryKey);
+        queryClient.invalidateQueries(accountQueries.oauthClients.queryKey);
       },
     }
   );
@@ -69,5 +63,5 @@ export const useUpdateOAuthClientMutation = (id: string) => {
 export const oauthClientsEventHandler = ({ queryClient }: EventWithStore) => {
   // We may over-fetch because on `onSuccess` also invalidates, but this will be
   // good for UX because Cloud will always be up to date
-  queryClient.invalidateQueries(queryKey);
+  queryClient.invalidateQueries(accountQueries.oauthClients.queryKey);
 };

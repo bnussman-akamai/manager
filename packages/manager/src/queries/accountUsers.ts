@@ -1,9 +1,9 @@
-import { deleteUser, getUser, getUsers } from '@linode/api-v4/lib/account';
+import { deleteUser } from '@linode/api-v4/lib/account';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useProfile } from 'src/queries/profile';
 
-import { queryKey } from './account';
+import { accountQueries } from './account';
 
 import type {
   APIError,
@@ -16,31 +16,27 @@ import type {
 export const useAccountUsers = (params?: Params, filters?: Filter) => {
   const { data: profile } = useProfile();
 
-  return useQuery<ResourcePage<User>, APIError[]>(
-    [queryKey, 'users', 'paginated', params, filters],
-    () => getUsers(params, filters),
-    {
-      enabled: !profile?.restricted,
-      keepPreviousData: true,
-    }
-  );
+  return useQuery<ResourcePage<User>, APIError[]>({
+    ...accountQueries.users.paginated(params, filters),
+    enabled: !profile?.restricted,
+    keepPreviousData: true,
+  });
 };
 
 export const useAccountUser = (username: string) => {
-  return useQuery<User, APIError[]>(
-    [queryKey, 'users', 'user', username],
-    () => getUser(username),
+  return useQuery<User, APIError[]>({
+    ...accountQueries.users.user(username),
     // Enable the query if the user is not on the blocklist
-    { enabled: !getIsBlocklistedUser(username) }
-  );
+    enabled: !getIsBlocklistedUser(username),
+  });
 };
 
 export const useAccountUserDeleteMutation = (username: string) => {
   const queryClient = useQueryClient();
   return useMutation<{}, APIError[]>(() => deleteUser(username), {
     onSuccess() {
-      queryClient.invalidateQueries([queryKey, 'users', 'paginated']);
-      queryClient.removeQueries([queryKey, 'users', 'user', username]);
+      queryClient.invalidateQueries(accountQueries.users.paginated.queryKey);
+      queryClient.removeQueries(accountQueries.users.user(username).queryKey);
     },
   });
 };

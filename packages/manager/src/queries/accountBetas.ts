@@ -2,8 +2,6 @@ import {
   AccountBeta,
   EnrollInBetaPayload,
   enrollInBeta,
-  getAccountBeta,
-  getAccountBetas,
 } from '@linode/api-v4/lib/account';
 import {
   APIError,
@@ -13,21 +11,18 @@ import {
 } from '@linode/api-v4/lib/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { accountQueries } from './account';
+
 export const queryKey = 'account-betas';
 
 export const useAccountBetasQuery = (params?: Params, filter?: Filter) =>
-  useQuery<ResourcePage<AccountBeta>, APIError[]>(
-    [queryKey, 'paginated', params, filter],
-    () => getAccountBetas(params, filter),
-    {
-      keepPreviousData: true,
-    }
-  );
+  useQuery<ResourcePage<AccountBeta>, APIError[]>({
+    ...accountQueries.betas.paginated(params, filter),
+    keepPreviousData: true,
+  });
 
 export const useAccountBetaQuery = (id: string) =>
-  useQuery<AccountBeta, APIError[]>([queryKey, 'account-beta', id], () =>
-    getAccountBeta(id)
-  );
+  useQuery<AccountBeta, APIError[]>(accountQueries.betas.beta(id));
 
 export const useCreateAccountBetaMutation = () => {
   const queryClient = useQueryClient();
@@ -37,7 +32,7 @@ export const useCreateAccountBetaMutation = () => {
     },
     {
       onSuccess() {
-        queryClient.invalidateQueries([queryKey, 'paginated']);
+        queryClient.invalidateQueries(accountQueries.betas.queryKey);
         queryClient.invalidateQueries(['regions', 'paginated']);
       },
     }

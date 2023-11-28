@@ -17,8 +17,7 @@ import { CircleProgress } from 'src/components/CircleProgress';
 import { Tooltip } from 'src/components/Tooltip';
 import { reportException } from 'src/exceptionReporting';
 import { getPaymentLimits } from 'src/features/Billing/billingUtils';
-import { useAccount } from 'src/queries/account';
-import { queryKey as accountBillingKey } from 'src/queries/accountBilling';
+import { accountQueries, useAccount } from 'src/queries/account';
 import { useClientToken } from 'src/queries/accountPayment';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
@@ -179,7 +178,7 @@ export const PayPalButton = (props: Props) => {
         setProcessing(false);
       });
       if (response) {
-        queryClient.invalidateQueries(`${accountBillingKey}-payments`);
+        queryClient.invalidateQueries(accountQueries.payments.queryKey);
 
         setSuccess(
           `Payment for $${response.usd} successfully submitted with PayPal`,

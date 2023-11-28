@@ -18,7 +18,7 @@ import { TabPanels } from 'src/components/ReachTabPanels';
 import { Tabs } from 'src/components/ReachTabs';
 import { SafeTabPanel } from 'src/components/SafeTabPanel/SafeTabPanel';
 import { TabLinkList } from 'src/components/TabLinkList/TabLinkList';
-import { queryKey } from 'src/queries/account';
+import { accountQueries } from 'src/queries/account';
 import { useProfile } from 'src/queries/profile';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
@@ -141,7 +141,13 @@ export const UserDetail = () => {
         if (profile?.username === originalUsername) {
           refreshProfile();
         } else {
-          queryClient.invalidateQueries([queryKey, 'users']);
+          queryClient.invalidateQueries(
+            accountQueries.users.paginated.queryKey
+          );
+          queryClient.setQueryData(
+            accountQueries.users.user(user.username).queryKey,
+            user
+          );
         }
 
         history.replace(`/account/users/${user.username}`, {

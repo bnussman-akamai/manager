@@ -49,10 +49,7 @@ import { resetEventsPolling } from 'src/eventsPolling';
 import withAgreements, {
   AgreementsProps,
 } from 'src/features/Account/Agreements/withAgreements';
-import {
-  accountAgreementsQueryKey,
-  reportAgreementSigningError,
-} from 'src/queries/accountAgreements';
+import { reportAgreementSigningError } from 'src/queries/accountAgreements';
 import { simpleMutationHandlers } from 'src/queries/base';
 import { vpcQueryKey } from 'src/queries/vpcs';
 import { CreateTypes } from 'src/store/linodeCreate/linodeCreate.actions';
@@ -86,6 +83,7 @@ import type {
   PriceObject,
 } from '@linode/api-v4/lib/linodes';
 import { getLinodeRegionPrice } from 'src/utilities/pricing/linodes';
+import { accountQueries } from 'src/queries/account';
 
 const DEFAULT_IMAGE = 'linode/debian11';
 
@@ -834,20 +832,18 @@ class LinodeCreateContainer extends React.PureComponent<CombinedProps, State> {
         this.setState({ formIsSubmitting: false });
 
         if (signedAgreement) {
-          this.props.queryClient.executeMutation<
-            {},
-            APIError[],
-            Partial<Agreements>
-          >({
-            mutationFn: signAgreement,
-            mutationKey: accountAgreementsQueryKey,
-            onError: reportAgreementSigningError,
-            variables: { eu_model: true, privacy_policy: true },
-            ...simpleMutationHandlers(
-              accountAgreementsQueryKey,
-              this.props.queryClient
-            ),
-          });
+          signAgreement({ eu_model: true, privacy_policy: true })
+            .then(() => {
+              this.props.queryClient.setQueryData<Agreements>(
+                accountQueries.agreements.queryKey,
+                (prev) => ({
+                  ...prev,
+                  eu_model: true,
+                  privacy_policy: true,
+                })
+              );
+            })
+            .catch(reportAgreementSigningError);
         }
 
         /** Analytics creation event */

@@ -1,6 +1,5 @@
 import {
   AccountSettings,
-  getAccountSettings,
   updateAccountSettings,
 } from '@linode/api-v4/lib/account';
 import { APIError } from '@linode/api-v4/lib/types';
@@ -13,6 +12,7 @@ import {
 
 import { useProfile } from 'src/queries/profile';
 
+import { accountQueries } from './account';
 import { queryPresets } from './base';
 
 export const queryKey = 'account-settings';
@@ -20,7 +20,8 @@ export const queryKey = 'account-settings';
 export const useAccountSettings = () => {
   const { data: profile } = useProfile();
 
-  return useQuery<AccountSettings, APIError[]>(queryKey, getAccountSettings, {
+  return useQuery<AccountSettings, APIError[]>({
+    ...accountQueries.settings,
     ...queryPresets.oneTimeFetch,
     ...queryPresets.noRetry,
     enabled: !profile?.restricted,
@@ -48,8 +49,11 @@ export const updateAccountSettingsData = (
   newData: Partial<AccountSettings>,
   queryClient: QueryClient
 ): void => {
-  queryClient.setQueryData(queryKey, (oldData: AccountSettings) => ({
-    ...oldData,
-    ...newData,
-  }));
+  queryClient.setQueryData(
+    accountQueries.settings.queryKey,
+    (oldData: AccountSettings) => ({
+      ...oldData,
+      ...newData,
+    })
+  );
 };

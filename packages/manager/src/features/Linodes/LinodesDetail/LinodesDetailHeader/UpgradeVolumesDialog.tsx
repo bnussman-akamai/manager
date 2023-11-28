@@ -1,8 +1,8 @@
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { Button } from 'src/components/Button/Button';
@@ -10,7 +10,7 @@ import { ConfirmationDialog } from 'src/components/ConfirmationDialog/Confirmati
 import { Paper } from 'src/components/Paper';
 import { Typography } from 'src/components/Typography';
 import { VolumeUpgradeCopy } from 'src/features/Volumes/UpgradeVolumeDialog';
-import { queryKey } from 'src/queries/accountNotifications';
+import { accountQueries } from 'src/queries/account';
 import { useVolumesMigrateMutation } from 'src/queries/volumesMigrations';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
@@ -52,7 +52,7 @@ export const UpgradeVolumesDialog = (props: Props) => {
         { variant: 'success' }
       );
       // Re-request notifications so the Upgrade Volume banner on the Linode Detail page disappears.
-      queryClient.invalidateQueries(queryKey);
+      queryClient.invalidateQueries(accountQueries.notifications.queryKey);
       onClose();
     });
   };

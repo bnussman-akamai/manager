@@ -1,8 +1,8 @@
 import { EventWithStore } from 'src/events';
-import { queryKey as accountNotificationsQueryKey } from 'src/queries/accountNotifications';
 import { queryKey as firewallsQueryKey } from 'src/queries/firewalls';
 import { queryKey as volumesQueryKey } from 'src/queries/volumes';
 
+import { accountQueries } from '../account';
 import { queryKey } from './linodes';
 
 import type { Event } from '@linode/api-v4';
@@ -27,7 +27,7 @@ export const linodeEventsHandler = ({ event, queryClient }: EventWithStore) => {
   // Some Linode events are an indication that the reponse from /v4/account/notifications
   // has changed, so refetch notifications.
   if (shouldRequestNotifications(event)) {
-    queryClient.invalidateQueries(accountNotificationsQueryKey);
+    queryClient.invalidateQueries(accountQueries.notifications.queryKey);
   }
 
   switch (event.action) {

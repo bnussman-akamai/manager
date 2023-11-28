@@ -11,9 +11,9 @@ import { ActionMenu, Action } from 'src/components/ActionMenu';
 import { Chip } from 'src/components/Chip';
 import { Paper } from 'src/components/Paper';
 import CreditCard from 'src/features/Billing/BillingPanels/BillingSummary/PaymentDrawer/CreditCard';
-import { queryKey } from 'src/queries/accountPayment';
 
 import ThirdPartyPayment from './ThirdPartyPayment';
+import { accountQueries } from 'src/queries/account';
 
 interface Props {
   onDelete: () => void;
@@ -30,7 +30,9 @@ const PaymentMethodRow = (props: Props) => {
 
   const makeDefault = (id: number) => {
     makeDefaultPaymentMethod(id)
-      .then(() => queryClient.invalidateQueries(`${queryKey}-all`))
+      .then(() =>
+        queryClient.invalidateQueries(accountQueries.paymentMethods.queryKey)
+      )
       .catch((errors) =>
         enqueueSnackbar(
           errors[0]?.reason || 'Unable to change your default payment method.',

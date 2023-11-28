@@ -41,14 +41,14 @@ const specificTypesQueryKey = (type: string) => [queryKey, 'detail', type];
  */
 export const useSpecificTypes = (types: string[], enabled = true) => {
   const queryClient = useQueryClient();
-  return useQueries(
-    types.map<UseQueryOptions<LinodeType, APIError[]>>((type) => ({
+  return useQueries({
+    queries: types.map<UseQueryOptions<LinodeType, APIError[]>>((type) => ({
       enabled,
       queryFn: () => getSingleType(type, queryClient),
       queryKey: specificTypesQueryKey(type),
       ...queryPresets.oneTimeFetch,
-    }))
-  );
+    })),
+  });
 };
 
 export const useTypeQuery = (type: string, enabled = true) => {
