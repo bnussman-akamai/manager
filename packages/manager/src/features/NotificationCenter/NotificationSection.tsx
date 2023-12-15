@@ -161,8 +161,8 @@ const ContentBody = React.memo((props: BodyProps) => {
     <>
       {_content.map((thisItem) => (
         <StyledNotificationItem
+          header={props.header}
           key={`notification-row-${thisItem.id}`}
-          {...props}
         >
           {thisItem.body}
         </StyledNotificationItem>
@@ -239,7 +239,7 @@ const StyledNotificationItem = styled(Box, {
     'loading',
     'content',
   ]),
-})<NotificationSectionProps>(({ theme, ...props }) => ({
+})<Pick<NotificationSectionProps, 'header'>>(({ theme, ...props }) => ({
   '& p': {
     color: theme.textColors.headlineStatic,
     lineHeight: '1.25rem',
