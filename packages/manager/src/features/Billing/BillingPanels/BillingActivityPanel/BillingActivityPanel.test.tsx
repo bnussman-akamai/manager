@@ -168,22 +168,22 @@ describe('paymentToActivityFeedItem', () => {
         { zone: 'utc' }
       );
       const testDateISO = testDate.toISO();
-      expect(getCutoffFromDateRange('30 Days', testDateISO)).toBe(
+      expect(getCutoffFromDateRange('30 Days', testDateISO!)).toBe(
         testDate.minus({ days: 30 }).toISO()
       );
-      expect(getCutoffFromDateRange('60 Days', testDateISO)).toBe(
+      expect(getCutoffFromDateRange('60 Days', testDateISO!)).toBe(
         testDate.minus({ days: 60 }).toISO()
       );
-      expect(getCutoffFromDateRange('90 Days', testDateISO)).toBe(
+      expect(getCutoffFromDateRange('90 Days', testDateISO!)).toBe(
         testDate.minus({ days: 90 }).toISO()
       );
-      expect(getCutoffFromDateRange('6 Months', testDateISO)).toBe(
+      expect(getCutoffFromDateRange('6 Months', testDateISO!)).toBe(
         testDate.minus({ months: 6 }).toISO()
       );
-      expect(getCutoffFromDateRange('12 Months', testDateISO)).toBe(
+      expect(getCutoffFromDateRange('12 Months', testDateISO!)).toBe(
         testDate.minus({ months: 12 }).toISO()
       );
-      expect(getCutoffFromDateRange('All Time', testDateISO)).toBeUndefined();
+      expect(getCutoffFromDateRange('All Time', testDateISO!)).toBeUndefined();
     });
   });
 
