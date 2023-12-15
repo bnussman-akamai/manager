@@ -45,26 +45,23 @@
     "coverage": "yarn workspace linode-manager coverage",
     "coverage:summary": "yarn workspace linode-manager coverage:summary"
   },
-  "resolutions": {
-    "minimist": "^1.2.3",
-    "yargs-parser": "^18.1.3",
-    "kind-of": "^6.0.3",
-    "node-fetch": "^2.6.7",
-    "ua-parser-js": "^0.7.33",
-    "immer": "^9.0.6",
-    "lodash": "^4.17.21",
-    "glob-parent": "^5.1.2",
-    "hosted-git-info": "^5.0.0",
-    "@types/react": "^17",
-    "yaml": "^2.3.0",
-    "word-wrap": "^1.2.4",
-    "semver": "^7.5.2",
-    "tough-cookie": "^4.1.3"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
+  "pnpm": {
+    "overrides": {
+      "minimist": "^1.2.3",
+      "yargs-parser": "^18.1.3",
+      "kind-of": "^6.0.3",
+      "node-fetch": "^2.6.7",
+      "ua-parser-js": "^0.7.33",
+      "immer": "^9.0.6",
+      "lodash": "^4.17.21",
+      "glob-parent": "^5.1.2",
+      "hosted-git-info": "^5.0.0",
+      "@types/react": "^17",
+      "yaml": "^2.3.0",
+      "word-wrap": "^1.2.4",
+      "semver": "^7.5.2",
+      "tough-cookie": "^4.1.3"
+    }
   },
   "version": "0.0.0",
   "volta": {
