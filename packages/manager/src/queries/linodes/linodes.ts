@@ -53,7 +53,7 @@ export const useLinodesQuery = (
   return useQuery<ResourcePage<Linode>, APIError[]>(
     [queryKey, 'paginated', params, filter],
     () => getLinodes(params, filter),
-    { ...queryPresets.longLived, enabled, keepPreviousData: true }
+    { ...queryPresets.longLived, retry: false, enabled, keepPreviousData: true }
   );
 };
 

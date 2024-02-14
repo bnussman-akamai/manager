@@ -1,12 +1,29 @@
 import { Tag, getTags } from '@linode/api-v4';
-import { APIError, Filter, Params } from '@linode/api-v4/lib/types';
-import { QueryClient, useQuery } from 'react-query';
+import {
+  APIError,
+  Filter,
+  Params,
+  ResourcePage,
+} from '@linode/api-v4/lib/types';
+import { QueryClient, useInfiniteQuery, useQuery } from 'react-query';
 
 import { getAll } from 'src/utilities/getAll';
 
 import { queryPresets } from './base';
 
 export const queryKey = 'tags';
+
+export const useInfiniteTagsQuery = () =>
+  useInfiniteQuery<ResourcePage<Tag>, APIError[]>({
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
+    queryFn: ({ pageParam }) => getTags({ page: pageParam }),
+    queryKey: [queryKey, 'infinite'],
+  });
 
 export const useTagSuggestions = (enabled = true) =>
   useQuery<Tag[], APIError[]>(queryKey, () => getAllTagSuggestions(), {

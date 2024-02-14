@@ -6,6 +6,8 @@ import { useAllAccountMaintenanceQuery } from 'src/queries/accountMaintenance';
 import { useInProgressEvents } from 'src/queries/events/events';
 import { useAllLinodesQuery } from 'src/queries/linodes/linodes';
 import { addMaintenanceToLinodes } from 'src/utilities/linodes';
+
+import { LinodesLandingNew } from './LinodesLanding/LinodesLandingNew';
 import { linodesInTransition } from './transitions';
 
 const LinodesLanding = React.lazy(
@@ -17,12 +19,20 @@ const LinodesCreate = React.lazy(
 );
 
 const LinodesRoutes: React.FC = () => {
+  const useNewLinodesLanding = true;
   return (
     <React.Suspense fallback={<SuspenseLoader />}>
       <Switch>
         <Route component={LinodesCreate} path="/linodes/create" />
         <Route component={LinodesDetail} path="/linodes/:linodeId" />
-        <Route component={LinodesLandingWrapper} exact path="/linodes" strict />
+        <Route
+          component={
+            useNewLinodesLanding ? LinodesLandingNew : LinodesLandingWrapper
+          }
+          exact
+          path="/linodes"
+          strict
+        />
         <Redirect to="/linodes" />
       </Switch>
     </React.Suspense>
