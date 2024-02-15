@@ -1,8 +1,10 @@
+import { GlobalGrantTypes } from '@linode/api-v4/lib/account';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Theme, styled, useMediaQuery } from '@mui/material';
 import Popover from '@mui/material/Popover';
 import Grid from '@mui/material/Unstable_Grid2';
+import { useSnackbar } from 'notistack';
 import * as React from 'react';
 
 import { Box } from 'src/components/Box';
@@ -14,8 +16,14 @@ import { Link } from 'src/components/Link';
 import { Stack } from 'src/components/Stack';
 import { Tooltip } from 'src/components/Tooltip';
 import { Typography } from 'src/components/Typography';
-import { useAccountManagement } from 'src/hooks/useAccountManagement';
-import { useGrants } from 'src/queries/profile';
+import { switchAccountSessionContext } from 'src/context/switchAccountSessionContext';
+import { SwitchAccountButton } from 'src/features/Account/SwitchAccountButton';
+import { SwitchAccountDrawer } from 'src/features/Account/SwitchAccountDrawer';
+import { useParentTokenManagement } from 'src/features/Account/SwitchAccounts/useParentTokenManagement';
+import { useFlags } from 'src/hooks/useFlags';
+import { useAccount } from 'src/queries/account';
+import { useGrants, useProfile } from 'src/queries/profile';
+import { getStorage } from 'src/utilities/storage';
 
 interface MenuLink {
   display: string;
@@ -42,18 +50,54 @@ const profileLinks: MenuLink[] = [
 ];
 
 export const UserMenu = React.memo(() => {
-  const {
-    _hasAccountAccess,
-    _isRestrictedUser,
-    profile,
-  } = useAccountManagement();
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState<boolean>(false);
+
+  const { data: account } = useAccount();
+  const { data: profile } = useProfile();
+  const { data: grants } = useGrants();
+  const { enqueueSnackbar } = useSnackbar();
+  const flags = useFlags();
+  const sessionContext = React.useContext(switchAccountSessionContext);
+
+  const hasGrant = (grant: GlobalGrantTypes) =>
+    grants?.global?.[grant] ?? false;
+  const isRestrictedUser = profile?.restricted ?? false;
+  const hasAccountAccess = !isRestrictedUser || hasGrant('account_access');
+  const hasReadWriteAccountAccess = hasGrant('account_access') === 'read_write';
+  const hasParentChildAccountAccess = Boolean(flags.parentChildAccountAccess);
+  const isParentUser = profile?.user_type === 'parent';
+  const isProxyUser = profile?.user_type === 'proxy';
+  const canSwitchBetweenParentOrProxyAccount =
+    hasParentChildAccountAccess && (isParentUser || isProxyUser);
+  const open = Boolean(anchorEl);
+  const id = open ? 'user-menu-popover' : undefined;
+  const companyName =
+    (hasParentChildAccountAccess &&
+      profile?.user_type !== 'default' &&
+      account?.company) ??
+    '';
+  const showCompanyName = hasParentChildAccountAccess && companyName;
+  const { isParentTokenExpired } = useParentTokenManagement({ isProxyUser });
+
+  // Used for fetching parent profile and account data by making a request with the parent's token.
+  const proxyHeaders =
+    hasParentChildAccountAccess && isProxyUser
+      ? {
+          Authorization: getStorage(`authentication/parent_token/token`),
+        }
+      : undefined;
+
+  const { data: parentProfile } = useProfile({ headers: proxyHeaders });
+
+  const userName =
+    (hasParentChildAccountAccess && isProxyUser ? parentProfile : profile)
+      ?.username ?? '';
 
   const matchesSmDown = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down('sm')
-  );
-
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-    null
   );
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -64,13 +108,14 @@ export const UserMenu = React.memo(() => {
     setAnchorEl(null);
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'user-menu-popover' : undefined;
-
-  const { data: grants } = useGrants();
-  const userName = profile?.username ?? '';
-  const hasFullAccountAccess =
-    grants?.global?.account_access === 'read_write' || !_isRestrictedUser;
+  React.useEffect(() => {
+    // Run after we've switched to a proxy user.
+    if (isProxyUser) {
+      enqueueSnackbar(`Account switched to ${companyName}.`, {
+        variant: 'success',
+      });
+    }
+  }, [isProxyUser, companyName, enqueueSnackbar]);
 
   const accountLinks: MenuLink[] = React.useMemo(
     () => [
@@ -81,13 +126,13 @@ export const UserMenu = React.memo(() => {
       // Restricted users can't view the Users tab regardless of their grants
       {
         display: 'Users & Grants',
-        hide: _isRestrictedUser,
+        hide: isRestrictedUser,
         href: '/account/users',
       },
       // Restricted users can't view the Transfers tab regardless of their grants
       {
         display: 'Service Transfers',
-        hide: _isRestrictedUser,
+        hide: isRestrictedUser,
         href: '/account/service-transfers',
       },
       {
@@ -97,11 +142,11 @@ export const UserMenu = React.memo(() => {
       // Restricted users with read_write account access can view Settings.
       {
         display: 'Account Settings',
-        hide: !hasFullAccountAccess,
+        hide: !hasReadWriteAccountAccess,
         href: '/account/settings',
       },
     ],
-    [hasFullAccountAccess, _isRestrictedUser]
+    [hasReadWriteAccountAccess, isRestrictedUser]
   );
 
   const renderLink = (link: MenuLink) => {
@@ -124,15 +169,26 @@ export const UserMenu = React.memo(() => {
   };
 
   const getEndIcon = () => {
-    if (matchesSmDown) {
-      return undefined;
-    }
-    if (open) {
-      return <KeyboardArrowUp sx={{ height: 26, width: 26 }} />;
-    }
-    return (
-      <KeyboardArrowDown sx={{ color: '#9ea4ae', height: 26, width: 26 }} />
+    const sx = {
+      height: 26,
+      width: 26,
+    };
+
+    return matchesSmDown ? undefined : open ? (
+      <KeyboardArrowUp sx={sx} />
+    ) : (
+      <KeyboardArrowDown sx={{ color: '#9ea4ae', ...sx }} />
     );
+  };
+
+  const handleAccountSwitch = () => {
+    if (isParentTokenExpired) {
+      return sessionContext.updateState({
+        isOpen: true,
+      });
+    }
+
+    setIsDrawerOpen(true);
   };
 
   return (
@@ -145,9 +201,6 @@ export const UserMenu = React.memo(() => {
       >
         <Button
           sx={(theme) => ({
-            '& .MuiButton-endIcon': {
-              marginLeft: '4px',
-            },
             backgroundColor: open ? theme.bg.app : undefined,
             height: '50px',
             minWidth: 'unset',
@@ -161,7 +214,25 @@ export const UserMenu = React.memo(() => {
           startIcon={<GravatarByEmail email={profile?.email ?? ''} />}
         >
           <Hidden mdDown>
-            <Typography sx={{ fontSize: '0.875rem' }}>{userName}</Typography>
+            <Stack alignItems={'flex-start'}>
+              <Typography
+                sx={{
+                  fontSize: showCompanyName ? '0.775rem' : '0.875rem',
+                }}
+              >
+                {userName}
+              </Typography>
+              {showCompanyName && (
+                <Typography
+                  sx={(theme) => ({
+                    fontFamily: theme.font.bold,
+                    fontSize: '0.875rem',
+                  })}
+                >
+                  {companyName}
+                </Typography>
+              )}
+            </Stack>
           </Hidden>
         </Button>
       </Tooltip>
@@ -179,18 +250,32 @@ export const UserMenu = React.memo(() => {
           },
         }}
         anchorEl={anchorEl}
+        data-testid={id}
         id={id}
         marginThreshold={0}
         onClose={handleClose}
         open={open}
+        // When the Switch Account drawer is open, hide the user menu popover so it's not covering the drawer.
+        sx={{ zIndex: isDrawerOpen ? 0 : 1 }}
       >
         <Stack data-qa-user-menu minWidth={250} spacing={2}>
+          {canSwitchBetweenParentOrProxyAccount && (
+            <Typography>You are currently logged in as:</Typography>
+          )}
           <Typography
             color={(theme) => theme.textColors.headlineStatic}
             fontSize="1.1rem"
           >
-            <strong>{userName}</strong>
+            <strong>
+              {canSwitchBetweenParentOrProxyAccount ? companyName : userName}
+            </strong>
           </Typography>
+          {canSwitchBetweenParentOrProxyAccount && (
+            <SwitchAccountButton
+              buttonType="outlined"
+              onClick={handleAccountSwitch}
+            />
+          )}
           <Box>
             <Heading>My Profile</Heading>
             <Divider color="#9ea4ae" />
@@ -215,7 +300,7 @@ export const UserMenu = React.memo(() => {
               </Grid>
             </Grid>
           </Box>
-          {_hasAccountAccess && (
+          {hasAccountAccess && (
             <Box>
               <Heading>Account</Heading>
               <Divider color="#9ea4ae" />
@@ -238,6 +323,11 @@ export const UserMenu = React.memo(() => {
           )}
         </Stack>
       </Popover>
+      <SwitchAccountDrawer
+        isProxyUser={isProxyUser}
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+      />
     </>
   );
 });

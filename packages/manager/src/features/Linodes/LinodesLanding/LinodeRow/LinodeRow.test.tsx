@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event';
-import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { linodeFactory } from 'src/factories';
@@ -10,15 +9,13 @@ import { LinodeRow, RenderFlag } from './LinodeRow';
 describe('LinodeRow', () => {
   describe('when Linode has mutation', () => {
     it('should render a Flag', () => {
-      const wrapper = shallow(<RenderFlag mutationAvailable={true} />);
-
-      const Tooltip = wrapper.find('Tooltip');
-
-      expect(Tooltip).toHaveLength(1);
-      expect(Tooltip.props()).toHaveProperty(
-        'title',
-        'There is a free upgrade available for this Linode'
+      const { getByLabelText } = renderWithTheme(
+        <RenderFlag mutationAvailable={true} />
       );
+
+      expect(
+        getByLabelText('There is a free upgrade available for this Linode')
+      ).toBeVisible();
     });
   });
 
@@ -45,6 +42,7 @@ describe('LinodeRow', () => {
         ipv6={linode.ipv6 || ''}
         key={`linode-row-${1}`}
         label={linode.label}
+        placement_groups={linode.placement_groups}
         region={linode.region}
         specs={linode.specs}
         status={linode.status}

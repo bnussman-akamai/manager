@@ -16,10 +16,12 @@ import { TableRow } from 'src/components/TableRow';
 import { TextField } from 'src/components/TextField';
 import { ISO_DATETIME_NO_TZ_FORMAT } from 'src/constants';
 import { AccessCell } from 'src/features/ObjectStorage/AccessKeyLanding/AccessCell';
+import { VPC_READ_ONLY_TOOLTIP } from 'src/features/VPCs/constants';
 import { useFlags } from 'src/hooks/useFlags';
-import { useAccountUser } from 'src/queries/accountUsers';
+import { useAccount } from 'src/queries/account';
 import { useProfile } from 'src/queries/profile';
 import { useCreatePersonalAccessTokenMutation } from 'src/queries/tokens';
+import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
 import { getErrorMap } from 'src/utilities/errorUtils';
 
 import {
@@ -29,9 +31,10 @@ import {
   StyledSelectCell,
 } from './APITokenDrawer.styles';
 import {
+  basePermNameMap as _basePermNameMap,
   Permission,
   allScopesAreTheSame,
-  basePermNameMap,
+  filterPermsNameMap,
   permTuplesToScopeString,
   scopeStringToPermTuples,
 } from './utils';
@@ -94,13 +97,34 @@ export const CreateAPITokenDrawer = (props: Props) => {
   };
 
   const { data: profile } = useProfile();
-  const { data: user } = useAccountUser(profile?.username ?? '');
+  const { data: account } = useAccount();
 
   const {
     error,
     isLoading,
     mutateAsync: createPersonalAccessToken,
   } = useCreatePersonalAccessTokenMutation();
+
+  const showVPCs = isFeatureEnabled(
+    'VPCs',
+    Boolean(flags.vpc),
+    account?.capabilities ?? []
+  );
+
+  const hasParentChildAccountAccess = Boolean(flags.parentChildAccountAccess);
+
+  // @TODO: VPC & Parent/Child - once these are in GA, remove _basePermNameMap logic and references.
+  // Just use the basePermNameMap import directly w/o any manipulation.
+  const basePermNameMap = filterPermsNameMap(_basePermNameMap, [
+    {
+      name: 'vpc',
+      shouldBeIncluded: showVPCs,
+    },
+    {
+      name: 'child_account',
+      shouldBeIncluded: hasParentChildAccountAccess,
+    },
+  ]);
 
   const form = useFormik<{
     expiry: string;
@@ -162,9 +186,11 @@ export const CreateAPITokenDrawer = (props: Props) => {
 
   // Filter permissions for all users except parent user accounts.
   const allPermissions = form.values.scopes;
+
   const showFilteredPermissions =
-    (flags.parentChildAccountAccess && user?.user_type !== 'parent') ||
+    (flags.parentChildAccountAccess && profile?.user_type !== 'parent') ||
     Boolean(!flags.parentChildAccountAccess);
+
   const filteredPermissions = allPermissions.filter(
     (scopeTup) => basePermNameMap[scopeTup[0]] !== 'Child Account Access'
   );
@@ -258,6 +284,9 @@ export const CreateAPITokenDrawer = (props: Props) => {
               if (!basePermNameMap[scopeTup[0]]) {
                 return null;
               }
+
+              const scopeIsForVPC = scopeTup[0] === 'vpc';
+
               return (
                 <TableRow
                   data-qa-row={basePermNameMap[scopeTup[0]]}
@@ -281,8 +310,11 @@ export const CreateAPITokenDrawer = (props: Props) => {
                     parentColumn="Read Only"
                   >
                     <AccessCell
+                      tooltipText={
+                        scopeIsForVPC ? VPC_READ_ONLY_TOOLTIP : undefined
+                      }
                       active={scopeTup[1] === 1}
-                      disabled={false}
+                      disabled={scopeIsForVPC} // "Read Only" is not a valid scope for VPC
                       onChange={handleScopeChange}
                       scope="1"
                       scopeDisplay={scopeTup[0]}

@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import * as React from 'react';
 
+import { PLAN_IS_SOLD_OUT_COPY } from 'src/constants';
 import { extendedTypeFactory } from 'src/factories/types';
 import { breakpoints } from 'src/foundations/breakpoints';
 import {
@@ -28,9 +29,10 @@ const extendedType = extendedTypeFactory.build();
 const props: KubernetesPlanSelectionProps = {
   getTypeCount: vi.fn(),
   idx: 0,
+  isPlanSoldOut: false,
   onAdd: vi.fn(),
   onSelect: vi.fn(),
-  selectedRegionID: 'us-east',
+  selectedRegionId: 'us-east',
   type: extendedType,
   updatePlanCount: vi.fn(),
 };
@@ -62,12 +64,47 @@ describe('KubernetesPlanSelection (table, desktop view)', () => {
   it('displays DC-specific prices in a region with a price increase', async () => {
     const { queryByText } = render(
       wrapWithTableBody(
-        <KubernetesPlanSelection {...props} selectedRegionID="id-cgk" />
+        <KubernetesPlanSelection {...props} selectedRegionId="id-cgk" />
       )
     );
 
     expect(queryByText(regionHourlyPrice)).toBeInTheDocument();
     expect(queryByText(regionMonthlyPrice)).toBeInTheDocument();
+  });
+
+  it('should not display an error message for $0 regions', () => {
+    const propsWithRegionZeroPrice = {
+      ...props,
+      type: extendedTypeFactory.build({
+        region_prices: [
+          {
+            hourly: 0,
+            id: 'id-cgk',
+            monthly: 0,
+          },
+        ],
+      }),
+    };
+    const { container } = renderWithTheme(
+      wrapWithTableBody(
+        <KubernetesPlanSelection
+          {...propsWithRegionZeroPrice}
+          selectedRegionId={'id-cgk'}
+        />
+      )
+    );
+
+    const monthlyTableCell = container.querySelector('[data-qa-monthly]');
+    const hourlyTableCell = container.querySelector('[data-qa-hourly]');
+    expect(monthlyTableCell).toHaveTextContent('$0');
+    // error tooltip button should not display
+    expect(
+      monthlyTableCell?.querySelector('[data-qa-help-button]')
+    ).not.toBeInTheDocument();
+    expect(hourlyTableCell).toHaveTextContent('$0');
+    expect(
+      hourlyTableCell?.querySelector('[data-qa-help-button]')
+    ).not.toBeInTheDocument();
   });
 
   describe('KubernetesPlanSelection (cards, mobile view)', () => {
@@ -96,7 +133,7 @@ describe('KubernetesPlanSelection (table, desktop view)', () => {
 
     it('displays DC-specific prices in a region with a price increase', async () => {
       const { getByText } = renderWithTheme(
-        <KubernetesPlanSelection {...props} selectedRegionID="id-cgk" />
+        <KubernetesPlanSelection {...props} selectedRegionId="id-cgk" />
       );
 
       expect(
@@ -105,6 +142,18 @@ describe('KubernetesPlanSelection (table, desktop view)', () => {
       expect(
         getByText(`${regionHourlyPrice}/hr`, { exact: false })
       ).toBeInTheDocument();
+    });
+
+    it('shows a chip if plan is sold out', () => {
+      const { getByLabelText } = renderWithTheme(
+        <KubernetesPlanSelection
+          {...props}
+          isPlanSoldOut={true}
+          selectedRegionId={'us-east'}
+        />
+      );
+
+      expect(getByLabelText(PLAN_IS_SOLD_OUT_COPY)).toBeInTheDocument();
     });
   });
 });

@@ -36,7 +36,7 @@ import {
   useQueryClient,
 } from 'react-query';
 
-import { EventWithStore } from 'src/events';
+import { EventHandlerData } from 'src/hooks/useEventHandlers';
 
 import { queryKey as accountQueryKey } from './account';
 import { queryPresets } from './base';
@@ -69,9 +69,9 @@ export const profileQueries = getQueryKeys({
   }),
 });
 
-export const useProfile = () =>
+export const useProfile = (options?: RequestOptions) =>
   useQuery<Profile, APIError[]>({
-    ...profileQueries.profile(),
+    ...profileQueries.profile(options),
     ...queryPresets.oneTimeFetch,
   });
 
@@ -178,7 +178,7 @@ export const useDeleteSSHKeyMutation = (id: number) => {
   });
 };
 
-export const sshKeyEventHandler = (event: EventWithStore) => {
+export const sshKeyEventHandler = (event: EventHandlerData) => {
   // This event handler is a bit agressive and will over-fetch, but UX will
   // be great because this will ensure Cloud has up to date data all the time.
 

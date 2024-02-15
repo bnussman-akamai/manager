@@ -6,10 +6,11 @@ import { Paper } from 'src/components/Paper';
 import { Stack } from 'src/components/Stack';
 import { Typography } from 'src/components/Typography';
 import { IPAddress } from 'src/features/Linodes/LinodesLanding/IPAddress';
-import { useLoadBalancerQuery } from 'src/queries/aglb/loadbalancers';
+import { useLoadBalancerQuery } from 'src/queries/aclb/loadbalancers';
 // import { useRegionsQuery } from 'src/queries/regions';
 
 import { Ports } from '../LoadBalancerLanding/Ports';
+import { LoadBalancerEndpointHealth } from './LoadBalancerEndpointHealth';
 import { LoadBalancerRegions } from './LoadBalancerRegions';
 
 export const LoadBalancerSummary = () => {
@@ -36,6 +37,10 @@ export const LoadBalancerSummary = () => {
     {
       title: 'Ports',
       value: <Ports loadbalancerId={id} />,
+    },
+    {
+      title: 'Endpoints',
+      value: <LoadBalancerEndpointHealth id={id} />,
     },
     {
       title: 'Regions',

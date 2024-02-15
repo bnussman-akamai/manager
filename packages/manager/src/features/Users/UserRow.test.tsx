@@ -2,6 +2,7 @@ import React from 'react';
 
 import { profileFactory } from 'src/factories';
 import { accountUserFactory } from 'src/factories/accountUsers';
+import { grantsFactory } from 'src/factories/grants';
 import { rest, server } from 'src/mocks/testServer';
 import {
   mockMatchMedia,
@@ -26,6 +27,7 @@ describe('UserRow', () => {
     expect(getByText(user.username)).toBeVisible();
     expect(getByText(user.email)).toBeVisible();
   });
+
   it('renders "Full" if the user is unrestricted', () => {
     const user = accountUserFactory.build({ restricted: false });
 
@@ -35,6 +37,7 @@ describe('UserRow', () => {
 
     expect(getByText('Full')).toBeVisible();
   });
+
   it('renders "Limited" if the user is restricted', () => {
     const user = accountUserFactory.build({ restricted: true });
 
@@ -44,6 +47,122 @@ describe('UserRow', () => {
 
     expect(getByText('Limited')).toBeVisible();
   });
+
+  it('renders "Enabled" if a user on an active parent account has Child Account Access', async () => {
+    // Mock the additional user on the parent account.
+    const user = accountUserFactory.build();
+
+    server.use(
+      // Mock the grants of the additional user on the parent account.
+      rest.get('*/account/users/*/grants', (req, res, ctx) => {
+        return res(
+          ctx.json(
+            grantsFactory.build({ global: { child_account_access: true } })
+          )
+        );
+      }),
+      // Mock the active profile, which must be of `parent` user type to see the Child Account Access column.
+      rest.get('*/profile', (req, res, ctx) => {
+        return res(ctx.json(profileFactory.build({ user_type: 'parent' })));
+      })
+    );
+
+    const { findByText } = renderWithTheme(
+      wrapWithTableBody(<UserRow onDelete={vi.fn()} user={user} />, {
+        flags: { parentChildAccountAccess: true },
+      })
+    );
+    expect(await findByText('Enabled')).toBeVisible();
+  });
+
+  it('renders "Disabled" if a user on an active parent account does not have Child Account Access', async () => {
+    // Mock the additional user on the parent account.
+    const user = accountUserFactory.build();
+
+    server.use(
+      // Mock the grants of the additional user on the parent account.
+      rest.get('*/account/users/*/grants', (req, res, ctx) => {
+        return res(
+          ctx.json(
+            grantsFactory.build({ global: { child_account_access: false } })
+          )
+        );
+      }),
+      // Mock the active profile, which must be of `parent` user type to see the Child Account Access column.
+      rest.get('*/profile', (req, res, ctx) => {
+        return res(ctx.json(profileFactory.build({ user_type: 'parent' })));
+      })
+    );
+
+    const { findByText } = renderWithTheme(
+      wrapWithTableBody(<UserRow onDelete={vi.fn()} user={user} />, {
+        flags: { parentChildAccountAccess: true },
+      })
+    );
+    expect(await findByText('Disabled')).toBeVisible();
+  });
+
+  it('does not render the Child Account Access column for an active non-parent user', async () => {
+    // Mock the additional user on the parent account.
+    const user = accountUserFactory.build();
+
+    server.use(
+      // Mock the grants of the additional user on the parent account.
+      rest.get('*/account/users/*/grants', (req, res, ctx) => {
+        return res(
+          ctx.json(
+            grantsFactory.build({ global: { child_account_access: true } })
+          )
+        );
+      }),
+      // Mock the active profile, which must NOT be of `parent` user type to hide the Child Account Access column.
+      rest.get('*/profile', (req, res, ctx) => {
+        return res(ctx.json(profileFactory.build({ user_type: 'default' })));
+      })
+    );
+
+    const { queryByText } = renderWithTheme(
+      wrapWithTableBody(<UserRow onDelete={vi.fn()} user={user} />, {
+        flags: { parentChildAccountAccess: true },
+      })
+    );
+    expect(queryByText('Enabled')).not.toBeInTheDocument();
+  });
+
+  it('renders only a username, email, and account access status for a Proxy user', async () => {
+    const mockLogin = {
+      login_datetime: '2022-02-09T16:19:26',
+    };
+    const proxyUser = accountUserFactory.build({
+      email: 'proxy@proxy.com',
+      last_login: mockLogin,
+      restricted: true,
+      user_type: 'proxy',
+      username: 'proxyUsername',
+    });
+
+    server.use(
+      // Mock the active profile for the child account.
+      rest.get('*/profile', (req, res, ctx) => {
+        return res(ctx.json(profileFactory.build({ user_type: 'child' })));
+      })
+    );
+
+    const { findByText, queryByText } = renderWithTheme(
+      wrapWithTableBody(<UserRow onDelete={vi.fn()} user={proxyUser} />, {
+        flags: { parentChildAccountAccess: true },
+      })
+    );
+
+    // Renders Username, Email, and Account Access fields for a proxy user.
+    expect(await findByText('proxyUsername')).toBeInTheDocument();
+    expect(await findByText('proxy@proxy.com')).toBeInTheDocument();
+    expect(await findByText('Limited')).toBeInTheDocument();
+
+    // Does not render the Last Login for a proxy user.
+    expect(queryByText('2022-02-09T16:19:26')).not.toBeInTheDocument();
+  });
+
   it('renders "Never" if last_login is null', () => {
     const user = accountUserFactory.build({ last_login: null });
 

@@ -9,8 +9,11 @@ import { makeResponse } from 'support/util/response';
 
 import { objectStorageBucketFactory } from 'src/factories/objectStorage';
 
-import type { ObjectStorageBucket, ObjectStorageKey } from '@linode/api-v4';
-import { Cluster } from 'cluster';
+import type {
+  ObjectStorageBucket,
+  ObjectStorageKey,
+  ObjectStorageCluster,
+} from '@linode/api-v4';
 
 /**
  * Intercepts GET requests to fetch buckets.
@@ -45,6 +48,25 @@ export const mockGetBuckets = (
     'GET',
     apiMatcher('object-storage/buckets/*'),
     sequentialStub([paginateResponse(buckets), paginateResponse([])])
+  );
+};
+
+/**
+ * Intercepts GET request to fetch buckets for a region and mocks response.
+ *
+ * @param regionId - ID of region for which to mock buckets.
+ * @param buckets - Array of Bucket objects with which to mock response.
+ *
+ * @returns Cypress chainable.
+ */
+export const mockGetBucketsForRegion = (
+  regionId: string,
+  buckets: ObjectStorageBucket[]
+): Cypress.Chainable<null> => {
+  return cy.intercept(
+    'GET',
+    apiMatcher(`object-storage/buckets/${regionId}*`),
+    paginateResponse(buckets)
   );
 };
 
@@ -350,6 +372,23 @@ export const mockCreateAccessKey = (
 };
 
 /**
+ * Intercepts request to update an Object Storage Access Key and mocks response.
+ *
+ * @param updatedAccessKey - Access key with which to mock response.
+ *
+ * @returns Cypress chainable.
+ */
+export const mockUpdateAccessKey = (
+  updatedAccessKey: ObjectStorageKey
+): Cypress.Chainable<null> => {
+  return cy.intercept(
+    'PUT',
+    apiMatcher(`object-storage/keys/${updatedAccessKey.id}`),
+    makeResponse(updatedAccessKey)
+  );
+};
+
+/**
  * Intercepts object storage access key DELETE request and mocks success response.
  *
  * @param keyId - ID of access key for which to intercept DELETE request.
@@ -379,7 +418,9 @@ export const mockCancelObjectStorage = (): Cypress.Chainable => {
  *
  * @returns Cypress chainable.
  */
-export const mockGetClusters = (clusters: Cluster[]): Cypress.Chainable => {
+export const mockGetClusters = (
+  clusters: ObjectStorageCluster[]
+): Cypress.Chainable => {
   return cy.intercept(
     'GET',
     apiMatcher('object-storage/clusters*'),

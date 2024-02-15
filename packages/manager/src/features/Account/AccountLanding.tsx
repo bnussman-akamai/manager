@@ -11,10 +11,15 @@ import { SafeTabPanel } from 'src/components/Tabs/SafeTabPanel';
 import { TabLinkList } from 'src/components/Tabs/TabLinkList';
 import { TabPanels } from 'src/components/Tabs/TabPanels';
 import { Tabs } from 'src/components/Tabs/Tabs';
+import { switchAccountSessionContext } from 'src/context/switchAccountSessionContext';
+import { useParentTokenManagement } from 'src/features/Account/SwitchAccounts/useParentTokenManagement';
+import { useFlags } from 'src/hooks/useFlags';
 import { useAccount } from 'src/queries/account';
-import { useGrants } from 'src/queries/profile';
+import { useGrants, useProfile } from 'src/queries/profile';
 
 import AccountLogins from './AccountLogins';
+import { SwitchAccountButton } from './SwitchAccountButton';
+import { SwitchAccountDrawer } from './SwitchAccountDrawer';
 
 const Billing = React.lazy(() =>
   import('src/features/Billing/BillingDetail').then((module) => ({
@@ -43,10 +48,19 @@ const AccountLanding = () => {
   const location = useLocation();
   const { data: account } = useAccount();
   const { data: grants } = useGrants();
+  const { data: profile } = useProfile();
+
+  const flags = useFlags();
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState<boolean>(false);
+  const sessionContext = React.useContext(switchAccountSessionContext);
 
   const accountAccessGrant = grants?.global?.account_access;
   const readOnlyAccountAccess = accountAccessGrant === 'read_only';
   const isAkamaiAccount = account?.billing_source === 'akamai';
+  const isProxyUser = profile?.user_type === 'proxy';
+  const isParentUser = profile?.user_type === 'parent';
+
+  const { isParentTokenExpired } = useParentTokenManagement({ isProxyUser });
 
   const tabs = [
     {
@@ -81,6 +95,16 @@ const AccountLanding = () => {
     '/account/billing/edit',
   ];
 
+  const handleAccountSwitch = () => {
+    if (isParentTokenExpired) {
+      return sessionContext.updateState({
+        isOpen: true,
+      });
+    }
+
+    setIsDrawerOpen(true);
+  };
+
   const getDefaultTabIndex = () => {
     const tabChoice = tabs.findIndex((tab) =>
       Boolean(matchPath(tab.routeName, { path: location.pathname }))
@@ -107,6 +131,8 @@ const AccountLanding = () => {
   let idx = 0;
 
   const isBillingTabSelected = location.pathname.match(/billing/);
+  const canSwitchBetweenParentOrProxyAccount =
+    flags.parentChildAccountAccess && (isParentUser || isProxyUser);
 
   const landingHeaderProps: LandingHeaderProps = {
     breadcrumbProps: {
@@ -125,6 +151,9 @@ const AccountLanding = () => {
         history.replace('/account/billing/make-payment');
     }
     landingHeaderProps.disabledCreateButton = readOnlyAccountAccess;
+    landingHeaderProps.extraActions = canSwitchBetweenParentOrProxyAccount ? (
+      <SwitchAccountButton onClick={handleAccountSwitch} />
+    ) : undefined;
   }
 
   return (
@@ -158,6 +187,11 @@ const AccountLanding = () => {
           </TabPanels>
         </React.Suspense>
       </Tabs>
+      <SwitchAccountDrawer
+        isProxyUser={isProxyUser}
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+      />
     </React.Fragment>
   );
 };

@@ -4,6 +4,234 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2024-02-13] - v1.112.0
+
+### Added:
+
+- Support for IPv4 Ranges in VPC 'Assign Linodes to subnet' drawer ([#10089](https://github.com/linode/manager/pull/10089))
+- VPC IPv4 address and range to Linode IP Address Table ([#10108](https://github.com/linode/manager/pull/10108))
+- Support for VPC IPv4 Ranges data in Unassign Linodes drawer ([#10114](https://github.com/linode/manager/pull/10114))
+- Support for VPC IPv4 Ranges in Linode Create flow and 'VPC IPv4 Ranges' column to inner Subnets table on VPC Detail page ([#10116](https://github.com/linode/manager/pull/10116))
+- Support VPC IPv4 Ranges in Add/Edit Linode Config dialog ([#10170](https://github.com/linode/manager/pull/10170))
+
+### Changed:
+
+- "Learn more" docs link for IPv4 ranges in Add/Edit Linode Config dialog, Linode Create flow, and VPC "Assign Linodes" drawer
+
+### Fixed:
+
+- Error when enabling backups for Linodes in regions with $0 pricing ([#10153](https://github.com/linode/manager/pull/10153))
+- Error notices for $0 regions in LKE Resize and Add Node Pools drawers ([#10157](https://github.com/linode/manager/pull/10157))
+- Error in Enable All Backups drawer when one or more Linode is in a $0 region ([#10161](https://github.com/linode/manager/pull/10161))
+- Display $0.00 prices in Linode Migration dialog ([#10166](https://github.com/linode/manager/pull/10166))
+
+## [2024-02-05] - v1.111.0
+### Changed:
+
+- Table CollapsibleRow icon orientation ([#10119](https://github.com/linode/manager/pull/10119))
+- Hide error message for $0 regions ([#10141](https://github.com/linode/manager/pull/10141))
+
+### Fixed:
+
+- Incorrect color of VPC Action Buttons in Dark Mode ([#10101](https://github.com/linode/manager/pull/10101))
+- Breadcrumb label in NodeBalancers details & create pages ([#10127](https://github.com/linode/manager/pull/10127))
+
+### Tech Stories:
+
+- Improve NodeBalancer Restricted User Experience ([#10095](https://github.com/linode/manager/pull/10095))
+- Update Storybook & add @babel/traverse resolution ([#10097](https://github.com/linode/manager/pull/10097))
+- Remove unused `@types/reach__router` package ([#10099](https://github.com/linode/manager/pull/10099))
+- Add RegionMultiSelect Component ([#10084](https://github.com/linode/manager/pull/10084))
+- Remove unused `react-page-visibility` and `@types/react-page-visibility` packages ([#10099](https://github.com/linode/manager/pull/10099))
+- Move `simple-git` from `dependencies` to `devDependencies` ([#10099](https://github.com/linode/manager/pull/10099))
+- Remove `kubernetesDashboardAvailability` feature flag ([#10121](https://github.com/linode/manager/pull/10121))
+- Refactor AccessKeyTable - Eliminate React anti-patterns ([#10124](https://github.com/linode/manager/pull/10124))
+- React Query for Events ([#9949](https://github.com/linode/manager/pull/9949))
+- Upgrade to Vitest 1.2.0 ([#10070](https://github.com/linode/manager/pull/10070))
+- Enable TypeScript type checks in the Cypress directory ([#10086](https://github.com/linode/manager/pull/10086))
+
+### Tests:
+
+- Add Cypress tests for restricted user billing flows ([#10070](https://github.com/linode/manager/pull/10070))
+- Fix test failure related to Ubuntu 23.04 Image deprecation ([#10091](https://github.com/linode/manager/pull/10091))
+- Add regression tests for deleting users on the Users & Grants page. ([#10093](https://github.com/linode/manager/pull/10093))
+- Fix Domains landing page empty state test flake ([#10094](https://github.com/linode/manager/pull/10094))
+- Add Cypress test for VPC assignment during Linode create flow ([#9939](https://github.com/linode/manager/pull/9939))
+
+### Upcoming Features:
+
+- Create Load Balancer Summary page ([#10018](https://github.com/linode/manager/pull/10018))
+- OBJ MultiCluster - Add regions field in Create Access Key Drawer ([#10034](https://github.com/linode/manager/pull/10034))
+- Add Rule support to ACLB Full Create Flow ([#10035](https://github.com/linode/manager/pull/10035))
+- Update ACLB Configuration Port Copy ([#10079](https://github.com/linode/manager/pull/10079))
+- Add search filter in Clone Linode and Create Linode from Backup flows ([#10088](https://github.com/linode/manager/pull/10088))
+- Handle ACLB Account Capability ([#10098](https://github.com/linode/manager/pull/10098))
+- Add new ACLB logo ([#10105](https://github.com/linode/manager/pull/10105))
+- Put newly created ACLB Rules at the top of the table upon creation ([#10107](https://github.com/linode/manager/pull/10107))
+- Change ACLB Rule Execution Order Column ([#10112](https://github.com/linode/manager/pull/10112))
+- Add ACLB rule Path Regex match type ([#10126](https://github.com/linode/manager/pull/10126))
+- Update ACLB Copy ([#10128](https://github.com/linode/manager/pull/10128))
+- Implement Account Switching Functionality (#10064)
+- Add `user_type` to /profile endpoint for Parent/Child user roles ([#10080](https://github.com/linode/manager/pull/10080))
+- Add business partner table to Users & Grants child view ([#10076](https://github.com/linode/manager/pull/10076))
+- Disable adding and editing API tokens for proxy users (#10109)
+- Restrict proxy users from updating username/email (#10103)
+- Add Verification Banner for Child Accounts ([#10085](https://github.com/linode/manager/pull/10085))
+- Add Placement Groups Detail Page ([#10096](https://github.com/linode/manager/pull/10096))
+- Add Placement Groups Create/Rename Drawers (#10106)
+- Add Placement Groups Landing Page ([#10068](https://github.com/linode/manager/pull/10068))
+- Add Placement Groups Landing Page empty state ([#10075](https://github.com/linode/manager/pull/10075))
+
+
+## [2024-01-31] - v1.110.3
+
+### Fix:
+- Enable `Can add VPCs to this account` for user permissions
+
+## [2024-01-31] - v1.110.2
+
+### Changed:
+- Remove VPC beta feedback link
+
+## [2024-01-31] - v1.110.1
+
+### Changed:
+- Updated VPC flag for primary navigation
+
+## [2024-01-22] - v1.110.0
+
+
+### Added:
+
+- Subnet IPv4 range recommendation in VPC Create flow and Subnet Create Drawer ([#10010](https://github.com/linode/manager/pull/10010))
+- Sold out chips for GPU and Premium CPU plans ([#10013](https://github.com/linode/manager/pull/10013))
+- Cloud Manager Documentation microsite with Vitepress ([#10027](https://github.com/linode/manager/pull/10027))
+- Proper support for OBJ Access Key events ([#10038](https://github.com/linode/manager/pull/10038))
+- Support VPC in Access Token drawers ([#10024](https://github.com/linode/manager/pull/10024))
+
+### Changed:
+
+- Styling of Toggles and Radios in dark mode ([#10020](https://github.com/linode/manager/pull/10020))
+- Deprecate Ark, TF2, Terraria, Percona, Mist, MagicSpam and BitNinja from Marketplace Apps ([#10046](https://github.com/linode/manager/pull/10046))
+- Update user title and emote icons on Support Ticket page ([#10054](https://github.com/linode/manager/pull/10054))
+- Update Cloud Manager LICENSE ([#10067](https://github.com/linode/manager/pull/10067))
+- Remove unified migrations feature flag ([#10074](https://github.com/linode/manager/pull/10074))
+- Right align chart tooltip data points ([#10078](https://github.com/linode/manager/pull/10078))
+- Update OBJ types used in several Object Storage components ([#9996](https://github.com/linode/manager/pull/9996))
+- Replace Linode details Analytics tab with Recharts ([#10037, #10001](https://github.com/linode/manager/pull/10037))
+- Replace Managed summary charts with Recharts ([#10001](https://github.com/linode/manager/pull/10001))
+
+### Fixed:
+
+- Managed Summary layout ([#10042](https://github.com/linode/manager/pull/10042))
+- Textfield Label Tooltip Icon elongation/distortion upon focus ([#10044](https://github.com/linode/manager/pull/10044))
+- Broken PrimaryNav marketplace navigation within Linode Create ([#10049](https://github.com/linode/manager/pull/10049))
+- Kubernetes upgrade flow on Kubernetes details page ([#10057](https://github.com/linode/manager/pull/10057))
+- VPC arguments in Linode Create flow CLI ([#10071](https://github.com/linode/manager/pull/10071))
+- Standardize Copy Icon Color Variations in CopyableTextField ([#10073](https://github.com/linode/manager/pull/10073))
+- Linode details action button color in dark mode ([#10077](https://github.com/linode/manager/pull/10077))
+- AGLB route rules being cleared when updating a route ([#10016](https://github.com/linode/manager/pull/10016))
+- AGLB Service Target validation ([#10016](https://github.com/linode/manager/pull/10016))
+
+### Tech Stories:
+
+- Update `react-waypoint` for React 18 ([#10026](https://github.com/linode/manager/pull/10026))
+- Improve accessibility of Button Component ([#10028](https://github.com/linode/manager/pull/10028))
+- Remove `classnames` and `@types/classnames` ([#10029](https://github.com/linode/manager/pull/10029))
+- Update `axios` to resolve `follow-redirects` dependabot alert ([#10059](https://github.com/linode/manager/pull/10059))
+
+### Tests:
+
+- Add test coverage updating/renaming Linode labels ([#10032](https://github.com/linode/manager/pull/10032))
+- GDPR agreement e2e test ([#10033](https://github.com/linode/manager/pull/10033))
+- Add test coverage for Billing Access permission for Child accounts ([#10045](https://github.com/linode/manager/pull/10045))
+- Improve Kubernetes version upgrade Cypress test ([#10057](https://github.com/linode/manager/pull/10057))
+- Combine VPC landing page tests for update and delete operations ([#10061](https://github.com/linode/manager/pull/10061))
+
+### Upcoming Features:
+
+- Add AGLB Endpoint Health ([#10008](https://github.com/linode/manager/pull/10008))
+- Add child account access column and disable delete account button when account has child accounts ([#10025](https://github.com/linode/manager/pull/10025))
+- Add parent/proxy 'Switch Account' button and drawer to user profile dropdown menu  ([#10031](https://github.com/linode/manager/pull/10031))
+- Disable Contact / Billing Info for Restricted Users ([#10036](https://github.com/linode/manager/pull/10036))
+- Disable Billing Access user permission for child accounts ([#10045](https://github.com/linode/manager/pull/10045))
+- Fix AGLB Configuration "Save" button remaining disabled when trying to remove a route ([#10048](https://github.com/linode/manager/pull/10048))
+- Add Switch Account button to Account Landing page for parent and proxy users ([#10052](https://github.com/linode/manager/pull/10052))
+- Add VM Placement feature flag ([#10060](https://github.com/linode/manager/pull/10060))
+- Add Placement Groups: Queries, Types, Validation, Factories and Mock Data ([#10062](https://github.com/linode/manager/pull/10062))
+- Improve AGLB Configuration - Add Certificate Drawer ([#10066](https://github.com/linode/manager/pull/10066))
+- Configure User Permissions Billing Account Access for user types ([#10069](https://github.com/linode/manager/pull/10069))
+- Ability to scale up Database instances ([#9869](https://github.com/linode/manager/pull/9869))
+- Clone Linode power-off notice ([#10072](https://github.com/linode/manager/pull/10072))
+
+## [2024-01-10] - v1.109.1
+
+### Fixed:
+
+- VPC docs links on VPC landing, Create, and Detail pages and in "Assign Linodes" flow ([#10050](https://github.com/linode/manager/pull/10050))
+- VPC subnet Linode assignment text field input issue ([#10047](https://github.com/linode/manager/pull/10047))
+
+### Tests:
+
+- Remove obsolete VPC disabled state tests ([#10047](https://github.com/linode/manager/pull/10047))
+
+
+## [2024-01-08] - v1.109.0
+
+
+### Changed:
+
+- Improve layout of User Permissions page ([#10005](https://github.com/linode/manager/pull/10005))
+- Update toast notifications for UserPermissions ([#10011](https://github.com/linode/manager/pull/10011))
+- VLAN availability text on Linode Create ([#9989](https://github.com/linode/manager/pull/9989))
+- Default access to `None` for all scopes when creating Personal Access Tokens ([#9992](https://github.com/linode/manager/pull/9992))
+- Filter already assigned services from firewall dropdowns ([#9993](https://github.com/linode/manager/pull/9993))
+
+### Fixed:
+
+- User Permissions toggle and radio button accessibility ([#10009](https://github.com/linode/manager/pull/10009))
+
+### Tech Stories:
+
+- Currency and DateTimeDisplay v7 storybook migrations ([#10007](https://github.com/linode/manager/pull/10007))
+- ColorPalette and CircleProgress v7 storybook migration ([#10015](https://github.com/linode/manager/pull/10015))
+- DebouncedSearchTextfield and EditableText v7 storybook migrations ([#10017](https://github.com/linode/manager/pull/10017))
+- Placeholder and EntityDetails v7 storybook migrations ([#10019](https://github.com/linode/manager/pull/10019))
+- PaginationControls V7 story migration ([#9959](https://github.com/linode/manager/pull/9959))
+- TagsInput & TagsPanel Storybook v7 Stories ([#9963](https://github.com/linode/manager/pull/9963))
+- Add Lint Github Action ([#9973](https://github.com/linode/manager/pull/9973))
+- Complete @mui/styles to tss-react migration and remove @mui/styles ([#9978](https://github.com/linode/manager/pull/9978))
+- ErrorState and FileUploader v7 storybook migrations ([#9981](https://github.com/linode/manager/pull/9981))
+- Speed up code coverage Github Actions jobs by skipping Cloud Manager build ([#9988](https://github.com/linode/manager/pull/9988))
+- Radio and TextField v7 storybook migrations ([#9994](https://github.com/linode/manager/pull/9994))
+- Graphs stories v7 migration ([#9999](https://github.com/linode/manager/pull/9999))
+- Add ability to pass headers to useProfile query ([#9987](https://github.com/linode/manager/pull/9987))
+
+### Tests:
+
+- Add Cypress test for Firewalls empty state landing page ([#10000](https://github.com/linode/manager/pull/10000))
+- Add integration test for Domains empty landing page ([#10004](https://github.com/linode/manager/pull/10004))
+- Add Cypress integration tests for User Permissions page ([#10009](https://github.com/linode/manager/pull/10009))
+- Fix `CreditCard.test.tsx` failing unit test triggered by new year ([#10023](https://github.com/linode/manager/pull/10023))
+- Add integration test for AGLB Load Balancer delete flows. ([#9955](https://github.com/linode/manager/pull/9955))
+- Add Cypress test for Volumes empty state landing page ([#9995](https://github.com/linode/manager/pull/9995))
+- Tests to power on/off and reboot Linodes ([#9980](https://github.com/linode/manager/pull/9980))
+
+### Upcoming Features:
+
+- Add child access user permissions for parent accounts ([#10005](https://github.com/linode/manager/pull/10005))
+- Update top menu for parent, child, and proxy accounts ([#10014](https://github.com/linode/manager/pull/10014))
+- Add AGLB Service Target Section to Full Create Flow ([#9965](https://github.com/linode/manager/pull/9965))
+- Change AGLB Rule Session Stickiness unit from milliseconds to seconds ([#9969](https://github.com/linode/manager/pull/9969))
+- Improve AGLB selects and other UX ([#9975](https://github.com/linode/manager/pull/9975))
+- Ability to choose a single Compute Region ID (e.g., us-east) in Create Object Storage Bucket drawer ([#9976](https://github.com/linode/manager/pull/9976))
+- Add mocks and update queries for new Parent/Child endpoints ([#9977](https://github.com/linode/manager/pull/9977))
+- Replace NodeBalancer detail charts with Recharts ([#9983](https://github.com/linode/manager/pull/9983))
+- Revised copy for Private IP add-on in Linode Create flow ([#9990](https://github.com/linode/manager/pull/9990))
+- Add `child_account` oauth scope to Personal Access Token drawers ([#9992](https://github.com/linode/manager/pull/9992))
+- Add AGLB Routes section of full create page ([#9997](https://github.com/linode/manager/pull/9997))
+
+
 ## [2023-12-11] - v1.108.0
 
 ### Added:

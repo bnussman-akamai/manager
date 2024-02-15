@@ -13,7 +13,7 @@ import {
 } from '@linode/api-v4/lib/types';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import { EventWithStore } from 'src/events';
+import { EventHandlerData } from 'src/hooks/useEventHandlers';
 
 import { updateInPaginatedStore } from './base';
 import { profileQueries } from './profile';
@@ -96,7 +96,7 @@ export const useRevokeAppAccessTokenMutation = (id: number) => {
   });
 };
 
-export function tokenEventHandler({ queryClient }: EventWithStore) {
+export function tokenEventHandler({ queryClient }: EventHandlerData) {
   queryClient.invalidateQueries(
     profileQueries.profile().personalAccessTokens.queryKey
   );

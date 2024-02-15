@@ -7,7 +7,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import mediaQuery from 'css-mediaquery';
 import { Formik, FormikConfig, FormikValues } from 'formik';
-import { Provider as LDProvider } from 'launchdarkly-react-client-sdk/lib/context';
+import { LDProvider } from 'launchdarkly-react-client-sdk';
 import { SnackbarProvider } from 'notistack';
 import { mergeDeepRight } from 'ramda';
 import * as React from 'react';
@@ -82,9 +82,7 @@ export const baseStore = (customStore: DeepPartial<ApplicationState> = {}) =>
 export const wrapWithTheme = (ui: any, options: Options = {}) => {
   const { customStore, queryClient: passedQueryClient } = options;
   const queryClient = passedQueryClient ?? queryClientFactory();
-  const storeToPass = customStore
-    ? baseStore(customStore)
-    : storeFactory(queryClient);
+  const storeToPass = customStore ? baseStore(customStore) : storeFactory();
 
   // we have to call setupInterceptors so that our API error normalization works as expected
   // I'm sorry that it makes us pass it the "ApplicationStore"
@@ -97,10 +95,10 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
       <QueryClientProvider client={passedQueryClient || queryClient}>
         <LinodeThemeWrapper theme={options.theme}>
           <LDProvider
-            value={{
-              flagKeyMap: {},
-              flags: options.flags ?? {},
-            }}
+            clientSideID={''}
+            deferInitialization
+            flags={options.flags ?? {}}
+            options={{ bootstrap: options.flags }}
           >
             <SnackbarProvider>
               <MemoryRouter {...options.MemoryRouter}>
@@ -132,8 +130,7 @@ export const wrapWithStore = (props: {
   queryClient?: QueryClient;
   store?: ApplicationStore;
 }) => {
-  const queryClient = props.queryClient ?? queryClientFactory();
-  const store = props.store ?? storeFactory(queryClient);
+  const store = props.store ?? storeFactory();
   return <Provider store={store}>{props.children}</Provider>;
 };
 
