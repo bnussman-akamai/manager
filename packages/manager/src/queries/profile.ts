@@ -25,34 +25,39 @@ import {
   ResourcePage,
 } from '@linode/api-v4/lib/types';
 import {
+  createQueryKeyStore,
+  createQueryKeys,
+} from '@lukemorales/query-key-factory';
+import {
   QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from 'react-query';
 
+import { EventHandlerData } from 'src/hooks/useEventHandlers';
+
 import { Grants } from '../../../api-v4/lib';
 import { queryKey as accountQueryKey } from './account';
 import { queryPresets } from './base';
-import { EventHandlerData } from 'src/hooks/useEventHandlers';
 
 import type { RequestOptions } from '@linode/api-v4';
 
 export const queryKey = 'profile';
 
-export const useProfile = (options?: RequestOptions) => {
-  const key = [
-    queryKey,
-    options?.headers ? { headers: options.headers } : null,
-  ];
+export const queries = createQueryKeys('profile', {
+  profile: (options: RequestOptions = {}) => ({
+    queryFn: () => getProfile(options),
+    queryKey: [options],
+  }),
+  sshKeys: (params: Params = {}, filter: Filter) => ({
+    queryFn: () => getSSHKeys(params, filter),
+    queryKey: [params, filter],
+  }),
+});
 
-  return useQuery<Profile, APIError[]>(
-    key,
-    () => getProfile({ headers: options?.headers }),
-    {
-      ...queryPresets.oneTimeFetch,
-    }
-  );
+export const useProfile = (options?: RequestOptions) => {
+  return useQuery<Profile, APIError[]>(queries.profile(options));
 };
 
 export const useMutateProfile = () => {
@@ -107,18 +112,15 @@ export const useVerifyPhoneVerificationCodeMutation = () =>
   );
 
 export const useSSHKeysQuery = (
-  params?: Params,
-  filter?: Filter,
+  params: Params = {},
+  filter: Filter = {},
   enabled = true
 ) =>
-  useQuery(
-    [queryKey, 'ssh-keys', 'paginated', params, filter],
-    () => getSSHKeys(params, filter),
-    {
-      enabled,
-      keepPreviousData: true,
-    }
-  );
+  useQuery({
+    ...queries.sshKeys(params, filter),
+    enabled,
+    keepPreviousData: true,
+  });
 
 export const useCreateSSHKeyMutation = () => {
   const queryClient = useQueryClient();
@@ -126,7 +128,7 @@ export const useCreateSSHKeyMutation = () => {
     createSSHKey,
     {
       onSuccess() {
-        queryClient.invalidateQueries([queryKey, 'ssh-keys']);
+        queryClient.invalidateQueries(queries.sshKeys._def);
         // also invalidate the /account/users data because that endpoint returns some SSH key data
         queryClient.invalidateQueries([accountQueryKey, 'users']);
       },
@@ -140,7 +142,7 @@ export const useUpdateSSHKeyMutation = (id: number) => {
     (data) => updateSSHKey(id, data),
     {
       onSuccess() {
-        queryClient.invalidateQueries([queryKey, 'ssh-keys']);
+        queryClient.invalidateQueries(queries.sshKeys._def);
         // also invalidate the /account/users data because that endpoint returns some SSH key data
         queryClient.invalidateQueries([accountQueryKey, 'users']);
       },
@@ -152,7 +154,7 @@ export const useDeleteSSHKeyMutation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation<{}, APIError[]>(() => deleteSSHKey(id), {
     onSuccess() {
-      queryClient.invalidateQueries([queryKey, 'ssh-keys']);
+      queryClient.invalidateQueries(queries.sshKeys._def);
       // also invalidate the /account/users data because that endpoint returns some SSH key data
       queryClient.invalidateQueries([accountQueryKey, 'users']);
     },
