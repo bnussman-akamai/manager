@@ -1,3 +1,5 @@
+import { CreateLinodeRequest, InterfacePurpose } from '@linode/api-v4';
+import { useController, useWatch } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
 
 import { getQueryParamsFromQueryString } from 'src/utilities/queryParams';
@@ -51,6 +53,24 @@ export const getTabIndex = (tabType: LinodeCreateType | undefined) => {
 
   return currentTabIndex;
 };
+
+// interface InterfaceIndexOptions {
+//   purpose: InterfacePurpose;
+// }
+
+// const useInterface = (options: InterfaceIndexOptions) => {
+//   const interfaces = useWatch<CreateLinodeRequest, 'interfaces'>({
+//     name: 'interfaces',
+//   });
+
+//   const index = interfaces?.findIndex(i => i.purpose === options.purpose);
+
+//   const control = useController<CreateLinodeRequest>({
+//     name: `interfaces.${index}` as const,
+//   });
+
+//   return 
+// };
 
 export const tabs: LinodeCreateType[] = [
   'Distributions',
