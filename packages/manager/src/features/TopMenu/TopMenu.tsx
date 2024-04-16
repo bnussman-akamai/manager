@@ -13,7 +13,7 @@ import { AddNewMenu } from './AddNewMenu/AddNewMenu';
 import { Community } from './Community';
 import { Help } from './Help';
 import { NotificationMenu } from './NotificationMenu/NotificationMenu';
-import SearchBar from './SearchBar/SearchBar';
+import { SearchBar } from './SearchBar/SearchBar';
 import { TopMenuIcon } from './TopMenuIcon';
 import { UserMenu } from './UserMenu';
 
@@ -89,6 +89,7 @@ export const TopMenu = React.memo((props: TopMenuProps) => {
             </TopMenuIcon>
           </Hidden>
           <AddNewMenu />
+          <Box  display="flex" flexGrow={1} />
           <SearchBar />
           <Help />
           <Community />
