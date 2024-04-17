@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
 
 import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
+import { Tooltip } from 'src/components/Tooltip';
+import { Typography } from 'src/components/Typography';
 
 import { useSearch } from './search';
 
 export const SearchBar = () => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
 
-  const { data, isLoading } = useSearch(query);
+  const { data, isLoading, isQueryInvalid, queryParseError } = useSearch(query);
 
   return (
     <Autocomplete
-      filterOptions={x => x}
+      textFieldProps={{
+        InputProps: {
+          endAdornment:
+            query && isQueryInvalid ? (
+              <Tooltip title={queryParseError}>
+                <Typography>⛔️</Typography>
+              </Tooltip>
+            ) : undefined,
+        },
+        error: Boolean(query) && isQueryInvalid,
+      }}
+      filterOptions={(x) => x}
       fullWidth
       inputValue={query}
       label=""

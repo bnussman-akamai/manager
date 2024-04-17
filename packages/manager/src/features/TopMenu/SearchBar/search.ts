@@ -12,14 +12,16 @@ const parser = generate(grammar);
 
 export function useSearch(query: string) {
   let apiFilter: Filter = {};
-
-  const shouldSearch = Boolean(query);
+  let queryParseError = '';
 
   try {
     apiFilter = parser.parse(query);
   } catch (error) {
-    // ...
+    queryParseError = error.message;
   }
+
+  const isQueryInvalid = Boolean(queryParseError);
+  const shouldSearch = Boolean(query) && !isQueryInvalid;
 
   const queries = [
     useInfiniteVolumesQuery(apiFilter, shouldSearch),
@@ -34,5 +36,5 @@ export function useSearch(query: string) {
     (q) => q.data?.pages.flatMap((page) => page.data) ?? []
   );
 
-  return { data, isLoading };
+  return { data, isLoading, isQueryInvalid, queryParseError };
 }

@@ -12,7 +12,6 @@ andQuery
 
 subQuery
   = '(' ws* query:orQuery ws* ')' { return query; }
-  / TagQuery
   / EqualQuery
   / ContainsQuery
   / NotEqualQuery
@@ -81,12 +80,13 @@ Contains
    
 FilterableField 
  = 'label'
- / 'tag'
  / 'id'
  / 'size'
+ / 'region'
+ / 'tags'
 
 String
-  = [a-zA-Z0-9]+ { return text(); }
+  = [a-zA-Z0-9\-]+ { return text(); }
   
 Number
     = number:[0-9\.]+ { return parseFloat(number.join("")); }
