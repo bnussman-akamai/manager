@@ -40,11 +40,13 @@ export const useVolumesQuery = (params: Params, filters: Filter) =>
     { keepPreviousData: true }
   );
 
-export const useInfiniteVolumesQuery = (filter: Filter) =>
+export const useInfiniteVolumesQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<Volume>, APIError[]>(
     [queryKey, 'infinite', filter],
     ({ pageParam }) => getVolumes({ page: pageParam, page_size: 25 }, filter),
     {
+      retry: false,
+      enabled,
       getNextPageParam: ({ page, pages }) => {
         if (page === pages) {
           return undefined;

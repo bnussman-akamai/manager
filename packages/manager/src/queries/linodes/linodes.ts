@@ -71,11 +71,13 @@ export const useAllLinodesQuery = (
   );
 };
 
-export const useInfiniteLinodesQuery = (filter: Filter = {}) =>
+export const useInfiniteLinodesQuery = (filter: Filter = {}, enabled = true) =>
   useInfiniteQuery<ResourcePage<Linode>, APIError[]>(
     [queryKey, 'infinite', filter],
     ({ pageParam }) => getLinodes({ page: pageParam, page_size: 25 }, filter),
     {
+      retry: false,
+      enabled,
       getNextPageParam: ({ page, pages }) => {
         if (page === pages) {
           return undefined;

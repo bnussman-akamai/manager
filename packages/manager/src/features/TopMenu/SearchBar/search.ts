@@ -1,23 +1,38 @@
 import { generate } from 'peggy';
 
-import { useInfiniteVolumesQuery } from "src/queries/volumes";
+import { useInfiniteLinodesQuery } from 'src/queries/linodes/linodes';
+import { useInfiniteNodebalancersQuery } from 'src/queries/nodebalancers';
+import { useInfiniteVolumesQuery } from 'src/queries/volumes';
 
-// @ts-expect-error no type
 import grammar from './search.peggy?raw';
+
+import type { Filter, Linode, NodeBalancer, Volume } from '@linode/api-v4';
 
 const parser = generate(grammar);
 
 export function useSearch(query: string) {
+  let apiFilter: Filter = {};
 
-  let apiFilter = {};
+  const shouldSearch = Boolean(query);
 
   try {
     apiFilter = parser.parse(query);
   } catch (error) {
-    console.log(error.message)
+    // ...
   }
-  
-  const { data, isLoading } = useInfiniteVolumesQuery(apiFilter);
+
+  const queries = [
+    useInfiniteVolumesQuery(apiFilter, shouldSearch),
+    useInfiniteLinodesQuery(apiFilter, shouldSearch),
+    useInfiniteNodebalancersQuery(apiFilter, shouldSearch),
+  ];
+
+  const isLoading = queries.some((q) => q.isFetching);
+
+  const data = queries.flatMap<Linode | NodeBalancer | Volume>(
+    // @ts-expect-error dumb TS
+    (q) => q.data?.pages.flatMap((page) => page.data) ?? []
+  );
 
   return { data, isLoading };
-};
+}

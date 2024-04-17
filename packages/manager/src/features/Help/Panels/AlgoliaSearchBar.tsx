@@ -8,7 +8,6 @@ import { makeStyles } from 'tss-react/mui';
 
 import EnhancedSelect, { Item } from 'src/components/EnhancedSelect';
 import { Notice } from 'src/components/Notice/Notice';
-import { selectStyles } from 'src/features/TopMenu/SearchBar/SearchBar';
 
 import withSearch, { AlgoliaState as AlgoliaProps } from '../SearchHOC';
 import { SearchItem } from './SearchItem';
@@ -132,7 +131,6 @@ const AlgoliaSearchBar = (props: AlgoliaSearchBarProps) => {
           onInputChange={onInputValueChange}
           options={options}
           placeholder="Search for answers..."
-          styles={selectStyles}
         />
       </div>
     </React.Fragment>

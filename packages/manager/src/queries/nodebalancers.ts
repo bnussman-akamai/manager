@@ -210,12 +210,14 @@ export const useAllNodeBalancersQuery = (enabled = true) =>
     enabled,
   });
 
-export const useInfiniteNodebalancersQuery = (filter: Filter) =>
+export const useInfiniteNodebalancersQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<NodeBalancer>, APIError[]>(
     [queryKey, 'infinite', filter],
     ({ pageParam }) =>
       getNodeBalancers({ page: pageParam, page_size: 25 }, filter),
     {
+      retry: false,
+      enabled,
       getNextPageParam: ({ page, pages }) => {
         if (page === pages) {
           return undefined;

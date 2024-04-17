@@ -47,3 +47,8 @@ declare module '*.css?raw' {
   const src: string;
   export default src;
 }
+
+declare module '*.peggy?raw' {
+  const src: string;
+  export default src;
+}

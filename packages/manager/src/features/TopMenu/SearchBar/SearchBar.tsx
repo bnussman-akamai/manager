@@ -18,7 +18,7 @@ export const SearchBar = () => {
       loading={isLoading}
       noMarginTop
       onInputChange={(e, value) => setQuery(value)}
-      options={data?.pages.flatMap((page) => page.data) ?? []}
+      options={data}
       placeholder="Search 🔎"
       sx={{ flexGrow: 1, mt: -1 }}
       value={null}
