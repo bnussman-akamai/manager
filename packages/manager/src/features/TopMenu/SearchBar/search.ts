@@ -24,27 +24,45 @@ export function useSearch(query: string) {
   const shouldSearch = Boolean(query) && !isQueryInvalid;
 
   const queries = [
-    useInfiniteVolumesQuery(apiFilter, shouldSearch),
-    useInfiniteLinodesQuery(apiFilter, shouldSearch),
-    useInfiniteNodebalancersQuery(apiFilter, shouldSearch),
+    {
+      entity: 'volume' as const,
+      query: useInfiniteVolumesQuery(apiFilter, shouldSearch),
+    },
+    {
+      entity: 'linode' as const,
+      query: useInfiniteLinodesQuery(apiFilter, shouldSearch),
+    },
+    {
+      entity: 'nodebalancer' as const,
+      query: useInfiniteNodebalancersQuery(apiFilter, shouldSearch),
+    },
   ];
 
-  const isLoading = queries.some((q) => q.isFetching);
+  const isLoading = queries.some((q) => q.query.isFetching);
 
-  const hasMorePages = queries.some((q) => q.hasNextPage);
+  const hasMorePages = queries.some((q) => q.query.hasNextPage);
 
   const loadNextPages = () => {
-    for (const q of queries) {
-      if (q.hasNextPage) {
-        q.fetchNextPage();
+    for (const { query } of queries) {
+      if (query.hasNextPage) {
+        query.fetchNextPage();
       }
     }
   };
 
-  const data = queries.flatMap<Linode | NodeBalancer | Volume>(
-    // @ts-expect-error dumb TS
-    (q) => q.data?.pages.flatMap((page) => page.data) ?? []
-  );
+  const getData = () => {
+    const items: ({ entityName: 'volume' | 'linode' | 'nodebalancer' } & (Volume | Linode | NodeBalancer))[] = [];
+    for (const query of queries) {
+      for (const page of query.query.data?.pages ?? []) {
+        for (const item of page.data) {
+          items.push({ entityName: query.entity, ...item });
+        }
+      }
+    }
+    return items;
+  };
+
+  const data = getData();
 
   return {
     data,

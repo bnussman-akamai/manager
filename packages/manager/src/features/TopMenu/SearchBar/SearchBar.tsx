@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
 import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
+import { EntityIcon } from 'src/components/EntityIcon/EntityIcon';
+import { Stack } from 'src/components/Stack';
 import { Tooltip } from 'src/components/Tooltip';
 import { Typography } from 'src/components/Typography';
 
@@ -32,6 +34,14 @@ export const SearchBar = () => {
           }
         },
       }}
+      renderOption={(props, option) => (
+        <li {...props}>
+          <Stack direction="row" gap={1}>
+            <EntityIcon size={16} variant={option.entityName} />
+            {option.label}
+          </Stack>
+        </li>
+      )}
       textFieldProps={{
         InputProps: {
           endAdornment:

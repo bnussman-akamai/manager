@@ -78,17 +78,13 @@ Contains
    = "~"
    / ":"
    
-FilterableField 
- = 'label'
- / 'id'
- / 'size'
- / 'region'
- / 'tags'
+FilterableField "filterable field"
+  = [a-zA-Z0-9\-\.]+ { return text(); }
 
-String
-  = [a-zA-Z0-9\-]+ { return text(); }
+String "search value"
+  = [a-zA-Z0-9\-\.]+ { return text(); }
   
-Number
+Number "numeric search value"
     = number:[0-9\.]+ { return parseFloat(number.join("")); }
     / number:[0-9]+ { return parseInt(number.join(""), 10); }
 
