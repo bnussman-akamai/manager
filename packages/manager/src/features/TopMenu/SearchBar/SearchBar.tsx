@@ -9,10 +9,29 @@ import { useSearch } from './search';
 export const SearchBar = () => {
   const [query, setQuery] = useState('');
 
-  const { data, isLoading, isQueryInvalid, queryParseError } = useSearch(query);
+  const {
+    data,
+    hasMorePages,
+    isLoading,
+    isQueryInvalid,
+    loadNextPages,
+    queryParseError,
+  } = useSearch(query);
 
   return (
     <Autocomplete
+      ListboxProps={{
+        onScroll: (event: React.SyntheticEvent) => {
+          const listboxNode = event.currentTarget;
+          if (
+            listboxNode.scrollTop + listboxNode.clientHeight >=
+              listboxNode.scrollHeight &&
+            hasMorePages
+          ) {
+            loadNextPages();
+          }
+        },
+      }}
       textFieldProps={{
         InputProps: {
           endAdornment:

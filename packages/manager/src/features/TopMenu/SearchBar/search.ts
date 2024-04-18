@@ -31,10 +31,27 @@ export function useSearch(query: string) {
 
   const isLoading = queries.some((q) => q.isFetching);
 
+  const hasMorePages = queries.some((q) => q.hasNextPage);
+
+  const loadNextPages = () => {
+    for (const q of queries) {
+      if (q.hasNextPage) {
+        q.fetchNextPage();
+      }
+    }
+  };
+
   const data = queries.flatMap<Linode | NodeBalancer | Volume>(
     // @ts-expect-error dumb TS
     (q) => q.data?.pages.flatMap((page) => page.data) ?? []
   );
 
-  return { data, isLoading, isQueryInvalid, queryParseError };
+  return {
+    data,
+    hasMorePages,
+    isLoading,
+    isQueryInvalid,
+    loadNextPages,
+    queryParseError,
+  };
 }
