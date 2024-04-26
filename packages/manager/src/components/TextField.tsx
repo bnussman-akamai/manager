@@ -347,6 +347,7 @@ export const TextField = (props: TextFieldProps) => {
 
   return (
     <Box
+      mt={noMarginTop ? undefined : 2}
       {...containerProps}
       className={cx(
         {
@@ -356,55 +357,6 @@ export const TextField = (props: TextFieldProps) => {
         containerProps?.className
       )}
     >
-      <Box
-        className={cx({
-          'visually-hidden': hideLabel,
-        })}
-        sx={{
-          marginBottom: theme.spacing(1),
-          ...(!noMarginTop && { marginTop: theme.spacing(2) }),
-        }}
-        alignItems={'center'}
-        data-testid="inputLabelWrapper"
-        display="flex"
-      >
-        <InputLabel
-          className={cx({
-            [classes.noTransform]: true,
-          })}
-          sx={{
-            marginBottom: 0,
-          }}
-          data-qa-textfield-label={label}
-          htmlFor={validInputId}
-        >
-          {label}
-          {required ? (
-            <span className={classes.label}> (required)</span>
-          ) : optional ? (
-            <span className={classes.label}> (optional)</span>
-          ) : null}
-        </InputLabel>
-        {labelTooltipText && (
-          <TooltipIcon
-            sxTooltipIcon={{
-              marginLeft: `${theme.spacing(0.5)}`,
-              padding: `${theme.spacing(0.5)}`,
-            }}
-            status="help"
-            text={labelTooltipText}
-          />
-        )}
-      </Box>
-
-      {helperText && helperTextPosition === 'top' && (
-        <FormHelperText
-          className={classes.helperTextTop}
-          data-qa-textfield-helper-text
-        >
-          {helperText}
-        </FormHelperText>
-      )}
       <div
         className={cx({
           [classes.helpWrapperContainer]: Boolean(tooltipText),
@@ -415,7 +367,6 @@ export const TextField = (props: TextFieldProps) => {
           {...dataAttrs}
           InputLabelProps={{
             ...InputLabelProps,
-            required: false,
             shrink: true,
           }}
           InputProps={{
@@ -454,17 +405,32 @@ export const TextField = (props: TextFieldProps) => {
           )}
           inputProps={{
             'data-testid': 'textfield-input',
-            id: validInputId,
             ...inputProps,
           }}
-          error={!!error || !!errorText}
-          fullWidth
-          helperText={''}
           /**
            * Set _helperText_ and _label_ to no value because we want to
            * have the ability to put the helper text under the label at the top.
            */
-          label={''}
+          label={
+            hideLabel ? (
+              ''
+            ) : labelTooltipText ? (
+              <>
+                {label}
+                <TooltipIcon
+                  status="help"
+                  text={labelTooltipText}
+                  sxTooltipIcon={{ p: 0, mx: 1 }}
+                />
+              </>
+            ) : (
+              label
+            )
+          }
+          required={required}
+          error={!!error || !!errorText}
+          fullWidth
+          helperText={errorText ? errorText : helperText}
           onBlur={handleBlur}
           onChange={handleChange}
           type={type}
@@ -492,25 +458,6 @@ export const TextField = (props: TextFieldProps) => {
           />
         )}
       </div>
-      {errorText && (
-        <FormHelperText
-          className={cx({
-            [classes.absolute]: editable || hasAbsoluteError,
-            [classes.editable]: editable,
-            [classes.errorText]: true,
-          })}
-          data-qa-textfield-error-text={label}
-          role="alert"
-        >
-          {errorText}
-        </FormHelperText>
-      )}
-      {helperText &&
-        (helperTextPosition === 'bottom' || !helperTextPosition) && (
-          <FormHelperText data-qa-textfield-helper-text>
-            {helperText}
-          </FormHelperText>
-        )}
     </Box>
   );
 };

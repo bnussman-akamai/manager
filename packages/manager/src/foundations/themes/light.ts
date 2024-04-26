@@ -684,16 +684,8 @@ export const lightTheme: ThemeOptions = {
       styleOverrides: {
         root: {
           '&$disabled': {
-            color: '#555',
             opacity: 0.5,
           },
-          '&$error': {
-            color: '#555',
-          },
-          '&.Mui-focused': {
-            color: '#555',
-          },
-          color: '#555',
           fontFamily: latoWeb.bold,
           fontSize: '.875rem',
           marginBottom: 8,
