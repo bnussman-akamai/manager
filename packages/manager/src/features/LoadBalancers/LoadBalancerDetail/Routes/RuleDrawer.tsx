@@ -233,6 +233,7 @@ export const RuleDrawer = (props: Props) => {
                 />
                 <Stack direction="row" spacing={2}>
                   <Autocomplete
+                  noMarginTop
                     errorText={getIn(
                       formik.errors,
                       'match_condition.match_field'
@@ -499,7 +500,7 @@ export const RuleDrawer = (props: Props) => {
                         disableClearable
                         label="test"
                         options={timeUnitOptions}
-                        sx={{ marginTop: '52px !important', minWidth: '140px' }}
+                        sx={{ marginTop: '14px !important', minWidth: '140px' }}
                         textFieldProps={{ hideLabel: true }}
                       />
                     </Stack>

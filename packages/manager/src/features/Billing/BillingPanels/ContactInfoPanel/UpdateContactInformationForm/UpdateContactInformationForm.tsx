@@ -191,7 +191,6 @@ const UpdateContactInformationForm = ({ focusEmail, onClose }: Props) => {
             data-qa-contact-email
             disabled={isReadOnly}
             errorText={errorMap.email}
-            helperTextPosition="top"
             inputRef={emailRef}
             label="Email"
             name="email"

@@ -108,6 +108,7 @@ export const EnhancedNumberInput = React.memo(
           data-testid={'quantity-input'}
           disabled={disabled}
           hideLabel
+          noMarginTop
           label={inputLabel ? inputLabel : 'Edit Quantity'}
           max={max}
           min={min}

@@ -1,5 +1,5 @@
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import { Theme, useTheme } from '@mui/material/styles';
+import { Theme } from '@mui/material/styles';
 import {
   default as _TextField,
   StandardTextFieldProps,
@@ -10,12 +10,9 @@ import { makeStyles } from 'tss-react/mui';
 
 import { Box } from 'src/components/Box';
 import { CircleProgress } from 'src/components/CircleProgress';
-import { FormHelperText } from 'src/components/FormHelperText';
 import { InputAdornment } from 'src/components/InputAdornment';
-import { InputLabel } from 'src/components/InputLabel';
 import { TooltipProps } from 'src/components/Tooltip';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { convertToKebabCase } from 'src/utilities/convertToKebobCase';
 
 import type { BoxProps } from 'src/components/Box';
 
@@ -96,16 +93,6 @@ interface BaseProps {
    * @default false
    */
   expand?: boolean;
-  /**
-   * Makes the error text have the absolute positioning
-   * @default false
-   */
-  hasAbsoluteError?: boolean;
-  /**
-   * Placement of the `helperText`
-   * @default bottom
-   */
-  helperTextPosition?: 'bottom' | 'top';
   /**
    * Hides the `label`
    * @default false
@@ -225,20 +212,15 @@ export const TextField = (props: TextFieldProps) => {
     InputLabelProps,
     InputProps,
     SelectProps,
+    containerProps,
     children,
     className,
-    containerProps,
     dataAttrs,
-    editable,
     error,
-    errorGroup,
     errorText,
     expand,
-    hasAbsoluteError,
     helperText,
-    helperTextPosition,
     hideLabel,
-    inputId,
     inputProps,
     label,
     labelTooltipText,
@@ -262,7 +244,6 @@ export const TextField = (props: TextFieldProps) => {
   } = props;
 
   const [_value, setValue] = React.useState<Value>(value);
-  const theme = useTheme();
 
   React.useEffect(() => {
     setValue(value);
@@ -334,130 +315,110 @@ export const TextField = (props: TextFieldProps) => {
     }
   };
 
-  let errorScrollClassName = '';
-
-  if (errorText) {
-    errorScrollClassName = errorGroup
-      ? `error-for-scroll-${errorGroup}`
-      : `error-for-scroll`;
-  }
-
-  const validInputId =
-    inputId || (label ? convertToKebabCase(`${label}`) : undefined);
-
   return (
     <Box
-      mt={noMarginTop ? undefined : 2}
+      display="flex"
+      flexDirection="row"
+      gap={1.5}
+      mt={noMarginTop ? 0 : 2}
       {...containerProps}
-      className={cx(
-        {
-          [classes.helpWrapper]: Boolean(tooltipText),
-          [errorScrollClassName]: !!errorText,
-        },
-        containerProps?.className
-      )}
     >
-      <div
-        className={cx({
-          [classes.helpWrapperContainer]: Boolean(tooltipText),
-        })}
-      >
-        <_TextField
-          {...textFieldProps}
-          {...dataAttrs}
-          InputLabelProps={{
-            ...InputLabelProps,
-            shrink: true,
-          }}
-          InputProps={{
-            className: cx(
-              'input',
-              {
-                [classes.expand]: expand,
-              },
-              className
-            ),
-            disableUnderline: true,
-            endAdornment: loading && (
-              <InputAdornment position="end">
-                <CircleProgress mini />
-              </InputAdornment>
-            ),
-            ...InputProps,
-          }}
-          SelectProps={{
-            IconComponent: KeyboardArrowDown,
-            MenuProps: {
-              MenuListProps: { className: 'selectMenuList' },
-              PaperProps: { className: 'selectMenuDropdown' },
-              anchorOrigin: { horizontal: 'left', vertical: 'bottom' },
-              transformOrigin: { horizontal: 'left', vertical: 'top' },
-            },
-            disableUnderline: true,
-            ...SelectProps,
-          }}
-          className={cx(
+      <_TextField
+        {...textFieldProps}
+        {...dataAttrs}
+        InputLabelProps={{
+          ...InputLabelProps,
+          shrink: true,
+        }}
+        InputProps={{
+          className: cx(
+            'input',
             {
-              [classes.helpWrapperTextField]: Boolean(tooltipText),
-              [classes.root]: true,
+              [classes.expand]: expand,
             },
             className
-          )}
-          inputProps={{
-            'data-testid': 'textfield-input',
-            ...inputProps,
-          }}
-          /**
-           * Set _helperText_ and _label_ to no value because we want to
-           * have the ability to put the helper text under the label at the top.
-           */
-          label={
-            hideLabel ? (
-              ''
-            ) : labelTooltipText ? (
-              <>
-                {label}
-                <TooltipIcon
-                  status="help"
-                  text={labelTooltipText}
-                  sxTooltipIcon={{ p: 0, mx: 1 }}
-                />
-              </>
-            ) : (
-              label
-            )
-          }
-          required={required}
-          error={!!error || !!errorText}
-          fullWidth
-          helperText={errorText ? errorText : helperText}
-          onBlur={handleBlur}
-          onChange={handleChange}
-          type={type}
-          /*
-           * Let us explicitly pass an empty string to the input
-           * See UserDefinedFieldsPanel.tsx for a verbose explanation why.
-           */
-          value={_value}
-          variant="standard"
-        >
-          {children}
-        </_TextField>
-        {tooltipText && (
+          ),
+          disableUnderline: true,
+          endAdornment: loading && (
+            <InputAdornment position="end">
+              <CircleProgress mini />
+            </InputAdornment>
+          ),
+          ...InputProps,
+        }}
+        SelectProps={{
+          IconComponent: KeyboardArrowDown,
+          MenuProps: {
+            MenuListProps: { className: 'selectMenuList' },
+            PaperProps: { className: 'selectMenuDropdown' },
+            anchorOrigin: { horizontal: 'left', vertical: 'bottom' },
+            transformOrigin: { horizontal: 'left', vertical: 'top' },
+          },
+          disableUnderline: true,
+          ...SelectProps,
+        }}
+        className={cx(
+          {
+            [classes.helpWrapperTextField]: Boolean(tooltipText),
+            [classes.root]: true,
+          },
+          className
+        )}
+        inputProps={{
+          'data-testid': 'textfield-input',
+          ...inputProps,
+        }}
+        /**
+         * Set _helperText_ and _label_ to no value because we want to
+         * have the ability to put the helper text under the label at the top.
+         */
+        label={
+          hideLabel ? (
+            ''
+          ) : labelTooltipText ? (
+            <>
+              {label} {required && '(required)'} {optional && '(optional)'}
+              <TooltipIcon
+                status="help"
+                sxTooltipIcon={{ mx: 1, p: 0 }}
+                text={labelTooltipText}
+              />
+            </>
+          ) : (
+            <>
+              {label} {required && '(required)'} {optional && '(optional)'}
+            </>
+          )
+        }
+        error={!!error || !!errorText}
+        fullWidth
+        helperText={errorText ? errorText : helperText}
+        onBlur={handleBlur}
+        onChange={handleChange}
+        required={required}
+        type={type}
+        /*
+         * Let us explicitly pass an empty string to the input
+         * See UserDefinedFieldsPanel.tsx for a verbose explanation why.
+         */
+        value={_value}
+        variant="standard"
+      >
+        {children}
+      </_TextField>
+      {tooltipText && (
+        <Box pt="35px">
           <TooltipIcon
-            sxTooltipIcon={{
-              margin: '0px 0px 0px 4px',
-              padding: '6px',
-            }}
             classes={{ popper: tooltipClasses }}
             interactive={tooltipInteractive}
             onMouseEnter={tooltipOnMouseEnter}
             status="help"
+            sxTooltipIcon={{ p: 0 }}
             text={tooltipText}
             tooltipPosition={tooltipPosition}
           />
-        )}
-      </div>
+        </Box>
+      )}
     </Box>
   );
 };

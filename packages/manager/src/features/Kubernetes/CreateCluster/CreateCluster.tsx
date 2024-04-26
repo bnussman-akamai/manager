@@ -225,14 +225,12 @@ export const CreateCluster = () => {
                 }
                 textFieldProps={{
                   helperText: <RegionHelperText mb={2} />,
-                  helperTextPosition: 'top',
                 }}
                 currentCapability="Kubernetes"
                 errorText={errorMap.region}
                 regions={regionsData}
                 selectedId={selectedId}
               />
-              <RegionHelperText sx={{ marginTop: 1 }} />
             </Stack>
             <StyledDocsLinkContainer>
               <DocsLink
