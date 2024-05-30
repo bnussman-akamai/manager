@@ -1,17 +1,16 @@
 import Close from '@mui/icons-material/Close';
 import Search from '@mui/icons-material/Search';
-import { take } from 'ramda';
-import * as React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { components } from 'react-select';
 import { debounce } from 'throttle-debounce';
 
 import EnhancedSelect, { Item } from 'src/components/EnhancedSelect/Select';
 import { getImageLabelForLinode } from 'src/features/Images/utils';
+import { SearchableItem, SearchResultsByEntity } from 'src/features/Search/search.interfaces';
 import { useAPISearch } from 'src/features/Search/useAPISearch';
-import withStoreSearch, {
-  SearchProps,
-} from 'src/features/Search/withStoreSearch';
+import { emptyResults } from 'src/features/Search/utils';
+import { searchEntities } from 'src/features/Search/withStoreSearch';
 import { useAccountManagement } from 'src/hooks/useAccountManagement';
 import { useFlags } from 'src/hooks/useFlags';
 import { useIsLargeAccount } from 'src/hooks/useIsLargeAccount';
@@ -79,8 +78,12 @@ export const selectStyles = {
   }),
 };
 
-const SearchBar = (props: SearchProps) => {
-  const { combinedResults, entitiesLoading, search } = props;
+const SearchBar = () => {
+  const [{ combinedResults }, setSearchResults] = useState<{
+    combinedResults: SearchableItem<string | number>[];
+    searchResultsByEntity: SearchResultsByEntity;
+  }>({ searchResultsByEntity: emptyResults, combinedResults: [] });
+
   const [searchText, setSearchText] = React.useState<string>('');
   const [value, setValue] = React.useState<Item | null>(null);
   const [searchActive, setSearchActive] = React.useState<boolean>(false);
@@ -206,7 +209,7 @@ const SearchBar = (props: SearchProps) => {
     if (isLargeAccount) {
       _searchAPI(searchText);
     } else {
-      search(
+      const results = searchEntities(
         searchText,
         buckets,
         domains ?? [],
@@ -217,10 +220,10 @@ const SearchBar = (props: SearchProps) => {
         searchableLinodes ?? [],
         nodebalancers ?? []
       );
+      setSearchResults(results);
     }
   }, [
     imagesLoading,
-    search,
     searchText,
     _searchAPI,
     isLargeAccount,
@@ -230,6 +233,9 @@ const SearchBar = (props: SearchProps) => {
     _privateImages,
     regions,
     nodebalancers,
+    // buckets,
+    // clusters,
+    // searchableLinodes,
   ]);
 
   const handleSearchChange = (_searchText: string): void => {
@@ -314,10 +320,12 @@ const SearchBar = (props: SearchProps) => {
     return true;
   };
 
+  const entitiesLoading = linodesLoading || imagesLoading;
+
   const finalOptions = createFinalOptions(
     isLargeAccount ? apiResults : combinedResults,
     searchText,
-    isLargeAccount ? apiSearchLoading : linodesLoading || imagesLoading,
+    isLargeAccount ? apiSearchLoading : entitiesLoading,
     // Ignore "Unauthorized" errors, since these will always happen on LKE
     // endpoints for restricted users. It's not really an "error" in this case.
     // We still want these users to be able to use the search feature.
@@ -442,8 +450,8 @@ export const createFinalOptions = (
     value: 'redirect',
   };
 
-  const first20Results = take(20, results);
+  const first20Results = results.slice(0, 20);
   return [redirectOption, ...first20Results, lastOption];
 };
 
-export default withStoreSearch()(SearchBar);
+export default SearchBar;

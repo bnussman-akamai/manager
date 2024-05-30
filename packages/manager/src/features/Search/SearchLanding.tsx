@@ -1,8 +1,7 @@
 import Grid from '@mui/material/Unstable_Grid2';
 import { equals } from 'ramda';
-import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { compose } from 'recompose';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { debounce } from 'throttle-debounce';
 
 import { CircleProgress } from 'src/components/CircleProgress';
@@ -34,6 +33,7 @@ import { getQueryParamFromQueryString } from 'src/utilities/queryParams';
 
 import { getImageLabelForLinode } from '../Images/utils';
 import { ResultGroup } from './ResultGroup';
+import { SearchResultsByEntity, SearchableItem } from './search.interfaces';
 import './searchLanding.css';
 import {
   StyledError,
@@ -43,7 +43,7 @@ import {
   StyledStack,
 } from './SearchLanding.styles';
 import { emptyResults } from './utils';
-import withStoreSearch, { SearchProps } from './withStoreSearch';
+import { searchEntities } from './withStoreSearch';
 
 const displayMap = {
   buckets: 'Buckets',
@@ -55,10 +55,6 @@ const displayMap = {
   volumes: 'Volumes',
 };
 
-export interface SearchLandingProps
-  extends SearchProps,
-    RouteComponentProps<{}> {}
-
 const splitWord = (word: any) => {
   word = word.split('');
   for (let i = 0; i < word.length; i += 2) {
@@ -67,8 +63,13 @@ const splitWord = (word: any) => {
   return word;
 };
 
-export const SearchLanding = (props: SearchLandingProps) => {
-  const { entities, search, searchResultsByEntity } = props;
+export const SearchLanding = () => {
+  const [searchResults, setSearchResults] = useState<{
+    combinedResults: SearchableItem<number | string>[];
+    searchResultsByEntity: SearchResultsByEntity;
+  }>({ combinedResults: [], searchResultsByEntity: emptyResults });
+
+  const location = useLocation();
   const { data: regions } = useRegionsQuery();
 
   const regionsSupportingObjectStorage = regions?.filter((region) =>
@@ -176,7 +177,7 @@ export const SearchLanding = (props: SearchLandingProps) => {
   let query = '';
   let queryError = false;
   try {
-    query = getQueryParamFromQueryString(props.location.search, 'query');
+    query = getQueryParamFromQueryString(location.search, 'query');
   } catch {
     queryError = true;
   }
@@ -206,7 +207,7 @@ export const SearchLanding = (props: SearchLandingProps) => {
     if (isLargeAccount) {
       _searchAPI(query);
     } else {
-      search(
+      const results = searchEntities(
         query,
         objectStorageBuckets?.buckets ?? [],
         domains ?? [],
@@ -217,11 +218,11 @@ export const SearchLanding = (props: SearchLandingProps) => {
         searchableLinodes ?? [],
         nodebalancers ?? []
       );
+      setSearchResults(results);
     }
   }, [
     query,
-    entities,
-    search,
+    searchEntities,
     isLargeAccount,
     _searchAPI,
     objectStorageBuckets,
@@ -267,7 +268,7 @@ export const SearchLanding = (props: SearchLandingProps) => {
     }
   };
 
-  const finalResults = isLargeAccount ? apiResults : searchResultsByEntity;
+  const finalResults = isLargeAccount ? apiResults : searchResults.searchResultsByEntity;
 
   const resultsEmpty = equals(finalResults, emptyResults);
 
@@ -345,8 +346,4 @@ export const SearchLanding = (props: SearchLandingProps) => {
   );
 };
 
-const enhanced = compose<SearchLandingProps, {}>(withStoreSearch())(
-  SearchLanding
-);
-
-export default enhanced;
+export default SearchLanding;
