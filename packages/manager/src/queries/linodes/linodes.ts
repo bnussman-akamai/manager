@@ -4,6 +4,7 @@ import {
   createLinode,
   deleteLinode,
   getLinode,
+  getLinodeBackups,
   getLinodeFirewalls,
   getLinodeKernel,
   getLinodeLishToken,
@@ -67,6 +68,10 @@ export const linodeQueries = createQueryKeys('linodes', {
   }),
   linode: (linodeId: number) => ({
     contextQueries: {
+      backups: {
+        queryFn: () => getLinodeBackups(linodeId),
+        queryKey: null,
+      },
       configs: {
         queryFn: () => getAllLinodeConfigs(linodeId),
         queryKey: null,

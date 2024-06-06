@@ -2,7 +2,7 @@ import { queryKey as firewallsQueryKey } from 'src/queries/firewalls';
 
 import { accountQueries } from '../account/queries';
 import { volumeQueries } from '../volumes/volumes';
-import { queryKey } from './linodes';
+import { linodeQueries, queryKey } from './linodes';
 
 import type { Event } from '@linode/api-v4';
 import type { EventHandlerData } from 'src/hooks/useEventHandlers';
@@ -44,55 +44,53 @@ export const linodeEventsHandler = ({
     case 'linode_resize_warm_create':
     case 'linode_reboot':
     case 'linode_update':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'details']);
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
+      queryClient.invalidateQueries({
+        exact: true,
+        queryKey: linodeQueries.linode(linodeId).queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linodes.queryKey,
+      });
       return;
     case 'linode_boot':
+    case 'linode_create':
+    case 'linode_clone':
     case 'linode_shutdown':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'details']);
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'configs']); // Ensure configs are fresh when Linode is booted up (see https://github.com/linode/manager/pull/9914)
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linode(linodeId).queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linodes.queryKey,
+      });
       return;
     case 'linode_snapshot':
       queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'backups']);
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'details']);
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
+      queryClient.invalidateQueries({
+        exact: true,
+        queryKey: linodeQueries.linode(linodeId).queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linodes.queryKey,
+      });
       return;
     case 'linode_addip':
     case 'linode_deleteip':
       queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'ips']);
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'details']);
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
-      return;
-    case 'linode_create':
-    case 'linode_clone':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'details']);
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'disks']);
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
-      return;
-    case 'linode_rebuild':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'disks']);
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'configs']);
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'details']);
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
+      queryClient.invalidateQueries({
+        exact: true,
+        queryKey: linodeQueries.linode(linodeId).queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linodes.queryKey,
+      });
       return;
     case 'linode_delete':
-      queryClient.removeQueries([queryKey, 'linode', linodeId]);
-      queryClient.invalidateQueries([queryKey, 'paginated']);
-      queryClient.invalidateQueries([queryKey, 'all']);
-      queryClient.invalidateQueries([queryKey, 'infinite']);
+      queryClient.removeQueries({
+        queryKey: linodeQueries.linode(linodeId).queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linodes.queryKey,
+      });
       // A Linode made have been on a Firewall's device list, but now that it is deleted,
       // it will no longer be listed as a device on that firewall. Here, we invalidate outdated firewall data.
       queryClient.invalidateQueries([firewallsQueryKey]);
@@ -103,7 +101,9 @@ export const linodeEventsHandler = ({
     case 'linode_config_create':
     case 'linode_config_delete':
     case 'linode_config_update':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'configs']);
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linode(linodeId)._ctx.configs.queryKey,
+      });
       return;
   }
 };
@@ -121,7 +121,9 @@ export const diskEventHandler = ({ event, queryClient }: EventHandlerData) => {
     return;
   }
 
-  queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'disks']);
+  queryClient.invalidateQueries({
+    queryKey: linodeQueries.linode(linodeId)._ctx.disks.queryKey,
+  });
 };
 
 /**

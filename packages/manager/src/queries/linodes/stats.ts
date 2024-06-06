@@ -1,17 +1,16 @@
 import {
-  APIError,
-  NetworkTransfer,
-  Stats,
   getLinodeStats,
   getLinodeStatsByDate,
   getLinodeTransferByDate,
 } from '@linode/api-v4';
-import { DateTime } from 'luxon';
 import { useQuery } from '@tanstack/react-query';
+import { DateTime } from 'luxon';
 
 import { parseAPIDate } from 'src/utilities/date';
 
 import { queryKey } from './linodes';
+
+import type { APIError, NetworkTransfer, Stats } from '@linode/api-v4';
 
 export const STATS_NOT_READY_API_MESSAGE =
   'Stats are unavailable at this time.';
