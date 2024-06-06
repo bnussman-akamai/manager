@@ -17,7 +17,6 @@ import { LinodeActionMenu } from 'src/features/Linodes/LinodesLanding/LinodeActi
 import { ProgressDisplay } from 'src/features/Linodes/LinodesLanding/LinodeRow/LinodeRow';
 import { lishLaunch } from 'src/features/Lish/lishUtils';
 import { useIsResourceRestricted } from 'src/hooks/useIsResourceRestricted';
-import { queryKey as linodesQueryKey } from 'src/queries/linodes/linodes';
 import { sendLinodeActionMenuItemEvent } from 'src/utilities/analytics/customEventAnalytics';
 
 import { VPC_REBOOT_MESSAGE } from '../VPCs/constants';
@@ -26,6 +25,7 @@ import { LinodeHandlers } from './LinodesLanding/LinodesLanding';
 import { getLinodeIconStatus } from './LinodesLanding/utils';
 
 import type { Linode, LinodeType } from '@linode/api-v4/lib/linodes/types';
+import { linodeQueries } from 'src/queries/linodes/linodes';
 
 interface LinodeEntityDetailProps {
   id: number;
@@ -112,12 +112,9 @@ export const LinodeEntityDetailHeader = (
   // be rebooted or not. So, we need to invalidate the linode configs query to get the most up to date information.
   React.useEffect(() => {
     if (isRunning) {
-      queryClient.invalidateQueries([
-        linodesQueryKey,
-        'linode',
-        linodeId,
-        'configs',
-      ]);
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linode(linodeId)._ctx.configs.queryKey,
+      });
     }
   }, [linodeId, isRunning, queryClient]);
 

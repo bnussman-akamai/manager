@@ -7,7 +7,7 @@ import { ConfirmationDialog } from 'src/components/ConfirmationDialog/Confirmati
 import { useDeleteFirewall, useMutateFirewall } from 'src/queries/firewalls';
 import { queryKey as firewallQueryKey } from 'src/queries/firewalls';
 import { useAllFirewallDevicesQuery } from 'src/queries/firewalls';
-import { queryKey as linodesQueryKey } from 'src/queries/linodes/linodes';
+import { linodeQueries } from 'src/queries/linodes/linodes';
 import { queryKey as nodebalancersQueryKey } from 'src/queries/nodebalancers';
 import { capitalize } from 'src/utilities/capitalize';
 
@@ -70,12 +70,19 @@ export const FirewallDialog = React.memo((props: Props) => {
     // eslint-disable-next-line no-unused-expressions
     devices?.forEach((device) => {
       const deviceType = device.entity.type;
-      queryClient.invalidateQueries([
-        deviceType === 'linode' ? linodesQueryKey : nodebalancersQueryKey,
-        deviceType,
-        device.entity.id,
-        'firewalls',
-      ]);
+      if (deviceType === 'linode') {
+        queryClient.invalidateQueries({
+          queryKey: linodeQueries.linode(device.entity.id)._ctx.firewalls
+            .queryKey,
+        });
+      } else {
+        queryClient.invalidateQueries([
+          nodebalancersQueryKey,
+          deviceType,
+          device.entity.id,
+          'firewalls',
+        ]);
+      }
     });
     if (mode === 'delete') {
       queryClient.invalidateQueries([firewallQueryKey]);

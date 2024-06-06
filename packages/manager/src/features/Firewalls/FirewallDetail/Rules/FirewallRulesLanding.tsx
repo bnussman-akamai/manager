@@ -12,7 +12,6 @@ import {
   useAllFirewallDevicesQuery,
   useUpdateFirewallRulesMutation,
 } from 'src/queries/firewalls';
-import { queryKey as linodesQueryKey } from 'src/queries/linodes/linodes';
 import { queryKey as nodebalancersQueryKey } from 'src/queries/nodebalancers';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
@@ -36,6 +35,7 @@ import type {
   FirewallRules,
 } from '@linode/api-v4/lib/firewalls';
 import type { APIError } from '@linode/api-v4/lib/types';
+import { linodeQueries } from 'src/queries/linodes/linodes';
 
 interface Props {
   disabled: boolean;
@@ -202,17 +202,23 @@ export const FirewallRulesLanding = React.memo((props: Props) => {
       .then((_rules) => {
         setSubmitting(false);
         // Invalidate Firewalls assigned to NodeBalancers and Linodes.
-        // eslint-disable-next-line no-unused-expressions
-        devices?.forEach((device) =>
-          queryClient.invalidateQueries([
-            device.entity.type === 'linode'
-              ? linodesQueryKey
-              : nodebalancersQueryKey,
-            device.entity.type,
-            device.entity.id,
-            'firewalls',
-          ])
-        );
+        if (devices) {
+          for (const device of devices) {
+            if (device.entity.type === 'linode') {
+              queryClient.invalidateQueries({
+                queryKey: linodeQueries.linode(device.entity.id)._ctx.firewalls
+                  .queryKey,
+              });
+            } else {
+              queryClient.invalidateQueries([
+                nodebalancersQueryKey,
+                device.entity.type,
+                device.entity.id,
+                'firewalls',
+              ]);
+            }
+          }
+        }
 
         // Reset editor state.
         inboundDispatch({ rules: _rules.inbound ?? [], type: 'RESET' });

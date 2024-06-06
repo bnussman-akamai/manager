@@ -6,6 +6,7 @@ import {
   getLinode,
   getLinodeBackups,
   getLinodeFirewalls,
+  getLinodeIPs,
   getLinodeKernel,
   getLinodeLishToken,
   getLinodes,
@@ -55,7 +56,7 @@ import type {
   ResourcePage,
 } from '@linode/api-v4';
 
-export const queryKey = 'linodes';
+// export const queryKey = 'linodes';
 
 export const linodeQueries = createQueryKeys('linodes', {
   kernel: (kernel: string) => ({
@@ -82,6 +83,10 @@ export const linodeQueries = createQueryKeys('linodes', {
       },
       firewalls: {
         queryFn: () => getLinodeFirewalls(linodeId),
+        queryKey: null,
+      },
+      ips: {
+        queryFn: () => getLinodeIPs(linodeId),
         queryKey: null,
       },
       lishToken: {
@@ -319,7 +324,7 @@ export const useBootLinodeMutation = (
           configsToUpdate
         );
         queryClient.setQueryData<Config[]>(
-          [queryKey, 'linode', id, 'configs'],
+          linodeQueries.linode(id)._ctx.configs.queryKey,
           updatedConfigs
         );
       }
@@ -354,7 +359,7 @@ export const useRebootLinodeMutation = (
           configsToUpdate
         );
         queryClient.setQueryData<Config[]>(
-          [queryKey, 'linode', id, 'configs'],
+          linodeQueries.linode(id)._ctx.configs.queryKey,
           updatedConfigs
         );
       }

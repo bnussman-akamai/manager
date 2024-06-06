@@ -2,7 +2,7 @@ import { queryKey as firewallsQueryKey } from 'src/queries/firewalls';
 
 import { accountQueries } from '../account/queries';
 import { volumeQueries } from '../volumes/volumes';
-import { linodeQueries, queryKey } from './linodes';
+import { linodeQueries } from './linodes';
 
 import type { Event } from '@linode/api-v4';
 import type { EventHandlerData } from 'src/hooks/useEventHandlers';
@@ -64,7 +64,9 @@ export const linodeEventsHandler = ({
       });
       return;
     case 'linode_snapshot':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'backups']);
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linode(linodeId)._ctx.backups.queryKey,
+      });
       queryClient.invalidateQueries({
         exact: true,
         queryKey: linodeQueries.linode(linodeId).queryKey,
@@ -75,7 +77,9 @@ export const linodeEventsHandler = ({
       return;
     case 'linode_addip':
     case 'linode_deleteip':
-      queryClient.invalidateQueries([queryKey, 'linode', linodeId, 'ips']);
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries.linode(linodeId)._ctx.ips.queryKey,
+      });
       queryClient.invalidateQueries({
         exact: true,
         queryKey: linodeQueries.linode(linodeId).queryKey,

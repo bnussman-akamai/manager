@@ -23,10 +23,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { EventHandlerData } from 'src/hooks/useEventHandlers';
-import { queryKey as linodesQueryKey } from 'src/queries/linodes/linodes';
 import { getAll } from 'src/utilities/getAll';
 
 import { updateInPaginatedStore } from './base';
+import { linodeQueries } from './linodes/linodes';
 import { profileQueries } from './profile/profile';
 
 export const queryKey = 'firewall';
@@ -47,12 +47,10 @@ export const useAddFirewallDeviceMutation = (id: number) => {
         queryClient.invalidateQueries([queryKey, 'firewall', id, 'devices']);
 
         // Refresh the cached result of the linode-specific firewalls query
-        queryClient.invalidateQueries([
-          linodesQueryKey,
-          'linode',
-          data.entity.id,
-          'firewalls',
-        ]);
+        queryClient.invalidateQueries({
+          queryKey: linodeQueries.linode(data.entity.id)._ctx.firewalls
+            .queryKey,
+        });
       },
     }
   );
