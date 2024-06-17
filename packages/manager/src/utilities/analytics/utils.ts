@@ -34,7 +34,7 @@ export const sendFormEvent = (
   eventPayload: FormPayload,
   eventType: FormEventType
 ): void => {
-  const formEventPayload = {
+  const formEventPayload: Record<string, string> = {
     formName: eventPayload.formName.replace(/\|/g, ''),
   };
   if (!ADOBE_ANALYTICS_URL) {

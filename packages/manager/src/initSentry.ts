@@ -164,9 +164,10 @@ const maybeAddCustomFingerprint = (event: SentryEvent): SentryEvent => {
       exception.values &&
       exception.values.length > 0 &&
       !!exception.values[0].value &&
-      !!exception.values[0].value.match(new RegExp(value, 'gmi'))
+      !!exception.values[0].value.match(new RegExp(value, 'gmi')) &&
+      value in customFingerPrintMap
     ) {
-      acc = customFingerPrintMap[value];
+      acc = customFingerPrintMap[value as keyof typeof customFingerPrintMap];
     }
     return acc;
   }, '');

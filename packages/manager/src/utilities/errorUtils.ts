@@ -89,14 +89,14 @@ export const getErrorMap = <T extends string = string>(
   if (!errors) {
     return {} as Partial<Record<any, any>>;
   }
-  return errors.reduce(
+  return errors.reduce<Record<'none' | T, string | undefined>>(
     (accum, thisError) => {
       if (thisError.field && fields.includes(thisError.field as T)) {
         return {
           ...accum,
           // We generally want the first error that matches the field,
           // so don't override it if it's already there
-          [thisError.field]: accum[thisError.field] || thisError.reason,
+          [thisError.field]: accum[thisError.field as T] || thisError.reason,
         };
       } else {
         return {
@@ -105,6 +105,6 @@ export const getErrorMap = <T extends string = string>(
         };
       }
     },
-    { none: undefined }
-  ) as Record<'none' | T, string | undefined>;
+    { none: undefined } as Record<'none' | T, string | undefined>
+  );
 };

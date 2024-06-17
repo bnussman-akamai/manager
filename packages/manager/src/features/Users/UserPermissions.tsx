@@ -1,4 +1,5 @@
 import {
+  GlobalGrantTypes,
   Grant,
   GrantLevel,
   GrantType,
@@ -67,7 +68,7 @@ interface Props {
 
 interface TabInfo {
   showTabs: boolean;
-  tabs: string[];
+  tabs: GrantType[];
 }
 
 interface State {
@@ -84,7 +85,7 @@ interface State {
   setAllPerm: 'null' | 'read_only' | 'read_write';
   /* Large Account Support */
   showTabs?: boolean;
-  tabs?: string[];
+  tabs?: GrantType[];
   userType: null | string;
 }
 
@@ -144,7 +145,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     }
   };
 
-  entityIsAll = (entity: string, value: GrantLevel): boolean => {
+  entityIsAll = (entity: GrantType, value: GrantLevel): boolean => {
     const { grants } = this.state;
     if (!(grants && grants[entity])) {
       return false;
@@ -186,7 +187,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
   formContainerRef = React.createRef<HTMLDivElement>();
 
   getTabInformation = (grants: Grants) =>
-    this.entityPerms.reduce(
+    this.entityPerms.reduce<TabInfo>(
       (acc: TabInfo, entity: GrantType) => {
         const grantsForEntity = grants?.[entity];
         if (grantsForEntity?.length > 25) {
@@ -261,8 +262,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     }
   };
 
-  globalBooleanPerms = [
-    'add_databases',
+  globalBooleanPerms: GlobalGrantTypes[] = [
     'add_domains',
     'add_firewalls',
     'add_images',
@@ -478,9 +478,8 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     );
   };
 
-  renderGlobalPerm = (perm: string, checked: boolean) => {
-    const permDescriptionMap = {
-      add_databases: 'Can add Databases to this account ($)',
+  renderGlobalPerm = (perm: GlobalGrantTypes, checked: boolean) => {
+    const permDescriptionMap: Partial<Record<GlobalGrantTypes, string>> = {
       add_domains: 'Can add Domains using the DNS Manager',
       add_firewalls: 'Can add Firewalls to this account',
       add_images: 'Can create frozen Images under this account ($)',
@@ -687,7 +686,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     );
   };
 
-  savePermsType = (type: string) => () => {
+  savePermsType = (type: 'global' | GrantType) => () => {
     this.setState({ errors: undefined });
     const { clearNewUser, currentUsername } = this.props;
     const { grants } = this.state;
@@ -809,7 +808,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     });
   };
 
-  setGrantTo = (entity: string, idx: number, value: GrantLevel) => () => {
+  setGrantTo = (entity: GrantType, idx: number, value: GrantLevel) => () => {
     const { grants } = this.state;
     if (!(grants && grants[entity])) {
       return;

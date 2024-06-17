@@ -516,6 +516,9 @@ export const SupportTicketDialog = (props: SupportTicketDialogProps) => {
       nodebalancer_id: nodebalancers,
       volume_id: volumes,
     };
+    if (entityType === 'general' || entityType === 'none') {
+      return [];
+    }
 
     if (!reactQueryEntityDataMap[entityType]) {
       return [];
