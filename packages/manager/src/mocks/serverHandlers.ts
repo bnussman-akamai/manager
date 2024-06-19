@@ -1,14 +1,3 @@
-import {
-  AccountMaintenance,
-  CreateIPv6RangePayload,
-  Firewall,
-  NotificationType,
-  ObjectStorageKeyRequest,
-  SecurityQuestionsPayload,
-  TokenRequest,
-  User,
-  VolumeStatus,
-} from '@linode/api-v4';
 import { DateTime } from 'luxon';
 import { HttpResponse, http } from 'msw';
 
@@ -110,6 +99,20 @@ import { accountUserFactory } from 'src/factories/accountUsers';
 import { grantFactory, grantsFactory } from 'src/factories/grants';
 import { pickRandom } from 'src/utilities/random';
 import { getStorage } from 'src/utilities/storage';
+
+import type {
+  NotificationType,
+  ObjectStorageKeyRequest,
+  SecurityQuestionsPayload,
+  TokenRequest,
+  User,
+  VolumeStatus,
+} from '@linode/api-v4';
+import type {
+  AccountMaintenance,
+  CreateIPv6RangePayload,
+  Firewall,
+} from '@linode/api-v4';
 
 export const makeResourcePage = <T>(
   e: T[],
