@@ -4,7 +4,7 @@ import {
   ObjectStorageClusterID,
   ObjectStorageObject,
 } from '@linode/api-v4/lib/object-storage';
-import { FormikProps } from 'formik';
+import { FormikErrors, FormikProps } from 'formik';
 
 import { Item } from 'src/components/EnhancedSelect/Select';
 import { OBJECT_STORAGE_DELIMITER, OBJECT_STORAGE_ROOT } from 'src/constants';
@@ -146,10 +146,10 @@ export const confirmObjectStorage = async <T extends {}>(
     // Setting `touched` is necessary because we only display errors
     // on fields that have been touched (handleSubmit() does this
     // implicitly).
-    Object.keys(validationErrors).forEach((key) => {
-      formikProps.setFieldTouched(key, validationErrors[key]);
-      formikProps.setFieldError(key, validationErrors[key]);
-    });
+    for (const key in validationErrors) {
+      formikProps.setFieldTouched(key, Boolean(validationErrors[key]));
+      formikProps.setFieldError(key, validationErrors[key] as string);
+    }
   } else {
     openConfirmationDialog();
   }

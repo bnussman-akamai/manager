@@ -379,8 +379,9 @@ export const useCreateObjectUrlMutation = (
   );
 
 export const useBucketSSLQuery = (cluster: string, bucket: string) =>
-  useQuery([queryKey, cluster, bucket, 'ssl'], () =>
-    getSSLCert(cluster, bucket)
+  useQuery<ObjectStorageBucketSSLResponse, APIError[]>(
+    [queryKey, cluster, bucket, 'ssl'],
+    () => getSSLCert(cluster, bucket)
   );
 
 export const useBucketSSLMutation = (cluster: string, bucket: string) => {
