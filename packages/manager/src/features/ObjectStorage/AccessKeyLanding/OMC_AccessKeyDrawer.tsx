@@ -1,17 +1,8 @@
-import { Region } from '@linode/api-v4';
-import {
-  AccessType,
-  ObjectStorageBucket,
-  ObjectStorageKey,
-  ObjectStorageKeyRequest,
-  Scope,
-  UpdateObjectStorageKeyRequest,
-} from '@linode/api-v4/lib/object-storage';
 import {
   createObjectStorageKeysSchema,
   updateObjectStorageKeysSchema,
 } from '@linode/validation/lib/objectStorageKeys.schema';
-import { FormikProps, useFormik } from 'formik';
+import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
@@ -21,12 +12,9 @@ import { Link } from 'src/components/Link';
 import { Notice } from 'src/components/Notice/Notice';
 import { TextField } from 'src/components/TextField';
 import { Typography } from 'src/components/Typography';
-import { useAccountManagement } from 'src/hooks/useAccountManagement';
-import { useFlags } from 'src/hooks/useFlags';
 import { useAccountSettings } from 'src/queries/account/settings';
 import { useObjectStorageBuckets } from 'src/queries/objectStorage';
 import { useRegionsQuery } from 'src/queries/regions/regions';
-import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
 import { getRegionsByRegionId } from 'src/utilities/regions';
 import { sortByString } from 'src/utilities/sort-by';
 
@@ -34,12 +22,23 @@ import { EnableObjectStorageModal } from '../EnableObjectStorageModal';
 import { confirmObjectStorage } from '../utilities';
 import { AccessKeyRegions } from './AccessKeyRegions/AccessKeyRegions';
 import { LimitedAccessControls } from './LimitedAccessControls';
-import { MODE } from './types';
 import {
   generateUpdatePayload,
   hasAccessBeenSelectedForAllBuckets,
   hasLabelOrRegionsChanged,
 } from './utils';
+
+import type { MODE } from './types';
+import type { Region } from '@linode/api-v4';
+import type {
+  AccessType,
+  ObjectStorageBucket,
+  ObjectStorageKey,
+  ObjectStorageKeyRequest,
+  Scope,
+  UpdateObjectStorageKeyRequest,
+} from '@linode/api-v4/lib/object-storage';
+import type { FormikProps } from 'formik';
 
 export interface AccessKeyDrawerProps {
   isRestrictedUser: boolean;
@@ -111,35 +110,19 @@ export const OMC_AccessKeyDrawer = (props: AccessKeyDrawerProps) => {
     open,
   } = props;
 
-  const { account } = useAccountManagement();
-  const flags = useFlags();
-
-  const isObjMultiClusterEnabled = isFeatureEnabled(
-    'Object Storage Access Key Regions',
-    Boolean(flags.objMultiCluster),
-    account?.capabilities ?? []
-  );
-
   const { data: regions } = useRegionsQuery();
 
   const regionsLookup = regions && getRegionsByRegionId(regions);
-
-  const regionsSupportingObjectStorage = regions?.filter((region) =>
-    region.capabilities.includes('Object Storage')
-  );
 
   const {
     data: objectStorageBuckets,
     error: bucketsError,
     isLoading: areBucketsLoading,
-  } = useObjectStorageBuckets({
-    isObjMultiClusterEnabled,
-    regions: regionsSupportingObjectStorage,
-  });
+  } = useObjectStorageBuckets();
 
   const { data: accountSettings } = useAccountSettings();
 
-  const buckets = objectStorageBuckets?.buckets || [];
+  const buckets = objectStorageBuckets || [];
 
   const hasBuckets = buckets?.length > 0;
 

@@ -76,7 +76,7 @@ export const deleteAllTestBuckets = async () => {
     async (bucket: ObjectStorageBucket) => {
       await deleteAllTestBucketObjects(bucket.cluster, bucket.label);
       return deleteBucket({
-        cluster: bucket.cluster,
+        region: bucket.region ?? bucket.cluster,
         label: bucket.label,
       });
     }

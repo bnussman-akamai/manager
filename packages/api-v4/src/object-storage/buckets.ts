@@ -111,39 +111,10 @@ export const createBucket = (data: ObjectStorageBucketRequestPayload) =>
  * NOTE: Attempting to delete a non-empty bucket will result in an error.
  */
 export const deleteBucket = ({
-  cluster,
-  label,
-}: ObjectStorageDeleteBucketRequestPayload) =>
-  Request<ObjectStorageBucket>(
-    setURL(
-      `${API_ROOT}/object-storage/buckets/${encodeURIComponent(
-        cluster
-      )}/${encodeURIComponent(label)}`
-    ),
-    setMethod('DELETE')
-  );
-
-/**
- * deleteBucketWithRegion
- *
- * Removes a Bucket from your account with region.
- *
- * NOTE: Attempting to delete a non-empty bucket will result in an error.
- */
-/*
-   @TODO OBJ Multicluster: deleteBucketWithRegion is a function,
-   once feature is rolled out we replace it with existing deleteBucket
-   by updating it with region instead of cluster.
-  */
-
-export const deleteBucketWithRegion = ({
   region,
   label,
-}: {
-  region: string;
-  label: string;
-}) =>
-  Request<ObjectStorageBucket>(
+}: ObjectStorageDeleteBucketRequestPayload) =>
+  Request<{}>(
     setURL(
       `${API_ROOT}/object-storage/buckets/${encodeURIComponent(
         region

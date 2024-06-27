@@ -1,4 +1,3 @@
-import { ObjectStorageBucket } from '@linode/api-v4/lib/object-storage';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
 
@@ -23,6 +22,8 @@ import {
   StyledBucketRow,
   StyledBucketSizeCell,
 } from './BucketTableRow.styles';
+
+import type { ObjectStorageBucket } from '@linode/api-v4/lib/object-storage';
 
 export interface BucketTableRowProps extends ObjectStorageBucket {
   onDetails: () => void;

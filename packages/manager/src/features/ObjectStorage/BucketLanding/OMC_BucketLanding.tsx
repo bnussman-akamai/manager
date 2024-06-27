@@ -1,7 +1,3 @@
-import { Region } from '@linode/api-v4';
-import { ObjectStorageBucket } from '@linode/api-v4/lib/object-storage';
-import { APIError } from '@linode/api-v4/lib/types';
-import { Theme } from '@mui/material/styles';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
 import { makeStyles } from 'tss-react/mui';
@@ -15,17 +11,13 @@ import OrderBy from 'src/components/OrderBy';
 import { TransferDisplay } from 'src/components/TransferDisplay/TransferDisplay';
 import { TypeToConfirmDialog } from 'src/components/TypeToConfirmDialog/TypeToConfirmDialog';
 import { Typography } from 'src/components/Typography';
-import { useAccountManagement } from 'src/hooks/useAccountManagement';
-import { useFlags } from 'src/hooks/useFlags';
 import { useOpenClose } from 'src/hooks/useOpenClose';
 import {
-  BucketError,
-  useDeleteBucketWithRegionMutation,
+  useDeleteBucketMutation,
   useObjectStorageBuckets,
 } from 'src/queries/objectStorage';
 import { useProfile } from 'src/queries/profile/profile';
 import { useRegionsQuery } from 'src/queries/regions/regions';
-import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
 import {
   sendDeleteBucketEvent,
   sendDeleteBucketFailedEvent,
@@ -38,6 +30,10 @@ import { BucketDetailsDrawer } from './BucketDetailsDrawer';
 import { BucketLandingEmptyState } from './BucketLandingEmptyState';
 import { BucketTable } from './BucketTable';
 
+import type { ObjectStorageBucket } from '@linode/api-v4/lib/object-storage';
+import type { APIError } from '@linode/api-v4/lib/types';
+import type { Theme } from '@mui/material/styles';
+
 const useStyles = makeStyles()((theme: Theme) => ({
   copy: {
     marginTop: theme.spacing(),
@@ -49,15 +45,6 @@ export const OMC_BucketLanding = () => {
 
   const isRestrictedUser = profile?.restricted;
 
-  const { account } = useAccountManagement();
-  const flags = useFlags();
-
-  const isObjMultiClusterEnabled = isFeatureEnabled(
-    'Object Storage Access Key Regions',
-    Boolean(flags.objMultiCluster),
-    account?.capabilities ?? []
-  );
-
   const {
     data: regions,
     error: regionErrors,
@@ -66,20 +53,13 @@ export const OMC_BucketLanding = () => {
 
   const regionsLookup = regions && getRegionsByRegionId(regions);
 
-  const regionsSupportingObjectStorage = regions?.filter((region) =>
-    region.capabilities.includes('Object Storage')
-  );
-
   const {
-    data: objectStorageBucketsResponse,
+    data: objectStorageBuckets,
     error: bucketsErrors,
     isLoading: areBucketsLoading,
-  } = useObjectStorageBuckets({
-    isObjMultiClusterEnabled,
-    regions: regionsSupportingObjectStorage,
-  });
+  } = useObjectStorageBuckets();
 
-  const { mutateAsync: deleteBucket } = useDeleteBucketWithRegionMutation();
+  const { mutateAsync: deleteBucket } = useDeleteBucketMutation();
 
   const { classes } = useStyles();
 
@@ -144,13 +124,8 @@ export const OMC_BucketLanding = () => {
     removeBucketConfirmationDialog.close();
   }, [removeBucketConfirmationDialog]);
 
-  // @TODO OBJ Multicluster - region is defined as an optional field in BucketError. Once the feature is rolled out to production, we could clean this up and remove the filter.
-  const unavailableRegions = objectStorageBucketsResponse?.errors
-    ?.map((error: BucketError) => error.region)
-    .filter((region): region is Region => region !== undefined);
-
   if (isRestrictedUser) {
-    return <RenderEmpty />;
+    return <BucketLandingEmptyState />;
   }
 
   if (regionErrors || bucketsErrors) {
@@ -165,37 +140,23 @@ export const OMC_BucketLanding = () => {
   if (
     areRegionsLoading ||
     areBucketsLoading ||
-    objectStorageBucketsResponse === undefined
+    objectStorageBuckets === undefined
   ) {
     return <CircleProgress />;
   }
 
-  if (objectStorageBucketsResponse?.buckets.length === 0) {
-    return (
-      <>
-        {unavailableRegions && unavailableRegions.length > 0 && (
-          <UnavailableRegionsDisplay unavailableRegions={unavailableRegions} />
-        )}
-        <RenderEmpty />
-      </>
-    );
+  if (objectStorageBuckets.length === 0) {
+    return <BucketLandingEmptyState />;
   }
 
-  const totalUsage = sumBucketUsage(objectStorageBucketsResponse.buckets);
+  const totalUsage = sumBucketUsage(objectStorageBuckets);
   const bucketLabel = bucketToRemove ? bucketToRemove.label : '';
 
   return (
     <React.Fragment>
       <DocumentTitleSegment segment="Buckets" />
-      {unavailableRegions && unavailableRegions.length > 0 && (
-        <UnavailableRegionsDisplay unavailableRegions={unavailableRegions} />
-      )}
       <Grid xs={12}>
-        <OrderBy
-          data={objectStorageBucketsResponse.buckets}
-          order={'asc'}
-          orderBy={'label'}
-        >
+        <OrderBy data={objectStorageBuckets} order={'asc'} orderBy={'label'}>
           {({ data: orderedData, handleOrderChange, order, orderBy }) => {
             const bucketTableProps = {
               data: orderedData,
@@ -209,16 +170,16 @@ export const OMC_BucketLanding = () => {
           }}
         </OrderBy>
         {/* If there's more than one Bucket, display the total usage. */}
-        {objectStorageBucketsResponse.buckets.length > 1 ? (
+        {objectStorageBuckets.length > 1 && (
           <Typography
             style={{ marginTop: 18, textAlign: 'center', width: '100%' }}
             variant="body1"
           >
             Total storage used: {readableBytes(totalUsage).formatted}
           </Typography>
-        ) : null}
+        )}
         <TransferDisplay
-          spacingTop={objectStorageBucketsResponse.buckets.length > 1 ? 8 : 18}
+          spacingTop={objectStorageBuckets.length > 1 ? 8 : 18}
         />
       </Grid>
       <TypeToConfirmDialog
@@ -257,7 +218,7 @@ export const OMC_BucketLanding = () => {
         {/* If the user is attempting to delete their last Bucket, remind them
           that they will still be billed unless they cancel Object Storage in
           Account Settings. */}
-        {objectStorageBucketsResponse?.buckets.length === 1 && (
+        {objectStorageBuckets.length === 1 && (
           <CancelNotice className={classes.copy} />
         )}
       </TypeToConfirmDialog>
@@ -275,52 +236,6 @@ export const OMC_BucketLanding = () => {
     </React.Fragment>
   );
 };
-
-const RenderEmpty = () => {
-  return <BucketLandingEmptyState />;
-};
-
-interface UnavailableRegionsDisplayProps {
-  unavailableRegions: Region[];
-}
-
-const UnavailableRegionsDisplay = React.memo(
-  ({ unavailableRegions }: UnavailableRegionsDisplayProps) => {
-    const regionsAffected = unavailableRegions.map(
-      (unavailableRegion) => unavailableRegion.label
-    );
-
-    return <Banner regionsAffected={regionsAffected} />;
-  }
-);
-
-interface BannerProps {
-  regionsAffected: string[];
-}
-
-const Banner = React.memo(({ regionsAffected }: BannerProps) => {
-  const moreThanOneRegionAffected = regionsAffected.length > 1;
-
-  return (
-    <Notice important variant="warning">
-      <Typography component="div" style={{ fontSize: '1rem' }}>
-        There was an error loading buckets in{' '}
-        {moreThanOneRegionAffected
-          ? 'the following regions:'
-          : `${regionsAffected[0]}.`}
-        <ul>
-          {moreThanOneRegionAffected &&
-            regionsAffected.map((thisRegion) => (
-              <li key={thisRegion}>{thisRegion}</li>
-            ))}
-        </ul>
-        If you have buckets in{' '}
-        {moreThanOneRegionAffected ? 'these regions' : regionsAffected[0]}, you
-        may not see them listed below.
-      </Typography>
-    </Notice>
-  );
-});
 
 export const sumBucketUsage = (buckets: ObjectStorageBucket[]) => {
   return buckets.reduce((acc, thisBucket) => {

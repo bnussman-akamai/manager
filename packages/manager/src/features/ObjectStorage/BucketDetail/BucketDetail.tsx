@@ -1,10 +1,4 @@
-import {
-  ObjectStorageClusterID,
-  ObjectStorageObject,
-  ObjectStorageObjectListResponse,
-  getObjectList,
-  getObjectURL,
-} from '@linode/api-v4/lib/object-storage';
+import { getObjectList, getObjectURL } from '@linode/api-v4/lib/object-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useSnackbar } from 'notistack';
@@ -24,14 +18,15 @@ import { TableHead } from 'src/components/TableHead';
 import { TableRow } from 'src/components/TableRow';
 import { ObjectUploader } from 'src/components/Uploaders/ObjectUploader/ObjectUploader';
 import { OBJECT_STORAGE_DELIMITER } from 'src/constants';
+import { useFlags } from 'src/hooks/useFlags';
+import { useAccount } from 'src/queries/account/account';
 import {
+  objectStorageQueries,
   prefixToQueryKey,
-  queryKey,
-  updateBucket,
   useObjectBucketDetailsInfiniteQuery,
   useObjectStorageBuckets,
-  useObjectStorageClusters,
 } from 'src/queries/objectStorage';
+import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
 import { sendDownloadObjectEvent } from 'src/utilities/analytics/customEventAnalytics';
 import { getQueryParamFromQueryString } from 'src/utilities/queryParams';
 import { truncateMiddle } from 'src/utilities/truncate';
@@ -55,10 +50,12 @@ import {
 import { CreateFolderDrawer } from './CreateFolderDrawer';
 import { ObjectDetailsDrawer } from './ObjectDetailsDrawer';
 import ObjectTableContent from './ObjectTableContent';
-import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
-import { useFlags } from 'src/hooks/useFlags';
-import { useAccount } from 'src/queries/account/account';
-import { useRegionsQuery } from 'src/queries/regions/regions';
+
+import type {
+  ObjectStorageClusterID,
+  ObjectStorageObject,
+  ObjectStorageObjectListResponse,
+} from '@linode/api-v4/lib/object-storage';
 
 interface MatchParams {
   bucketName: string;
@@ -90,20 +87,9 @@ export const BucketDetail = () => {
     account?.capabilities ?? []
   );
 
-  const { data: regions } = useRegionsQuery();
+  const { data: buckets } = useObjectStorageBuckets();
 
-  const regionsSupportingObjectStorage = regions?.filter((region) =>
-    region.capabilities.includes('Object Storage')
-  );
-
-  const { data: clusters } = useObjectStorageClusters();
-  const { data: buckets } = useObjectStorageBuckets({
-    clusters,
-    isObjMultiClusterEnabled,
-    regions: regionsSupportingObjectStorage,
-  });
-
-  const bucket = buckets?.buckets.find((bucket) => {
+  const bucket = buckets?.find((bucket) => {
     if (isObjMultiClusterEnabled) {
       return bucket.label === bucketName && bucket.region === clusterId;
     }
@@ -177,7 +163,9 @@ export const BucketDetail = () => {
   // we don't want to fetch for every delete action. Debounce
   // the updateBucket call by 3 seconds.
   const debouncedUpdateBucket = debounce(3000, false, () =>
-    updateBucket(clusterId, bucketName, queryClient)
+    queryClient.invalidateQueries({
+      queryKey: objectStorageQueries.buckets.queryKey,
+    })
   );
 
   const deleteObject = async () => {
@@ -239,7 +227,14 @@ export const BucketDetail = () => {
       pageParams: string[];
       pages: ObjectStorageObjectListResponse[];
     }>(
-      [queryKey, clusterId, bucketName, 'objects', ...prefixToQueryKey(prefix)],
+      [
+        'object-storage',
+        'bucket',
+        clusterId,
+        bucketName,
+        'objects',
+        ...prefixToQueryKey(prefix),
+      ],
       (data) => ({
         pageParams: data?.pageParams || [],
         pages,
@@ -337,7 +332,8 @@ export const BucketDetail = () => {
         // If a folder already exists in the store, invalidate that store for that specific
         // prefix. Due to how invalidateQueries works, all subdirectories also get invalidated.
         queryClient.invalidateQueries([
-          queryKey,
+          'object-storage',
+          'bucket',
           clusterId,
           bucketName,
           ...`${prefix}${objectName}`.split('/'),

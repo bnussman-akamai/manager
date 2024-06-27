@@ -1,13 +1,5 @@
-import {
-  AccessType,
-  ObjectStorageBucket,
-  ObjectStorageKey,
-  ObjectStorageKeyRequest,
-  Scope,
-  UpdateObjectStorageKeyRequest,
-} from '@linode/api-v4/lib/object-storage';
 import { createObjectStorageKeysSchema } from '@linode/validation/lib/objectStorageKeys.schema';
-import { Formik, FormikProps } from 'formik';
+import { Formik } from 'formik';
 import * as React from 'react';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
@@ -17,20 +9,23 @@ import { Link } from 'src/components/Link';
 import { Notice } from 'src/components/Notice/Notice';
 import { TextField } from 'src/components/TextField';
 import { Typography } from 'src/components/Typography';
-import { useAccountManagement } from 'src/hooks/useAccountManagement';
-import { useFlags } from 'src/hooks/useFlags';
 import { useAccountSettings } from 'src/queries/account/settings';
-import {
-  useObjectStorageBuckets,
-  useObjectStorageClusters,
-} from 'src/queries/objectStorage';
-import { useRegionsQuery } from 'src/queries/regions/regions';
-import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
+import { useObjectStorageBuckets } from 'src/queries/objectStorage';
 
 import { EnableObjectStorageModal } from '../EnableObjectStorageModal';
 import { confirmObjectStorage } from '../utilities';
 import { LimitedAccessControls } from './LimitedAccessControls';
-import { MODE } from './types';
+
+import type { MODE } from './types';
+import type {
+  AccessType,
+  ObjectStorageBucket,
+  ObjectStorageKey,
+  ObjectStorageKeyRequest,
+  Scope,
+  UpdateObjectStorageKeyRequest,
+} from '@linode/api-v4/lib/object-storage';
+import type { FormikProps } from 'formik';
 
 export interface AccessKeyDrawerProps {
   isRestrictedUser: boolean;
@@ -87,50 +82,19 @@ export const AccessKeyDrawer = (props: AccessKeyDrawerProps) => {
   } = props;
 
   const { data: accountSettings } = useAccountSettings();
-  const { account } = useAccountManagement();
-  const flags = useFlags();
-  const { data: regions } = useRegionsQuery();
-
-  const isObjMultiClusterEnabled = isFeatureEnabled(
-    'Object Storage Access Key Regions',
-    Boolean(flags.objMultiCluster),
-    account?.capabilities ?? []
-  );
-
-  const regionsSupportingObjectStorage = regions?.filter((region) =>
-    region.capabilities.includes('Object Storage')
-  );
 
   const {
-    data: objectStorageClusters,
-    isLoading: areClustersLoading,
-  } = useObjectStorageClusters(!isObjMultiClusterEnabled);
-
-  /*
-   @TODO OBJ Multicluster:'region' will become required, and the
-   'cluster' field will be deprecated once the feature is fully rolled out in production.
-   As part of the process of cleaning up after the 'objMultiCluster' feature flag, we will
-   remove 'cluster' and retain 'regions'.
-  */
-  const {
-    data: objectStorageBucketsResponse,
+    data: objectStorageBuckets,
     error: bucketsError,
     isLoading: areBucketsLoading,
-  } = useObjectStorageBuckets({
-    clusters: isObjMultiClusterEnabled ? undefined : objectStorageClusters,
-    enabled: true,
-    isObjMultiClusterEnabled,
-    regions: isObjMultiClusterEnabled
-      ? regionsSupportingObjectStorage
-      : undefined,
-  });
+  } = useObjectStorageBuckets();
 
-  const buckets = objectStorageBucketsResponse?.buckets || [];
+  const buckets = objectStorageBuckets || [];
 
   const hasBuckets = buckets?.length > 0;
 
   const hidePermissionsTable =
-    bucketsError || objectStorageBucketsResponse?.buckets.length === 0;
+    bucketsError || objectStorageBuckets?.length === 0;
 
   const createMode = mode === 'creating';
 
@@ -195,7 +159,7 @@ export const AccessKeyDrawer = (props: AccessKeyDrawerProps) => {
       title={title}
       wide={createMode && hasBuckets}
     >
-      {areBucketsLoading || areClustersLoading ? (
+      {areBucketsLoading ? (
         <CircleProgress />
       ) : (
         <Formik

@@ -1,6 +1,4 @@
-import { AccountSettings } from '@linode/api-v4/lib/account';
 import { cancelObjectStorage } from '@linode/api-v4/lib/object-storage';
-import { APIError } from '@linode/api-v4/lib/types';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
@@ -12,8 +10,12 @@ import { Notice } from 'src/components/Notice/Notice';
 import { TypeToConfirmDialog } from 'src/components/TypeToConfirmDialog/TypeToConfirmDialog';
 import { Typography } from 'src/components/Typography';
 import { updateAccountSettingsData } from 'src/queries/account/settings';
-import { queryKey } from 'src/queries/objectStorage';
+import { objectStorageQueries } from 'src/queries/objectStorage';
 import { useProfile } from 'src/queries/profile/profile';
+
+import type { AccountSettings } from '@linode/api-v4/lib/account';
+import type { APIError } from '@linode/api-v4/lib/types';
+
 interface Props {
   object_storage: AccountSettings['object_storage'];
 }
@@ -89,8 +91,7 @@ export const EnableObjectStorage = (props: Props) => {
       .then(() => {
         updateAccountSettingsData({ object_storage: 'disabled' }, queryClient);
         handleClose();
-        queryClient.invalidateQueries([`${queryKey}-buckets`]);
-        queryClient.invalidateQueries([`${queryKey}-access-keys`]);
+        queryClient.invalidateQueries({ queryKey: objectStorageQueries._def });
       })
       .catch(handleError);
   };

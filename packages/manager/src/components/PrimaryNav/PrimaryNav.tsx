@@ -1,4 +1,5 @@
 import Grid from '@mui/material/Unstable_Grid2';
+import { useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -29,16 +30,11 @@ import { Divider } from 'src/components/Divider';
 import { useIsDatabasesEnabled } from 'src/features/Databases/utilities';
 import { useIsACLBEnabled } from 'src/features/LoadBalancers/utils';
 import { useIsPlacementGroupsEnabled } from 'src/features/PlacementGroups/utils';
-import { useAccountManagement } from 'src/hooks/useAccountManagement';
 import { useFlags } from 'src/hooks/useFlags';
 import { usePrefetch } from 'src/hooks/usePreFetch';
-import {
-  useObjectStorageBuckets,
-  useObjectStorageClusters,
-} from 'src/queries/objectStorage';
-import { useRegionsQuery } from 'src/queries/regions/regions';
-import { useMarketplaceAppsQuery } from 'src/queries/stackscripts';
-import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
+import { useAccountSettings } from 'src/queries/account/settings';
+import { objectStorageQueries } from 'src/queries/objectStorage';
+import { stackscriptQueries } from 'src/queries/stackscripts';
 
 import useStyles from './PrimaryNav.styles';
 import { linkIsActive } from './utils';
@@ -95,72 +91,14 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
   const flags = useFlags();
   const location = useLocation();
 
-  const [enableObjectPrefetch, setEnableObjectPrefetch] = React.useState(false);
+  const queryClient = useQueryClient();
 
-  const [
-    enableMarketplacePrefetch,
-    setEnableMarketplacePrefetch,
-  ] = React.useState(false);
+  const { data: accountSettings } = useAccountSettings();
 
-  const { _isManagedAccount, account } = useAccountManagement();
-
-  const isObjMultiClusterEnabled = isFeatureEnabled(
-    'Object Storage Access Key Regions',
-    Boolean(flags.objMultiCluster),
-    account?.capabilities ?? []
-  );
-
-  const { data: regions } = useRegionsQuery();
-
-  const regionsSupportingObjectStorage = regions?.filter((region) =>
-    region.capabilities.includes('Object Storage')
-  );
-
-  const {
-    data: oneClickApps,
-    error: oneClickAppsError,
-    isLoading: oneClickAppsLoading,
-  } = useMarketplaceAppsQuery(enableMarketplacePrefetch);
-
-  const {
-    data: clusters,
-    error: clustersError,
-    isLoading: clustersLoading,
-  } = useObjectStorageClusters(
-    enableObjectPrefetch && !isObjMultiClusterEnabled
-  );
-
-  /*
-   @TODO OBJ Multicluster:'region' will become required, and the
-   'cluster' field will be deprecated once the feature is fully rolled out in production.
-   As part of the process of cleaning up after the 'objMultiCluster' feature flag, we will
-   remove 'cluster' and retain 'regions'.
-  */
-  const {
-    data: buckets,
-    error: bucketsError,
-    isLoading: bucketsLoading,
-  } = useObjectStorageBuckets({
-    clusters: isObjMultiClusterEnabled ? undefined : clusters,
-    enabled: enableObjectPrefetch,
-    isObjMultiClusterEnabled,
-    regions: isObjMultiClusterEnabled
-      ? regionsSupportingObjectStorage
-      : undefined,
-  });
-
-  const allowObjPrefetch =
-    !buckets &&
-    !clusters &&
-    !clustersLoading &&
-    !bucketsLoading &&
-    !clustersError &&
-    !bucketsError;
-
-  const allowMarketplacePrefetch =
-    !oneClickApps && !oneClickAppsLoading && !oneClickAppsError;
+  const isManagedAccount = accountSettings?.managed;
 
   const showCloudPulse = Boolean(flags.aclp?.enabled);
+
   // the followed comment is for later use, the showCloudPulse will be removed and isACLPEnabled will be used
   // const { isACLPEnabled } = useIsACLPEnabled();
 
@@ -168,24 +106,12 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
   const { isPlacementGroupsEnabled } = useIsPlacementGroupsEnabled();
   const { isDatabasesEnabled } = useIsDatabasesEnabled();
 
-  const prefetchObjectStorage = () => {
-    if (!enableObjectPrefetch) {
-      setEnableObjectPrefetch(true);
-    }
-  };
-
-  const prefetchMarketplace = () => {
-    if (!enableMarketplacePrefetch) {
-      setEnableMarketplacePrefetch(true);
-    }
-  };
-
   const primaryLinkGroups: PrimaryLink[][] = React.useMemo(
     () => [
       [
         {
           display: 'Managed',
-          hide: !_isManagedAccount,
+          hide: !isManagedAccount,
           href: '/managed',
           icon: <Managed />,
         },
@@ -275,8 +201,9 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
           display: 'Object Storage',
           href: '/object-storage/buckets',
           icon: <Storage />,
-          prefetchRequestCondition: allowObjPrefetch,
-          prefetchRequestFn: prefetchObjectStorage,
+          prefetchRequestCondition: true,
+          prefetchRequestFn: () =>
+            queryClient.prefetchQuery(objectStorageQueries.buckets),
         },
         {
           display: 'Longview',
@@ -295,8 +222,9 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
           display: 'Marketplace',
           href: '/linodes/create?type=One-Click',
           icon: <OCA />,
-          prefetchRequestCondition: allowMarketplacePrefetch,
-          prefetchRequestFn: prefetchMarketplace,
+          prefetchRequestCondition: true,
+          prefetchRequestFn: () =>
+            queryClient.prefetchQuery(stackscriptQueries.marketplace),
         },
       ],
       [
@@ -318,17 +246,14 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
         },
       ],
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      isDatabasesEnabled,
-      _isManagedAccount,
-      allowObjPrefetch,
-      allowMarketplacePrefetch,
-      flags.databaseBeta,
+      isManagedAccount,
       isACLBEnabled,
       isPlacementGroupsEnabled,
-      flags.placementGroups,
+      flags,
+      isDatabasesEnabled,
       showCloudPulse,
+      queryClient,
     ]
   );
 
@@ -383,7 +308,7 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
           <div key={idx}>
             <Divider
               spacingTop={
-                _isManagedAccount ? (idx === 0 ? 0 : 11) : idx === 1 ? 0 : 11
+                isManagedAccount ? (idx === 0 ? 0 : 11) : idx === 1 ? 0 : 11
               }
               sx={(theme) => ({
                 borderColor:

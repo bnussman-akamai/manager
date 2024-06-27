@@ -56,7 +56,7 @@ export interface ObjectStorageBucketRequestPayload {
 }
 
 export interface ObjectStorageDeleteBucketRequestPayload {
-  cluster: string;
+  region: string;
   label: string;
 }
 

@@ -7,8 +7,6 @@ import { Drawer } from 'src/components/Drawer';
 import { Notice } from 'src/components/Notice/Notice';
 import { TextField } from 'src/components/TextField';
 import { EUAgreementCheckbox } from 'src/features/Account/Agreements/EUAgreementCheckbox';
-import { useAccountManagement } from 'src/hooks/useAccountManagement';
-import { useFlags } from 'src/hooks/useFlags';
 import {
   reportAgreementSigningError,
   useAccountAgreements,
@@ -19,12 +17,10 @@ import { useNetworkTransferPricesQuery } from 'src/queries/networkTransfer';
 import {
   useCreateBucketMutation,
   useObjectStorageBuckets,
-  useObjectStorageClusters,
   useObjectStorageTypesQuery,
 } from 'src/queries/objectStorage';
 import { useProfile } from 'src/queries/profile/profile';
 import { useRegionsQuery } from 'src/queries/regions/regions';
-import { isFeatureEnabled } from 'src/utilities/accountCapabilities';
 import { sendCreateBucketEvent } from 'src/utilities/analytics/customEventAnalytics';
 import { getErrorMap } from 'src/utilities/errorUtils';
 import { getGDPRDetails } from 'src/utilities/formatRegion';
@@ -44,38 +40,8 @@ export const CreateBucketDrawer = (props: Props) => {
   const { isOpen, onClose } = props;
   const isRestrictedUser = profile?.restricted;
 
-  const { account } = useAccountManagement();
-  const flags = useFlags();
-
-  const isObjMultiClusterEnabled = isFeatureEnabled(
-    'Object Storage Access Key Regions',
-    Boolean(flags.objMultiCluster),
-    account?.capabilities ?? []
-  );
-
   const { data: regions } = useRegionsQuery();
-
-  const { data: clusters } = useObjectStorageClusters(
-    !isObjMultiClusterEnabled
-  );
-
-  const regionsSupportingObjectStorage = regions?.filter((region) =>
-    region.capabilities.includes('Object Storage')
-  );
-
-  /*
-   @TODO OBJ Multicluster:'region' will become required, and the
-   'cluster' field will be deprecated once the feature is fully rolled out in production.
-   As part of the process of cleaning up after the 'objMultiCluster' feature flag, we will
-   remove 'cluster' and retain 'regions'.
-  */
-  const { data: buckets } = useObjectStorageBuckets({
-    clusters: isObjMultiClusterEnabled ? undefined : clusters,
-    isObjMultiClusterEnabled,
-    regions: isObjMultiClusterEnabled
-      ? regionsSupportingObjectStorage
-      : undefined,
-  });
+  const { data: buckets } = useObjectStorageBuckets();
 
   const {
     data: objTypes,
@@ -126,7 +92,7 @@ export const CreateBucketDrawer = (props: Props) => {
     },
     validate(values) {
       reset();
-      const doesBucketExist = buckets?.buckets.find(
+      const doesBucketExist = buckets?.find(
         (b) => b.label === values.label && b.cluster === values.cluster
       );
       if (doesBucketExist) {
