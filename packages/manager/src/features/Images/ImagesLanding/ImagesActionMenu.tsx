@@ -6,6 +6,7 @@ import type { Event, Image, ImageStatus } from '@linode/api-v4';
 import type { Action } from 'src/components/ActionMenu/ActionMenu';
 
 export interface Handlers {
+  onView: (image: Image) => void;
   onCancelFailed?: (imageID: string) => void;
   onDelete?: (label: string, imageID: string, status?: ImageStatus) => void;
   onDeploy?: (imageID: string) => void;
@@ -38,6 +39,7 @@ export const ImagesActionMenu = (props: Props) => {
     onManageRegions,
     onRestore,
     onRetry,
+    onView,
   } = handlers;
 
   const actions: Action[] = React.useMemo(() => {
@@ -56,6 +58,10 @@ export const ImagesActionMenu = (props: Props) => {
           },
         ]
       : [
+          {
+            onClick: () => onView(image),
+            title: "View",
+          },
           {
             disabled: isDisabled,
             onClick: () => onEdit?.(image),

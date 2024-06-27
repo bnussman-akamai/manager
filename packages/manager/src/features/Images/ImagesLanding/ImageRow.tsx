@@ -93,7 +93,7 @@ export const ImageRow = (props: Props) => {
             <TableCell>
               {regions && regions.length > 0 && (
                 <RegionsList
-                  onManageRegions={() => handlers.onManageRegions?.(image)}
+                  onManageRegions={() => handlers.onView(image)}
                   regions={regions}
                 />
               )}

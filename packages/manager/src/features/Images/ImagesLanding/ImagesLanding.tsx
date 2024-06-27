@@ -53,6 +53,8 @@ import type { Handlers as ImageHandlers } from './ImagesActionMenu';
 import type { Image, ImageStatus } from '@linode/api-v4';
 import type { APIError } from '@linode/api-v4/lib/types';
 import type { Theme } from '@mui/material/styles';
+import { ManageRegionsDrawer } from './ManageRegionsDrawer';
+import { ViewImageDrawer } from './ViewImageDrawer';
 
 const searchQueryKey = 'query';
 
@@ -213,9 +215,12 @@ export const ImagesLanding = () => {
   );
 
   const [
-    // @ts-expect-error This will be unused until the regions drawer is implemented
     manageRegionsDrawerImage,
     setManageRegionsDrawerImage,
+  ] = React.useState<Image>();
+  const [
+    viewImageDrawerImage,
+    setViewImageDrawerImage,
   ] = React.useState<Image>();
   const [editDrawerImage, setEditDrawerImage] = React.useState<Image>();
   const [rebuildDrawerImage, setRebuildDrawerImage] = React.useState<Image>();
@@ -288,6 +293,10 @@ export const ImagesLanding = () => {
       });
   };
 
+  const onView = (image: Image) => {
+    setViewImageDrawerImage(image);
+  };
+
   const onRetryClick = (
     imageId: string,
     imageLabel: string,
@@ -351,6 +360,7 @@ export const ImagesLanding = () => {
       : undefined,
     onRestore: setRebuildDrawerImage,
     onRetry: onRetryClick,
+    onView: onView,
   };
 
   const renderError = (_: APIError[]) => {
@@ -602,6 +612,22 @@ export const ImagesLanding = () => {
       <RebuildImageDrawer
         image={rebuildDrawerImage}
         onClose={() => setRebuildDrawerImage(undefined)}
+      />
+      <ManageRegionsDrawer
+        onOpenView={(image) => {
+          setViewImageDrawerImage(image);
+          setManageRegionsDrawerImage(undefined);
+        }}
+        image={manageRegionsDrawerImage}
+        onClose={() => setManageRegionsDrawerImage(undefined)}
+      />
+      <ViewImageDrawer
+        onOpenManageRegions={(image) => {
+          setViewImageDrawerImage(undefined);
+          setManageRegionsDrawerImage(image);
+        }}
+        image={viewImageDrawerImage}
+        onClose={() => setViewImageDrawerImage(undefined)}
       />
       <ConfirmationDialog
         title={
