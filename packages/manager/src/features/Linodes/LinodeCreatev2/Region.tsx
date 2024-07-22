@@ -89,37 +89,33 @@ export const Region = () => {
       ? 'enabled'
       : undefined;
 
-    reset(
-      (prev) => ({
-        ...prev,
-        // reset EU agreement
-        hasSignedEUAgreement: undefined,
-        // Reset interfaces because VPC and VLANs are region-sepecific
-        interfaces: defaultInterfaces,
-        // Reset Cloud-init metadata because not all regions support it
-        metadata: undefined,
-        // Reset the placement group because they are region-specific
-        placement_group: undefined,
-        // Set the region
-        region: region.id,
-        // Backups and Private IP are not supported in distributed compute regions
-        ...(isDistributedRegion && {
-          backups_enabled: false,
-          private_ip: false,
-        }),
-        // If disk encryption is enabled, set the default value to "enabled" if the region supports it
-        ...(isDiskEncryptionFeatureEnabled && {
-          disk_encryption: defaultDiskEncryptionValue,
-        }),
-      }),
-      {
-        keepDirty: true,
-        keepDirtyValues: true,
-        keepErrors: true,
-        keepSubmitCount: true,
-        keepTouched: true,
-      }
-    );
+    field.onChange(region.id);
+
+    // Reset EU Agreement
+    setValue('hasSignedEUAgreement', undefined);
+
+    // Reset VPC
+    setValue('interfaces.0.vpc_id', null);
+    setValue('interfaces.0.subnet_id', null);
+
+    // Reset VLAN
+    setValue('interfaces.1.label', null);
+    setValue('interfaces.1.ipam_address', null);
+
+    // Reset Metadata
+    setValue('metadata.user_data', '');
+
+    // Reset Placement Group
+    setValue('placement_group.id', null);
+
+    if (isDistributedRegion) {
+      setValue('backups_enabled', false);
+      setValue('private_ip', false);
+    }
+
+    if (isDiskEncryptionFeatureEnabled) {
+      setValue('disk_encryption', defaultDiskEncryptionValue);
+    }
 
     if (!isLabelFieldDirty) {
       const label = await getGeneratedLinodeLabel({
