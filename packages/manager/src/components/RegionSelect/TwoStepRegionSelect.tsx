@@ -12,18 +12,11 @@ import { Tabs } from 'src/components/Tabs/Tabs';
 import { sendLinodeCreateDocsEvent } from 'src/utilities/analytics/customEventAnalytics';
 
 import type {
-  DisableRegionOption,
   RegionFilterValue,
+  RegionSelectProps,
 } from './RegionSelect.types';
-import type { Region } from '@linode/api-v4';
-import type { SelectRegionPanelProps } from 'src/components/SelectRegionPanel/SelectRegionPanel';
 
-interface TwoStepRegionSelectProps
-  extends Omit<SelectRegionPanelProps, 'selectedId'> {
-  disabledRegions: Record<string, DisableRegionOption>;
-  regions: Region[];
-  value?: string;
-}
+type TwoStepRegionSelectProps = RegionSelectProps<true>;
 
 interface GeographicalAreaOption {
   label: string;
@@ -62,18 +55,6 @@ const GEOGRAPHICAL_AREA_OPTIONS: GeographicalAreaOption[] = [
 ];
 
 export const TwoStepRegionSelect = (props: TwoStepRegionSelectProps) => {
-  const {
-    RegionSelectProps,
-    currentCapability,
-    disabled,
-    disabledRegions,
-    error,
-    handleSelection,
-    helperText,
-    regions,
-    value,
-  } = props;
-
   const [regionFilter, setRegionFilter] = React.useState<RegionFilterValue>(
     'distributed'
   );
@@ -92,18 +73,10 @@ export const TwoStepRegionSelect = (props: TwoStepRegionSelectProps) => {
             />
           </Box>
           <RegionSelect
-            currentCapability={currentCapability}
             disableClearable
-            disabled={disabled}
-            disabledRegions={disabledRegions}
-            errorText={error}
-            helperText={helperText}
-            onChange={(e, region: Region) => handleSelection(region.id)}
             regionFilter="core"
-            regions={regions ?? []}
             showDistributedRegionIconHelperText={false}
-            value={value}
-            {...RegionSelectProps}
+            {...props}
           />
         </SafeTabPanel>
         <SafeTabPanel index={1}>
@@ -119,18 +92,10 @@ export const TwoStepRegionSelect = (props: TwoStepRegionSelectProps) => {
             options={GEOGRAPHICAL_AREA_OPTIONS}
           />
           <RegionSelect
-            currentCapability={currentCapability}
             disableClearable
-            disabled={disabled}
-            disabledRegions={disabledRegions}
-            errorText={error}
-            helperText={helperText}
-            onChange={(e, region: Region) => handleSelection(region.id)}
             regionFilter={regionFilter}
-            regions={regions ?? []}
             showDistributedRegionIconHelperText={false}
-            value={value}
-            {...RegionSelectProps}
+            {...props}
           />
         </SafeTabPanel>
       </TabPanels>

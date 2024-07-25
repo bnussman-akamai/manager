@@ -191,8 +191,8 @@ export const SelectRegionPanel = (props: SelectRegionPanelProps) => {
           disabled={disabled}
           disabledRegions={disabledRegions}
           errorText={error}
-          handleSelection={handleRegionSelection}
           helperText={helperText}
+          onChange={(e, region) => handleRegionSelection(region.id)}
           regionFilter={hideDistributedRegions ? 'core' : undefined}
           regions={regions ?? []}
           value={selectedId}

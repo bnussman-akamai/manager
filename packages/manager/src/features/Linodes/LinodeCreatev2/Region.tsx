@@ -13,6 +13,7 @@ import {
   isDistributedRegionSupported,
   useIsGeckoEnabled,
 } from 'src/components/RegionSelect/RegionSelect.utils';
+import { TwoStepRegionSelect } from 'src/components/RegionSelect/TwoStepRegionSelect';
 import { RegionHelperText } from 'src/components/SelectRegionPanel/RegionHelperText';
 import { Typography } from 'src/components/Typography';
 import { useFlags } from 'src/hooks/useFlags';
@@ -181,6 +182,11 @@ export const Region = () => {
     selectedImage: image,
   });
 
+  const RegionSelectComponent =
+    isGeckoGAEnabled && isDistributedRegionSupported(params.type ?? 'OS')
+      ? TwoStepRegionSelect
+      : RegionSelect;
+
   return (
     <Paper>
       <Box display="flex" justifyContent="space-between" mb={1}>
@@ -198,7 +204,7 @@ export const Region = () => {
           </Typography>
         </Notice>
       )}
-      <RegionSelect
+      <RegionSelectComponent
         regionFilter={
           // We don't want the Image Service Gen2 work to abide by Gecko feature flags
           hideDistributedRegions && params.type !== 'Images'
