@@ -9,7 +9,6 @@ import { Notice } from 'src/components/Notice/Notice';
 import { Stack } from 'src/components/Stack';
 import { TextField } from 'src/components/TextField';
 import { Typography } from 'src/components/Typography';
-import { VPCPanel } from 'src/features/Linodes/LinodesCreate/VPCPanel';
 import { useVlansQuery } from 'src/queries/vlans';
 import { sendLinodeCreateDocsEvent } from 'src/utilities/analytics/customEventAnalytics';
 
@@ -19,6 +18,7 @@ import type {
 } from '@linode/api-v4/lib/linodes/types';
 import type { Item } from 'src/components/EnhancedSelect/Select';
 import type { ExtendedIP } from 'src/utilities/ipUtils';
+import { VPCPanel } from './VPCPanel';
 
 interface InterfaceErrors extends VPCInterfaceErrors, OtherInterfaceErrors {}
 

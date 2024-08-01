@@ -12,8 +12,7 @@ import {
 } from './schemas';
 import { getLinodeCreatePayload } from './utilities';
 
-import type { LinodeCreateType } from '../LinodesCreate/types';
-import type { LinodeCreateFormValues } from './utilities';
+import type { LinodeCreateFormValues, LinodeCreateType } from './utilities';
 import type { QueryClient } from '@tanstack/react-query';
 import type { Resolver } from 'react-hook-form';
 

@@ -24,12 +24,10 @@ import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 import { getQueryParamsFromQueryString } from 'src/utilities/queryParams';
 import { scrollErrorIntoView } from 'src/utilities/scrollErrorIntoView';
 
-import { REGION_CAVEAT_HELPER_TEXT } from './constants';
-import { VPCCreateDrawer } from './VPCCreateDrawer';
-
 import type { Item } from 'src/components/EnhancedSelect';
 import type { LinodeCreateQueryParams } from 'src/features/Linodes/types';
 import type { ExtendedIP } from 'src/utilities/ipUtils';
+import { VPCCreateDrawer } from '../../LinodeCreatev2/VPC/CreateVPCDrawer';
 
 export interface VPCPanelProps {
   additionalIPv4RangesForVPC: ExtendedIP[];
@@ -205,7 +203,7 @@ export const VPCPanel = (props: VPCPanelProps) => {
               });
             }}
             textFieldProps={{
-              tooltipText: REGION_CAVEAT_HELPER_TEXT,
+              tooltipText: 'A Linode may be assigned only to a VPC in the same region.',
             }}
             value={vpcDropdownOptions.find(
               (option) => option.value === selectedVPCId

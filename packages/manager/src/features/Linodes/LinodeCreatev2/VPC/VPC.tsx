@@ -21,8 +21,7 @@ import { useRegionsQuery } from 'src/queries/regions/regions';
 import { useVPCQuery, useVPCsQuery } from 'src/queries/vpcs/vpcs';
 import { doesRegionSupportFeature } from 'src/utilities/doesRegionSupportFeature';
 
-import { REGION_CAVEAT_HELPER_TEXT } from '../../LinodesCreate/constants';
-import { VPCCreateDrawer } from '../../LinodesCreate/VPCCreateDrawer';
+import { VPCCreateDrawer } from './CreateVPCDrawer';
 import { VPCRanges } from './VPCRanges';
 
 import type { CreateLinodeRequest } from '@linode/api-v4';
@@ -95,7 +94,8 @@ export const VPC = () => {
                   sx: (theme) => ({
                     [theme.breakpoints.up('sm')]: { minWidth: inputMaxWidth },
                   }),
-                  tooltipText: REGION_CAVEAT_HELPER_TEXT,
+                  tooltipText:
+                    'A Linode may be assigned only to a VPC in the same region.',
                 }}
                 disabled={!regionSupportsVPCs}
                 errorText={fieldState.error?.message}

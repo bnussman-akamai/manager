@@ -1,4 +1,4 @@
-import type { LinodeCreateType } from '../LinodesCreate/types';
+import type { LinodeCreateType } from './utilities';
 import type { Image, Region } from '@linode/api-v4';
 import type { DisableRegionOption } from 'src/components/RegionSelect/RegionSelect.types';
 

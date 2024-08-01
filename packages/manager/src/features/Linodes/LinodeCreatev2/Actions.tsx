@@ -8,7 +8,6 @@ import { useRestrictedGlobalGrantCheck } from 'src/hooks/useRestrictedGlobalGran
 import { sendApiAwarenessClickEvent } from 'src/utilities/analytics/customEventAnalytics';
 import { scrollErrorIntoView } from 'src/utilities/scrollErrorIntoView';
 
-import { ApiAwarenessModal } from '../LinodesCreate/ApiAwarenessModal/ApiAwarenessModal';
 import { getLinodeCreatePayload } from './utilities';
 
 import type { CreateLinodeRequest } from '@linode/api-v4';

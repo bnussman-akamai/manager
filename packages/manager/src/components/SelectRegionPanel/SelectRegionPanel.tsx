@@ -11,7 +11,6 @@ import { TwoStepRegionSelect } from 'src/components/RegionSelect/TwoStepRegionSe
 import { RegionHelperText } from 'src/components/SelectRegionPanel/RegionHelperText';
 import { Typography } from 'src/components/Typography';
 import { getDisabledRegions } from 'src/features/Linodes/LinodeCreatev2/Region.utils';
-import { CROSS_DATA_CENTER_CLONE_WARNING } from 'src/features/Linodes/LinodesCreate/constants';
 import { useFlags } from 'src/hooks/useFlags';
 import { useImageQuery } from 'src/queries/images';
 import { useRegionsQuery } from 'src/queries/regions/regions';
@@ -174,7 +173,7 @@ export const SelectRegionPanel = (props: SelectRegionPanelProps) => {
           variant="warning"
         >
           <Typography fontFamily={theme.font.bold}>
-            {CROSS_DATA_CENTER_CLONE_WARNING}
+            Cloning a powered off instance across data centers may cause long periods of down time.
           </Typography>
         </Notice>
       ) : null}

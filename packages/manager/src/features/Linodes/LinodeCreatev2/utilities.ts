@@ -8,10 +8,8 @@ import { sendCreateLinodeEvent } from 'src/utilities/analytics/customEventAnalyt
 import { privateIPRegex } from 'src/utilities/ipUtils';
 import { getQueryParamsFromQueryString } from 'src/utilities/queryParams';
 
-import { utoa } from '../LinodesCreate/utilities';
 import { getDefaultUDFData } from './Tabs/StackScripts/UserDefinedFields/utilities';
 
-import type { LinodeCreateType } from '../LinodesCreate/types';
 import type { StackScriptTabType } from './Tabs/StackScripts/utilities';
 import type {
   CreateLinodeRequest,
@@ -19,6 +17,14 @@ import type {
   Linode,
 } from '@linode/api-v4';
 import type { QueryClient } from '@tanstack/react-query';
+
+export type LinodeCreateType =
+  | 'Backups'
+  | 'Clone Linode'
+  | 'Images'
+  | 'OS'
+  | 'One-Click'
+  | 'StackScripts';
 
 /**
  * This is the ID of the Image of the default OS.
@@ -103,6 +109,18 @@ const getParsedLinodeCreateQueryParams = (rawParams: {
     subtype: rawParams.subtype as StackScriptTabType | undefined,
     type: rawParams.type as LinodeCreateType | undefined,
   };
+};
+
+/**
+ * Unicode to ASCII (encode data to Base64)
+ * https://base64.guru/developers/javascript/examples/unicode-strings
+ */
+export const utoa = (data: string) => {
+  try {
+    return btoa(unescape(encodeURIComponent(data)));
+  } catch (error) {
+    return data;
+  }
 };
 
 /**

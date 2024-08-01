@@ -18,9 +18,6 @@ const LinodesDetail = React.lazy(() =>
     default: module.LinodeDetail,
   }))
 );
-const LinodesCreate = React.lazy(
-  () => import('./LinodesCreate/LinodeCreateContainer')
-);
 const LinodesCreatev2 = React.lazy(() =>
   import('./LinodeCreatev2').then((module) => ({
     default: module.LinodeCreatev2,
@@ -42,7 +39,7 @@ export const LinodesRoutes = () => {
     <React.Suspense fallback={<SuspenseLoader />}>
       <Switch>
         <Route
-          component={isLinodeCreateV2Enabled ? LinodesCreatev2 : LinodesCreate}
+          component={LinodesCreatev2}
           path="/linodes/create"
         />
         <Route component={LinodesDetail} path="/linodes/:linodeId" />

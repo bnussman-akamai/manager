@@ -5,9 +5,6 @@ import * as React from 'react';
 import { Link } from 'src/components/Link';
 import { Notice } from 'src/components/Notice/Notice';
 import { Typography } from 'src/components/Typography';
-import { StyledNoticeTypography } from 'src/features/Linodes/LinodesCreate/PlansAvailabilityNotice.styles';
-
-import { PlansAvailabilityNotice } from '../../Linodes/LinodesCreate/PlansAvailabilityNotice';
 import {
   DEDICATED_COMPUTE_INSTANCES_LINK,
   GPU_COMPUTE_INSTANCES_LINK,
@@ -19,6 +16,7 @@ import { MetalNotice } from './MetalNotice';
 import { planTabInfoContent } from './utils';
 
 import type { Region } from '@linode/api-v4';
+import { PlansAvailabilityNotice } from './PlansAvailabilityNotice';
 
 export interface PlanInformationProps {
   disabledClasses?: LinodeTypeClass[];
@@ -83,9 +81,7 @@ export const PlanInformation = (props: PlanInformationProps) => {
             dataTestId={limitedAvailabilityBannerTestId}
             variant="warning"
           >
-            <StyledNoticeTypography>
-              These plans have limited deployment availability.
-            </StyledNoticeTypography>
+            These plans have limited deployment availability.
           </Notice>
         )}
       <ClassDescriptionCopy planType={planType} />

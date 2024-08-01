@@ -11,7 +11,6 @@ import { TooltipIcon } from 'src/components/TooltipIcon';
 import { Typography } from 'src/components/Typography';
 import { MBpsInterDC } from 'src/constants';
 import { EUAgreementCheckbox } from 'src/features/Account/Agreements/EUAgreementCheckbox';
-import { regionSupportsMetadata } from 'src/features/Linodes/LinodesCreate/utilities';
 import { useFlags } from 'src/hooks/useFlags';
 import {
   reportAgreementSigningError,
@@ -138,13 +137,16 @@ export const MigrateLinode = React.memo((props: Props) => {
       return;
     }
 
-    const currentRegionSupportsMetadata = regionSupportsMetadata(
-      regionsData ?? [],
-      linode.region
+    const currentRegion = regionsData?.find((r) => r.id === linode.region);
+    const currentRegionSupportsMetadata = currentRegion?.capabilities.includes(
+      'Metadata'
     );
-    const selectedRegionSupportsMetadata = regionSupportsMetadata(
-      regionsData ?? [],
-      selectedRegion
+
+    const selectedRegionObject = regionsData?.find(
+      (r) => r.id === selectedRegion
+    );
+    const selectedRegionSupportsMetadata = selectedRegionObject?.capabilities.includes(
+      'Metadata'
     );
 
     return currentRegionSupportsMetadata && !selectedRegionSupportsMetadata

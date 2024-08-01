@@ -1,4 +1,3 @@
-import { Linode } from '@linode/api-v4';
 import Grid from '@mui/material/Unstable_Grid2';
 import React from 'react';
 
@@ -15,6 +14,8 @@ import { formatStorageUnits } from 'src/utilities/formatStorageUnits';
 import { isNotNullOrUndefined } from 'src/utilities/nullOrUndefined';
 
 import { getLinodeIconStatus } from '../../LinodesLanding/utils';
+
+import type { Linode } from '@linode/api-v4';
 
 interface Props {
   disabled?: boolean;
