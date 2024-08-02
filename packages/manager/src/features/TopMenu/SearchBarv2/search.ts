@@ -27,60 +27,64 @@ import type {
 
 const entities = [
   {
-    name: 'Linode',
+    name: 'Linode' as const,
     query: useInfiniteLinodesQuery,
     searchOptions: {
       searchableFieldsWithoutOperator: ['label', 'tags', 'ipv4'],
     },
   },
   {
-    name: 'Volume',
+    name: 'Volume' as const,
     query: useInfiniteVolumesQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label', 'tags'] },
   },
   {
-    name: 'NodeBalancer',
+    name: 'NodeBalancer' as const,
     query: useInfiniteNodebalancersQuery,
-    searchOptions: { searchableFieldsWithoutOperator: ['label', 'tags'] },
+    searchOptions: {
+      searchableFieldsWithoutOperator: ['label', 'tags', 'ipv4'],
+    },
   },
   {
-    name: 'VPC',
+    name: 'VPC' as const,
     query: useInfiniteVPCsQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
-    name: 'Firewall',
+    name: 'Firewall' as const,
     query: useInfiniteFirewallsQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
     baseQuery: { mine: true },
-    name: 'StackScript',
+    name: 'StackScript' as const,
     query: useStackScriptsInfiniteQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
     baseQuery: { is_public: false },
-    name: 'Image',
+    name: 'Image' as const,
     query: useInfiniteImagesQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
-    name: 'Placement Group',
+    name: 'Placement Group' as const,
     query: useInfinitePlacementGroupsQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
-    name: 'Database',
+    name: 'Database' as const,
     query: useInfiniteDatabasesQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
-    name: 'Kubernetes Cluster',
+    name: 'Kubernetes Cluster' as const,
     query: useInfiniteKubernetesClustersQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
 ];
+
+type Entity = typeof entities[number]['name'];
 
 export const useSearch = (query: string) => {
   const deboundedQuery = useDebouncedValue(query);
@@ -117,17 +121,19 @@ export const useSearch = (query: string) => {
   const data = result.flatMap(
     (r) =>
       r.data?.pages.flatMap<
-        | DatabaseInstance
-        | Firewall
-        | Image
-        | KubernetesCluster
-        | Linode
-        | NodeBalancer
-        | PlacementGroup
-        | StackScript
-        | VPC
-        | Volume
-      >((p) => p.data) ?? []
+        (
+          | DatabaseInstance
+          | Firewall
+          | Image
+          | KubernetesCluster
+          | Linode
+          | NodeBalancer
+          | PlacementGroup
+          | StackScript
+          | VPC
+          | Volume
+        ) & { entity: Entity }
+      >((p) => p.data.map((i) => ({ ...i, entity: r.name }))) ?? []
   );
 
   return {
