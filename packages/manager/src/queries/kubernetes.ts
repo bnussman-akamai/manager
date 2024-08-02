@@ -109,16 +109,20 @@ export const useKubernetesClusterQuery = (id: number) => {
   return useQuery<KubernetesCluster, APIError[]>(kubernetesQueries.cluster(id));
 };
 
-
-export const useInfiniteKubernetesClustersQuery = (filter: Filter) =>
+export const useInfiniteKubernetesClustersQuery = (
+  filter: Filter,
+  enabled = true
+) =>
   useInfiniteQuery<ResourcePage<KubernetesCluster>, APIError[]>({
     ...kubernetesQueries.lists._ctx.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useKubernetesClusterMutation = (id: number) => {

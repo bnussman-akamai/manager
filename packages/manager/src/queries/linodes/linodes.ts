@@ -163,15 +163,17 @@ export const useAllLinodesQuery = (
   });
 };
 
-export const useInfiniteLinodesQuery = (filter: Filter = {}) =>
+export const useInfiniteLinodesQuery = (filter: Filter = {}, enabled = true) =>
   useInfiniteQuery<ResourcePage<Linode>, APIError[]>({
     ...linodeQueries.linodes._ctx.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useLinodeQuery = (id: number, enabled = true) => {

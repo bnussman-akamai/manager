@@ -108,15 +108,17 @@ export const useAllDatabasesQuery = (enabled: boolean = true) =>
     enabled,
   });
 
-export const useInfiniteDatabasesQuery = (filter: Filter) =>
+export const useInfiniteDatabasesQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<DatabaseInstance>, APIError[]>({
     ...databaseQueries.databases._ctx.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useDatabaseMutation = (engine: Engine, id: number) => {

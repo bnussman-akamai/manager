@@ -77,15 +77,17 @@ export const useVolumeTypesQuery = () =>
     ...queryPresets.oneTimeFetch,
   });
 
-export const useInfiniteVolumesQuery = (filter: Filter) =>
+export const useInfiniteVolumesQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<Volume>, APIError[]>({
     ...volumeQueries.lists._ctx.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useAllVolumesQuery = (

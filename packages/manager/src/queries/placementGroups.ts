@@ -92,16 +92,20 @@ export const usePlacementGroupQuery = (
   });
 };
 
-
-export const useInfinitePlacementGroupsQuery = (filter: Filter) =>
+export const useInfinitePlacementGroupsQuery = (
+  filter: Filter,
+  enabled = true
+) =>
   useInfiniteQuery<ResourcePage<PlacementGroup>, APIError[]>({
     ...placementGroupQueries.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useCreatePlacementGroup = () => {

@@ -82,15 +82,17 @@ export const useVPCsQuery = (
   });
 };
 
-export const useInfiniteVPCsQuery = (filter: Filter) =>
+export const useInfiniteVPCsQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<VPC>, APIError[]>({
     ...vpcQueries.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useVPCQuery = (id: number, enabled: boolean = true) =>

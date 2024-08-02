@@ -64,6 +64,7 @@ export const useStackScriptsInfiniteQuery = (
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const stackScriptEventHandler = ({

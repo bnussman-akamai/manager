@@ -73,15 +73,17 @@ export const useImageQuery = (imageId: string, enabled = true) =>
     enabled,
   });
 
-export const useInfiniteImagesQuery = (filter: Filter) =>
+export const useInfiniteImagesQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<Image>, APIError[]>({
     ...imageQueries.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useCreateImageMutation = () => {

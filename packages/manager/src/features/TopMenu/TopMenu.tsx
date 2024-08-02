@@ -15,10 +15,9 @@ import { Community } from './Community';
 import { Help } from './Help';
 import { NotificationMenu } from './NotificationMenu/NotificationMenu';
 import { NotificationMenuV2 } from './NotificationMenu/NotificationMenuV2';
-import SearchBar from './SearchBar/SearchBar';
+import { SearchBarv2 } from './SearchBarv2/SearchBarv2';
 import { TopMenuTooltip } from './TopMenuTooltip';
 import { UserMenu } from './UserMenu';
-import { SearchBarv2 } from './SearchBarv2/SearchBarv2';
 
 export interface TopMenuProps {
   desktopMenuToggle: () => void;

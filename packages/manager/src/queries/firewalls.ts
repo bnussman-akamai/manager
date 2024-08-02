@@ -397,15 +397,17 @@ export const useUpdateFirewallRulesMutation = (firewallId: number) => {
   });
 };
 
-export const useInfiniteFirewallsQuery = (filter: Filter) =>
+export const useInfiniteFirewallsQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<Firewall>, APIError[]>({
     ...firewallQueries.firewalls._ctx.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const firewallEventsHandler = ({

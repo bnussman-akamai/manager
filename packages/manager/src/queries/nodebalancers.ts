@@ -279,15 +279,17 @@ export const useAllNodeBalancersQuery = (enabled = true) =>
     enabled,
   });
 
-export const useInfiniteNodebalancersQuery = (filter: Filter) =>
+export const useInfiniteNodebalancersQuery = (filter: Filter, enabled = true) =>
   useInfiniteQuery<ResourcePage<NodeBalancer>, APIError[]>({
     ...nodebalancerQueries.nodebalancers._ctx.infinite(filter),
+    enabled,
     getNextPageParam: ({ page, pages }) => {
       if (page === pages) {
         return undefined;
       }
       return page + 1;
     },
+    retry: false,
   });
 
 export const useNodeBalancersFirewallsQuery = (nodebalancerId: number) =>
