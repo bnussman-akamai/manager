@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
 import { Box } from 'src/components/Box';
@@ -10,7 +11,6 @@ import { Typography } from 'src/components/Typography';
 import { useSearch } from './search';
 
 import type { EntityVariants } from 'src/components/EntityIcon/EntityIcon';
-import { useHistory } from 'react-router-dom';
 
 export const SearchBarv2 = () => {
   const [query, setQuery] = useState('');

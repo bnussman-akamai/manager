@@ -73,7 +73,7 @@ const entities = [
   {
     baseQuery: { mine: true },
     getURL(stackscript: StackScript) {
-      return `/firewalls/${stackscript.id}`;
+      return `/stackscripts/${stackscript.id}`;
     },
     name: 'StackScript' as const,
     query: useStackScriptsInfiniteQuery,
@@ -106,15 +106,13 @@ const entities = [
   },
   {
     getURL(cluster: KubernetesCluster) {
-      return `/kubernetes/${cluster.id}`;
+      return `/kubernetes/clusters/${cluster.id}`;
     },
     name: 'Kubernetes Cluster' as const,
     query: useInfiniteKubernetesClustersQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
 ];
-
-type Entity = typeof entities[number]['name'];
 
 export const useSearch = (query: string) => {
   const deboundedQuery = useDebouncedValue(query);

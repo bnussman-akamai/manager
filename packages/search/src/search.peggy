@@ -13,6 +13,7 @@ andQuery
 subQuery
   = '(' ws* query:orQuery ws* ')' { return query; }
   / EqualQuery
+  / TagQuery
   / ContainsQuery
   / NotEqualQuery
   / LessThanQuery
@@ -34,7 +35,7 @@ ContainsQuery
   = key:FilterableField ws* Contains ws* value:String { return { [key]: { "+contains": value } }; }
   
 TagQuery
-  = "tag" ws* Equal ws* value:String { return { "tags": { "+contains": value } }; } 
+  = "tag" ws* Contains ws* value:String { return { "tags": { "+contains": value } }; }
   
 NotEqualQuery
   = Not key:FilterableField ws* Equal ws* value:String { return { [key]: { "+neq": value } }; }
