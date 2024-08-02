@@ -10,7 +10,7 @@ import {
   updateFirewallRules,
 } from '@linode/api-v4/lib/firewalls';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getAll } from 'src/utilities/getAll';
 
@@ -66,6 +66,11 @@ export const firewallQueries = createQueryKeys('firewalls', {
         queryFn: getAllFirewallsRequest,
         queryKey: null,
       },
+      infinite: (filter: Filter = {}) => ({
+        queryFn: ({ pageParam }) =>
+          getFirewalls({ page: pageParam, page_size: 25 }, filter),
+        queryKey: [filter],
+      }),
       paginated: (params: Params = {}, filter: Filter = {}) => ({
         queryFn: () => getFirewalls(params, filter),
         queryKey: [params, filter],
@@ -391,6 +396,17 @@ export const useUpdateFirewallRulesMutation = (firewallId: number) => {
     },
   });
 };
+
+export const useInfiniteFirewallsQuery = (filter: Filter) =>
+  useInfiniteQuery<ResourcePage<Firewall>, APIError[]>({
+    ...firewallQueries.firewalls._ctx.infinite(filter),
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
+  });
 
 export const firewallEventsHandler = ({
   event,

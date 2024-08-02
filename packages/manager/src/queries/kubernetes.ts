@@ -19,7 +19,7 @@ import {
   updateNodePool,
 } from '@linode/api-v4';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getAll } from 'src/utilities/getAll';
 
@@ -76,6 +76,11 @@ export const kubernetesQueries = createQueryKeys('kubernetes', {
         queryFn: () => getAllKubernetesClusters(),
         queryKey: null,
       },
+      infinite: (filter: Filter = {}) => ({
+        queryFn: ({ pageParam }) =>
+          getKubernetesClusters({ page: pageParam, page_size: 25 }, filter),
+        queryKey: [filter],
+      }),
       paginated: (params: Params, filter: Filter) => ({
         queryFn: () => getKubernetesClusters(params, filter),
         queryKey: [params, filter],
@@ -103,6 +108,18 @@ export const useKubernetesClustersQuery = (params: Params, filter: Filter) => {
 export const useKubernetesClusterQuery = (id: number) => {
   return useQuery<KubernetesCluster, APIError[]>(kubernetesQueries.cluster(id));
 };
+
+
+export const useInfiniteKubernetesClustersQuery = (filter: Filter) =>
+  useInfiniteQuery<ResourcePage<KubernetesCluster>, APIError[]>({
+    ...kubernetesQueries.lists._ctx.infinite(filter),
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
+  });
 
 export const useKubernetesClusterMutation = (id: number) => {
   const queryClient = useQueryClient();

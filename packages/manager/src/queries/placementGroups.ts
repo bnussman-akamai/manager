@@ -8,7 +8,7 @@ import {
   updatePlacementGroup,
 } from '@linode/api-v4';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getAll } from 'src/utilities/getAll';
 
@@ -39,6 +39,11 @@ export const placementGroupQueries = createQueryKeys('placement-groups', {
   all: (params: Params = {}, filter: Filter = {}) => ({
     queryFn: () => getAllPlacementGroupsRequest(params, filter),
     queryKey: [params, filter],
+  }),
+  infinite: (filter: Filter = {}) => ({
+    queryFn: ({ pageParam }) =>
+      getPlacementGroups({ page: pageParam, page_size: 25 }, filter),
+    queryKey: [filter],
   }),
   paginated: (params: Params, filter: Filter) => ({
     queryFn: () => getPlacementGroups(params, filter),
@@ -86,6 +91,18 @@ export const usePlacementGroupQuery = (
     ...placementGroupQueries.placementGroup(placementGroupId),
   });
 };
+
+
+export const useInfinitePlacementGroupsQuery = (filter: Filter) =>
+  useInfiniteQuery<ResourcePage<PlacementGroup>, APIError[]>({
+    ...placementGroupQueries.infinite(filter),
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
+  });
 
 export const useCreatePlacementGroup = () => {
   const queryClient = useQueryClient();

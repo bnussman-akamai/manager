@@ -8,7 +8,7 @@ import {
   uploadImage,
 } from '@linode/api-v4';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getAll } from 'src/utilities/getAll';
 
@@ -45,6 +45,11 @@ export const imageQueries = createQueryKeys('images', {
     queryFn: () => getImage(imageId),
     queryKey: [imageId],
   }),
+  infinite: (filter: Filter = {}) => ({
+    queryFn: ({ pageParam }) =>
+      getImages({ page: pageParam, page_size: 25 }, filter),
+    queryKey: [filter],
+  }),
   paginated: (params: Params, filters: Filter) => ({
     queryFn: () => getImages(params, filters),
     queryKey: [params, filters],
@@ -66,6 +71,17 @@ export const useImageQuery = (imageId: string, enabled = true) =>
   useQuery<Image, APIError[]>({
     ...imageQueries.image(imageId),
     enabled,
+  });
+
+export const useInfiniteImagesQuery = (filter: Filter) =>
+  useInfiniteQuery<ResourcePage<Image>, APIError[]>({
+    ...imageQueries.infinite(filter),
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
   });
 
 export const useCreateImageMutation = () => {

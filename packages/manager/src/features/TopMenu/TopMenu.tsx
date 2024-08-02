@@ -18,6 +18,7 @@ import { NotificationMenuV2 } from './NotificationMenu/NotificationMenuV2';
 import SearchBar from './SearchBar/SearchBar';
 import { TopMenuTooltip } from './TopMenuTooltip';
 import { UserMenu } from './UserMenu';
+import { SearchBarv2 } from './SearchBarv2/SearchBarv2';
 
 export interface TopMenuProps {
   desktopMenuToggle: () => void;
@@ -86,7 +87,8 @@ export const TopMenu = React.memo((props: TopMenuProps) => {
             </TopMenuTooltip>
           </Hidden>
           <AddNewMenu />
-          <SearchBar />
+          <Box flexGrow={1} />
+          <SearchBarv2 />
           <Help />
           <Community />
           {flags.eventMessagesV2 ? (

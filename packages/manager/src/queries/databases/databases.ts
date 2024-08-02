@@ -10,7 +10,12 @@ import {
   updateDatabase,
 } from '@linode/api-v4/lib/databases';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { queryPresets } from '../base';
 import { profileQueries } from '../profile/profile';
@@ -57,6 +62,11 @@ export const databaseQueries = createQueryKeys('databases', {
         queryFn: getAllDatabases,
         queryKey: null,
       },
+      infinite: (filter: Filter = {}) => ({
+        queryFn: ({ pageParam }) =>
+          getDatabases({ page: pageParam, page_size: 25 }, filter),
+        queryKey: [filter],
+      }),
       paginated: (params: Params, filter: Filter) => ({
         queryFn: () => getDatabases(params, filter),
         queryKey: [params, filter],
@@ -96,6 +106,17 @@ export const useAllDatabasesQuery = (enabled: boolean = true) =>
   useQuery<DatabaseInstance[], APIError[]>({
     ...databaseQueries.databases._ctx.all,
     enabled,
+  });
+
+export const useInfiniteDatabasesQuery = (filter: Filter) =>
+  useInfiniteQuery<ResourcePage<DatabaseInstance>, APIError[]>({
+    ...databaseQueries.databases._ctx.infinite(filter),
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
   });
 
 export const useDatabaseMutation = (engine: Engine, id: number) => {

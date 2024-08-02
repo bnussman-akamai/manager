@@ -17,7 +17,7 @@ import {
   updateVPC,
 } from '@linode/api-v4';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getAllVPCsRequest } from './requests';
 
@@ -34,6 +34,11 @@ export const vpcQueries = createQueryKeys('vpcs', {
     queryFn: getAllVPCsRequest,
     queryKey: null,
   },
+  infinite: (filter: Filter = {}) => ({
+    queryFn: ({ pageParam }) =>
+      getVPCs({ page: pageParam, page_size: 25 }, filter),
+    queryKey: [filter],
+  }),
   paginated: (params: Params = {}, filter: Filter = {}) => ({
     queryFn: () => getVPCs(params, filter),
     queryKey: [params, filter],
@@ -76,6 +81,17 @@ export const useVPCsQuery = (
     keepPreviousData: true,
   });
 };
+
+export const useInfiniteVPCsQuery = (filter: Filter) =>
+  useInfiniteQuery<ResourcePage<VPC>, APIError[]>({
+    ...vpcQueries.infinite(filter),
+    getNextPageParam: ({ page, pages }) => {
+      if (page === pages) {
+        return undefined;
+      }
+      return page + 1;
+    },
+  });
 
 export const useVPCQuery = (id: number, enabled: boolean = true) =>
   useQuery<VPC, APIError[]>({
