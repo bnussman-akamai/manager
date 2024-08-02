@@ -20,12 +20,26 @@ export const SearchBarv2 = () => {
     data,
     entitiesThatCouldBeAPIFiltered,
     entitiesThatErroredWhenAPIFiltering,
+    fetchMore,
+    hasNextPage,
     isLoading,
     parsingError,
   } = useSearch(query);
 
   return (
     <Autocomplete
+      ListboxProps={{
+        onScroll: (event: React.SyntheticEvent) => {
+          const listboxNode = event.currentTarget;
+          if (
+            listboxNode.scrollTop + listboxNode.clientHeight >=
+              listboxNode.scrollHeight &&
+            hasNextPage
+          ) {
+            fetchMore();
+          }
+        },
+      }}
       onInputChange={(e, value, reason) => {
         if (reason === 'input' || reason === 'clear') {
           setQuery(value);

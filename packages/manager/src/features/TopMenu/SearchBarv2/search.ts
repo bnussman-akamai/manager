@@ -133,6 +133,15 @@ export const useSearch = (query: string) => {
   });
 
   const isLoading = result.some((r) => r.isFetching);
+  const hasNextPage = result.some((r) => r.hasNextPage);
+
+  const fetchMore = () => {
+    for (const query of result) {
+      if (query.hasNextPage) {
+        query.fetchNextPage();
+      }
+    }
+  };
 
   const entitiesThatErroredWhenAPIFiltering = result
     .filter((r) => r.error)
@@ -157,6 +166,8 @@ export const useSearch = (query: string) => {
     data,
     entitiesThatCouldBeAPIFiltered,
     entitiesThatErroredWhenAPIFiltering,
+    fetchMore,
+    hasNextPage,
     isLoading,
     parsingError,
   };
