@@ -27,6 +27,9 @@ import type {
 
 const entities = [
   {
+    getURL(linode: Linode) {
+      return `/linodes/${linode.id}`;
+    },
     name: 'Linode' as const,
     query: useInfiniteLinodesQuery,
     searchOptions: {
@@ -34,11 +37,17 @@ const entities = [
     },
   },
   {
+    getURL(volume: Volume) {
+      return `/volumes?query=${volume.label}`;
+    },
     name: 'Volume' as const,
     query: useInfiniteVolumesQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label', 'tags'] },
   },
   {
+    getURL(nodebalancer: NodeBalancer) {
+      return `/nodebalancers/${nodebalancer.id}`;
+    },
     name: 'NodeBalancer' as const,
     query: useInfiniteNodebalancersQuery,
     searchOptions: {
@@ -46,38 +55,59 @@ const entities = [
     },
   },
   {
+    getURL(vpc: VPC) {
+      return `/vpcs/${vpc.id}`;
+    },
     name: 'VPC' as const,
     query: useInfiniteVPCsQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
+    getURL(firewall: Firewall) {
+      return `/firewalls/${firewall.id}`;
+    },
     name: 'Firewall' as const,
     query: useInfiniteFirewallsQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
     baseQuery: { mine: true },
+    getURL(stackscript: StackScript) {
+      return `/firewalls/${stackscript.id}`;
+    },
     name: 'StackScript' as const,
     query: useStackScriptsInfiniteQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
     baseQuery: { is_public: false },
+    getURL(image: Image) {
+      return `/images?query=${image.label}`;
+    },
     name: 'Image' as const,
     query: useInfiniteImagesQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
+    getURL(group: PlacementGroup) {
+      return `/placement-groups/${group.id}`;
+    },
     name: 'Placement Group' as const,
     query: useInfinitePlacementGroupsQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
+    getURL(database: DatabaseInstance) {
+      return `/databases/${database.engine}/${database.id}`;
+    },
     name: 'Database' as const,
     query: useInfiniteDatabasesQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
   },
   {
+    getURL(cluster: KubernetesCluster) {
+      return `/kubernetes/${cluster.id}`;
+    },
     name: 'Kubernetes Cluster' as const,
     query: useInfiniteKubernetesClustersQuery,
     searchOptions: { searchableFieldsWithoutOperator: ['label'] },
@@ -120,20 +150,9 @@ export const useSearch = (query: string) => {
 
   const data = result.flatMap(
     (r) =>
-      r.data?.pages.flatMap<
-        (
-          | DatabaseInstance
-          | Firewall
-          | Image
-          | KubernetesCluster
-          | Linode
-          | NodeBalancer
-          | PlacementGroup
-          | StackScript
-          | VPC
-          | Volume
-        ) & { entity: Entity }
-      >((p) => p.data.map((i) => ({ ...i, entity: r.name }))) ?? []
+      r.data?.pages.flatMap((p) =>
+        p.data.map((i) => ({ ...i, entity: r.name, url: r.getURL(i) }))
+      ) ?? []
   );
 
   return {

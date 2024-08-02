@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 
 import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
 import { Box } from 'src/components/Box';
+import { EntityIcon } from 'src/components/EntityIcon/EntityIcon';
 import { Stack } from 'src/components/Stack';
 import { TooltipIcon } from 'src/components/TooltipIcon';
 import { Typography } from 'src/components/Typography';
 
 import { useSearch } from './search';
-import { EntityIcon, EntityVariants } from 'src/components/EntityIcon/EntityIcon';
+
+import type { EntityVariants } from 'src/components/EntityIcon/EntityIcon';
+import { useHistory } from 'react-router-dom';
 
 export const SearchBarv2 = () => {
   const [query, setQuery] = useState('');
+  const history = useHistory();
 
   const {
     data,
@@ -22,6 +26,11 @@ export const SearchBarv2 = () => {
 
   return (
     <Autocomplete
+      onInputChange={(e, value, reason) => {
+        if (reason === 'input' || reason === 'clear') {
+          setQuery(value);
+        }
+      }}
       renderOption={(props, option) => (
         <li {...props} style={{ width: '100%' }}>
           <Stack alignItems="center" direction="row" spacing={2} width="100%">
@@ -77,13 +86,14 @@ export const SearchBarv2 = () => {
         },
         hideLabel: true,
       }}
+      disableClearable
       filterOptions={(x) => x}
       fullWidth
       inputValue={query}
       label="Search"
       loading={isLoading}
       noOptionsText={!query ? 'Type to search' : 'No results'}
-      onInputChange={(e, value) => setQuery(value)}
+      onChange={(e, entity) => history.push(entity.url)}
       options={data}
       placeholder="Search"
     />
