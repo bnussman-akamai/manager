@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import { ISO_DATETIME_NO_TZ_FORMAT, POLLING_INTERVALS } from 'src/constants';
 import { EVENTS_LIST_FILTER } from 'src/features/Events/constants';
@@ -39,22 +39,39 @@ import type {
  * the next set of events when the items returned by the server may have shifted.
  */
 export const useEventsInfiniteQuery = (filter: Filter = EVENTS_LIST_FILTER) => {
+  const LIMIT = 25;
+
+  /**
+   * On the first request (when we don't have a `pageParam`) we only want to get events
+   * from the last 7 days.
+   */
+  const [defaultCreatedFilter] = useState(
+    DateTime.now()
+      .minus({ days: 7 })
+      .setZone('utc')
+      .toFormat(ISO_DATETIME_NO_TZ_FORMAT)
+  );
+
   const query = useInfiniteQuery<ResourcePage<Event>, APIError[]>({
     cacheTime: Infinity,
-    getNextPageParam: ({ data, results }) => {
-      if (results === data.length) {
+    getNextPageParam: ({ data }) => {
+      if (data.length < LIMIT) {
+        // If the page does not have 25 items, we know there is no more data to fetch.
         return undefined;
       }
-      return data[data.length - 1].id;
+      return data[data.length - 1].created;
     },
     queryFn: ({ pageParam }) =>
       getEvents(
         {},
         {
           ...filter,
+          '+limit': LIMIT,
           '+order': 'desc',
-          '+order_by': 'id',
-          id: pageParam ? { '+lt': pageParam } : undefined,
+          '+order_by': 'created',
+          created: pageParam
+            ? { '+lt': pageParam }
+            : { '+gt': defaultCreatedFilter },
         }
       ),
     queryKey: ['events', 'infinite', filter],
