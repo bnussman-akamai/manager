@@ -1,5 +1,9 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { ResourcePage, getEvents, type Event } from '@linode/api-v4';
+import { InfiniteData, useQueryClient } from '@tanstack/react-query';
+import { DateTime } from 'luxon';
 import * as React from 'react';
+import { ISO_DATETIME_NO_TZ_FORMAT } from 'src/constants';
+import { EVENTS_LIST_FILTER } from 'src/features/Events/constants';
 
 import { useAuthentication } from 'src/hooks/useAuthentication';
 import { usePendingUpload } from 'src/hooks/usePendingUpload';
@@ -42,6 +46,16 @@ export const useInitialRequests = () => {
   }, [isAuthenticated]);
 
   /**
+   * We only want to get events from the last 7 days.
+   */
+  const [defaultCreatedFilter] = React.useState(
+    DateTime.now()
+      .minus({ days: 7 })
+      .setZone('utc')
+      .toFormat(ISO_DATETIME_NO_TZ_FORMAT)
+  );
+
+  /**
    * We make a series of requests for data on app load. The flow is:
    * 1. App begins load; users see splash screen
    * 2. Initial requests (in makeInitialRequests) are made (account, profile, etc.)
@@ -61,6 +75,33 @@ export const useInitialRequests = () => {
         queryClient.prefetchQuery(accountQueries.settings),
         queryClient.prefetchQuery(profileQueries.profile()),
         queryClient.prefetchQuery(profileQueries.preferences),
+        queryClient.prefetchQuery(profileQueries.preferences),
+        queryClient.prefetchQuery<InfiniteData<ResourcePage<Event>>>({
+          queryFn: async () => {
+            const data = await getEvents(
+              {},
+              {
+                ...EVENTS_LIST_FILTER,
+                '+order': 'desc',
+                '+order_by': 'id',
+                created: { '+gt': defaultCreatedFilter },
+              }
+            );
+
+            if (data && data.data.length > 0) {
+              return {
+                pageParams: [],
+                pages: [data],
+              };
+            }
+
+            return {
+              pageParams: [],
+              pages: [],
+            };
+          },
+          queryKey: ['events', 'infinite', EVENTS_LIST_FILTER],
+        }),
       ]);
     } finally {
       setIsLoading(false);
