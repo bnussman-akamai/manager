@@ -13,7 +13,6 @@ import { AccessPanel } from 'src/components/AccessPanel/AccessPanel';
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { ImageSelect } from 'src/components/ImageSelect/ImageSelect';
 import { TypeToConfirm } from 'src/components/TypeToConfirm/TypeToConfirm';
-import { ImageEmptyState } from 'src/features/Linodes/LinodesCreate/TabbedContent/ImageEmptyState';
 import SelectStackScriptPanel from 'src/features/StackScripts/SelectStackScriptPanel/SelectStackScriptPanel';
 import StackScriptDialog from 'src/features/StackScripts/StackScriptDialog';
 import {
@@ -34,6 +33,7 @@ import {
 } from 'src/utilities/formikErrorUtils';
 import { scrollErrorIntoView } from 'src/utilities/scrollErrorIntoView';
 import { extendValidationSchema } from 'src/utilities/validatePassword';
+import { ImageEmptyState } from './ImageEmptyState';
 
 interface Props {
   disabled: boolean;
