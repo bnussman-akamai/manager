@@ -130,8 +130,8 @@ describe('CreateImageTab', () => {
     await findByText('Image scheduled for creation.');
   });
 
-  it('should render a notice if the user selects a Linode in a distributed compute region', async () => {
-    const region = regionFactory.build({ site_type: 'distributed' });
+  it('should render a notice if the selected Linode does not support local image storage', async () => {
+    const region = regionFactory.build({ capabilities: ['Linodes'] });
     const linode = linodeFactory.build({ region: region.id });
 
     server.use(
@@ -158,7 +158,7 @@ describe('CreateImageTab', () => {
 
     // Verify distributed compute region notice renders
     await findByText(
-      "This Linode is in a distributed compute region. These regions can't store images.",
+      'This Linode’s region doesn’t support local image storage.',
       { exact: false }
     );
   });

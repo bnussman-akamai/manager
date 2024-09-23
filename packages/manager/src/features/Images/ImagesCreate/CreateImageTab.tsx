@@ -140,12 +140,18 @@ export const CreateImageTab = () => {
 
   const isRawDisk = selectedDisk?.filesystem === 'raw';
 
-  const { data: regionsData } = useRegionsQuery();
+  const { data: regions } = useRegionsQuery();
 
   const linodeIsInDistributedRegion = getIsDistributedRegion(
-    regionsData ?? [],
+    regions ?? [],
     selectedLinode?.region ?? ''
   );
+
+  const linodeRegionLacksLocalImageStorage =
+    selectedLinode &&
+    !regions
+      ?.find((r) => r.id === selectedLinode?.region)
+      ?.capabilities.includes('Object Storage');
 
   /*
     We only want to display the notice about disk encryption if:
@@ -220,16 +226,18 @@ export const CreateImageTab = () => {
               required
               value={selectedLinodeId}
             />
-            {linodeIsInDistributedRegion && (
+            {linodeRegionLacksLocalImageStorage && (
               <Notice variant="warning">
-                This Linode is in a distributed compute region. These regions
-                can't store images. The image is stored in the core compute
-                region that is{' '}
-                <Link to="https://www.linode.com/global-infrastructure/">
+                This Linode’s region doesn’t support local image storage. This
+                image will be stored in the core compute region that’s{' '}
+                <Link to="https://techdocs.akamai.com/cloud-computing/docs/images#regions-and-captured-custom-images">
                   geographically closest
                 </Link>
-                . After it's stored, you can replicate it to other core compute
-                regions.
+                . After it’s stored, you can replicate it to other{' '}
+                <Link to="https://www.linode.com/global-infrastructure/">
+                  core compute regions
+                </Link>
+                .
               </Notice>
             )}
             {showDiskEncryptionWarning && (
