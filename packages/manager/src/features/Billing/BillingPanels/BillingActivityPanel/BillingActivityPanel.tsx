@@ -105,7 +105,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
     [theme.breakpoints.down('sm')]: {
       marginTop: theme.spacing(1),
     },
-    width: 130,
+    width: 140,
   },
   transactionType: {
     marginRight: theme.spacing(),
