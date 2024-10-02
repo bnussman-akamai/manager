@@ -97,7 +97,6 @@ export interface Flags {
   disableLargestGbPlans: boolean;
   gecko2: GeckoFeatureFlag;
   gpuv2: gpuV2;
-  imageServiceGen2: boolean;
   ipv6Sharing: boolean;
   linodeDiskEncryption: boolean;
   mainContentBanner: MainContentBanner;

@@ -41,9 +41,7 @@ describe('Images Landing Table', () => {
       })
     );
 
-    const { getAllByText, getByTestId } = renderWithTheme(<ImagesLanding />, {
-      flags: { imageServiceGen2: true },
-    });
+    const { getAllByText, getByTestId } = renderWithTheme(<ImagesLanding />);
 
     // Loading state should render
     expect(getByTestId(loadingTestId)).toBeInTheDocument();
@@ -326,12 +324,10 @@ describe('Images Landing Table', () => {
     );
 
     const {
+      findAllByLabelText,
       getAllByLabelText,
       getByTestId,
-      findAllByLabelText,
-    } = renderWithTheme(<ImagesLanding />, {
-      flags: { imageServiceGen2: true },
-    });
+    } = renderWithTheme(<ImagesLanding />);
 
     // Loading state should render
     expect(getByTestId(loadingTestId)).toBeInTheDocument();

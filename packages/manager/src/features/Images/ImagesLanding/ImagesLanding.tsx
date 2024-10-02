@@ -29,7 +29,6 @@ import { TableSortCell } from 'src/components/TableSortCell';
 import { TextField } from 'src/components/TextField';
 import { Typography } from 'src/components/Typography';
 import { getRestrictedResourceText } from 'src/features/Account/utils';
-import { useFlags } from 'src/hooks/useFlags';
 import { useOrder } from 'src/hooks/useOrder';
 import { usePagination } from 'src/hooks/usePagination';
 import { useRestrictedGlobalGrantCheck } from 'src/hooks/useRestrictedGlobalGrantCheck';
@@ -93,7 +92,6 @@ export const ImagesLanding = () => {
   const { classes } = useStyles();
   const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
-  const flags = useFlags();
   const location = useLocation();
   const isImagesReadOnly = useRestrictedGlobalGrantCheck({
     globalGrantType: 'add_images',
@@ -206,11 +204,8 @@ export const ImagesLanding = () => {
     imageEvents
   );
 
-  // TODO Image Service V2: delete after GA
   const multiRegionsEnabled =
-    (flags.imageServiceGen2 &&
-      manualImages?.data.some((image) => image.regions?.length)) ??
-    false;
+    manualImages?.data.some((image) => image.regions?.length) ?? false;
 
   // Automatic images with the associated events tied in.
   const automaticImagesEvents = getEventsForImages(
