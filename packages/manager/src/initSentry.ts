@@ -1,10 +1,12 @@
-import { BrowserOptions, Event as SentryEvent, init } from '@sentry/react';
+import { init } from '@sentry/react';
 
 import { APP_ROOT, SENTRY_URL } from 'src/constants';
 import { deepStringTransform } from 'src/utilities/deepStringTransform';
 import { redactAccessToken } from 'src/utilities/redactAccessToken';
 
 import packageJson from '../package.json';
+
+import type { BrowserOptions } from '@sentry/react';
 
 export const initSentry = () => {
   const environment = getSentryEnvironment();
@@ -101,13 +103,7 @@ const beforeSend: BrowserOptions['beforeSend'] = (sentryEvent, hint) => {
   sentryEvent.message = normalizedErrorMessage;
 
   /** remove the user's access token from the event if one exists */
-  const eventWithoutSensitiveInfo = deepStringTransform(
-    sentryEvent,
-    redactAccessToken
-  );
-
-  /** maybe add a custom fingerprint if this error is relevant */
-  return maybeAddCustomFingerprint(eventWithoutSensitiveInfo);
+  return deepStringTransform(sentryEvent, redactAccessToken);
 };
 
 export const errorsToIgnore: RegExp[] = [
@@ -153,56 +149,6 @@ export const normalizeErrorMessage = (sentryErrorMessage: any): string => {
   }
 
   return JSON.stringify(sentryErrorMessage);
-};
-
-const maybeAddCustomFingerprint = (event: SentryEvent): SentryEvent => {
-  const fingerprint = Object.keys(customFingerPrintMap).reduce((acc, value) => {
-    /** if our sentry error matches one of the keys in the map */
-    const exception = event.exception;
-    if (
-      exception &&
-      exception.values &&
-      exception.values.length > 0 &&
-      !!exception.values[0].value &&
-      !!exception.values[0].value.match(new RegExp(value, 'gmi'))
-    ) {
-      acc = customFingerPrintMap[value as keyof typeof customFingerPrintMap];
-    }
-    return acc;
-  }, '');
-
-  /**
-   * fingerprint will be an empty string if the error didn't match one
-   * of the keys from our map
-   *
-   * add the fingerprint to the Sentry error so same events get
-   * grouped together in the Sentry dashboard.
-   */
-  return !!fingerprint
-    ? {
-        ...event,
-        fingerprint: [fingerprint],
-      }
-    : event;
-};
-
-/**
- * this is the map that will help us determine if the
- * sentry error should be given a custom fingerprint.
- *
- * The way this works is that you compare the Sentry error
- * message to all the keys in this object and if it finds a match,
- * use the value of the match as the custom fingerprint.
- *
- * Read more about Sentry fingerprints here:
- *
- * https://blog.sentry.io/2018/01/18/setting-up-custom-fingerprints
- * https://docs.sentry.io/data-management/rollups/?platform=javascript#grouping-priorities
- */
-const customFingerPrintMap = {
-  /** group all local storage errors together */
-  localstorage: 'Local Storage Error',
-  quotaExceeded: 'Local Storage Error',
 };
 
 /**
