@@ -867,6 +867,10 @@ export const darkTheme: ThemeOptions = {
     primary: primaryColors,
     text: {
       primary: primaryColors.text,
+      secondary: primaryColors.text,
+    },
+    action: {
+      active: '#fff'
     },
   },
   textColors: customDarkModeOptions.textColors,
