@@ -1,11 +1,11 @@
 import { Box, Notice, Paper, Stack } from '@linode/ui';
 import { CreateVolumeSchema } from '@linode/validation/lib/volumes.schema';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from '@tanstack/react-router';
 import { createLazyRoute } from '@tanstack/react-router';
 import { useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
 
 import { Button } from 'src/components/Button/Button';
@@ -123,8 +123,8 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 export const VolumeCreate = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { classes } = useStyles();
-  const history = useHistory();
 
   const { data: types, isError, isLoading } = useVolumeTypesQuery();
 
@@ -222,7 +222,13 @@ export const VolumeCreate = () => {
           enqueueSnackbar(`Volume scheduled for creation.`, {
             variant: 'success',
           });
-          history.push('/volumes', { volume });
+          navigate({
+            search: (prev) => ({
+              page: prev.page,
+              query: prev.query,
+            }),
+            to: '/volumes',
+          });
           // Analytics Event
           sendCreateVolumeEvent(`Size: ${size}GB`, origin);
         })
