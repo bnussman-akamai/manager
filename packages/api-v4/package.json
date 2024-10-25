@@ -46,10 +46,10 @@
     "yup": "^0.32.9"
   },
   "scripts": {
-    "start": "concurrently --raw \"tsc -w --preserveWatchOutput\" \"tsup --watch\"",
-    "build": "concurrently --raw \"tsc\" \"tsup\"",
-    "test": "yarn vitest run",
-    "lint": "yarn run eslint . --quiet --ext .js,.ts,.tsx",
+    "start": "bun run dev.ts",
+    "build": "bun run build.ts",
+    "test": "vitest run",
+    "lint": "eslint . --quiet --ext .js,.ts,.tsx",
     "typecheck": "tsc --noEmit true --emitDeclarationOnly false",
     "precommit": "lint-staged"
   },

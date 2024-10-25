@@ -13,7 +13,7 @@
     "baseUrl": ".",
     "noUnusedLocals": true,
     "declarationMap": true,
-    "incremental": true
+    "incremental": true,
   },
   "include": [
     "src"
