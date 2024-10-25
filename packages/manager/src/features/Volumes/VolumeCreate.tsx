@@ -1,8 +1,8 @@
 import { Box, Notice, Paper, Stack } from '@linode/ui';
 import { CreateVolumeSchema } from '@linode/validation/lib/volumes.schema';
 import { useTheme } from '@mui/material/styles';
-import { useNavigate } from '@tanstack/react-router';
 import { createLazyRoute } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
@@ -42,6 +42,7 @@ import {
   useCreateVolumeMutation,
   useVolumeTypesQuery,
 } from 'src/queries/volumes/volumes';
+import { volumesSearchParams } from 'src/routes/volumes/index';
 import { sendCreateVolumeEvent } from 'src/utilities/analytics/customEventAnalytics';
 import { doesRegionSupportFeature } from 'src/utilities/doesRegionSupportFeature';
 import { getGDPRDetails } from 'src/utilities/formatRegion';
@@ -209,7 +210,7 @@ export const VolumeCreate = () => {
         region: isNilOrEmpty(region) || region === 'none' ? undefined : region,
         size: maybeCastToNumber(size),
       })
-        .then((volume) => {
+        .then(() => {
           if (hasSignedAgreement) {
             updateAccountAgreements({
               eu_model: true,
@@ -223,10 +224,7 @@ export const VolumeCreate = () => {
             variant: 'success',
           });
           navigate({
-            search: (prev) => ({
-              page: prev.page,
-              query: prev.query,
-            }),
+            search: (prev) => volumesSearchParams(prev),
             to: '/volumes',
           });
           // Analytics Event
