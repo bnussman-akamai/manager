@@ -207,7 +207,7 @@ export const VolumeCreate = () => {
         region: isNilOrEmpty(region) || region === 'none' ? undefined : region,
         size: maybeCastToNumber(size),
       })
-        .then(() => {
+        .then((volume) => {
           if (hasSignedAgreement) {
             updateAccountAgreements({
               eu_model: true,
@@ -221,7 +221,11 @@ export const VolumeCreate = () => {
             variant: 'success',
           });
           navigate({
-            to: '/volumes',
+            params: {
+              action: 'details',
+              volumeId: volume.id,
+            },
+            to: '/volumes/$volumeId/$action',
           });
           // Analytics Event
           sendCreateVolumeEvent(`Size: ${size}GB`, origin);
