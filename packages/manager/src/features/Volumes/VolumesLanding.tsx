@@ -1,7 +1,6 @@
 import { IconButton, InputAdornment } from '@linode/ui';
 import CloseIcon from '@mui/icons-material/Close';
-import { useLocation, useNavigate, useParams } from '@tanstack/react-router';
-import { createLazyRoute } from '@tanstack/react-router';
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import * as React from 'react';
 import { debounce } from 'throttle-debounce';
 
@@ -21,10 +20,10 @@ import { TableSortCell } from 'src/components/TableSortCell';
 import { TextField } from 'src/components/TextField';
 import { getRestrictedResourceText } from 'src/features/Account/utils';
 import { useOrder } from 'src/hooks/useOrder';
-import { usePagination } from 'src/hooks/usePagination';
+import { usePaginationV2 } from 'src/hooks/usePaginationV2';
 import { useRestrictedGlobalGrantCheck } from 'src/hooks/useRestrictedGlobalGrantCheck';
 import { useVolumesQuery } from 'src/queries/volumes/volumes';
-import { volumesSearchParams } from 'src/routes/volumes/index';
+import { setVolumesSearchParams } from 'src/routes/volumes';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
 import { AttachVolumeDrawer } from './AttachVolumeDrawer';
@@ -39,18 +38,24 @@ import { VolumesLandingEmptyState } from './VolumesLandingEmptyState';
 import { VolumeTableRow } from './VolumeTableRow';
 
 import type { Filter, Volume } from '@linode/api-v4';
+import type { VolumesSearchParams } from 'src/routes/volumes/index';
 
 const preferenceKey = 'volumes';
 
 export const VolumesLanding = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const params = useParams({ strict: false });
-  const pagination = usePagination(1, preferenceKey);
+  const search: VolumesSearchParams = useSearch({ strict: false });
+  const pagination = usePaginationV2({
+    baseRoute: '/volumes',
+    initialPage: 1,
+    preferenceKey,
+    searchParams: setVolumesSearchParams,
+  });
   const isRestricted = useRestrictedGlobalGrantCheck({
     globalGrantType: 'add_volumes',
   });
-  const query = location.search.query ?? '';
+  const { query } = search;
 
   const { handleOrderChange, order, orderBy } = useOrder(
     {
@@ -84,7 +89,7 @@ export const VolumesLanding = () => {
   const handleDetach = (volume: Volume) => {
     navigate({
       params: { action: 'detach', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -92,7 +97,7 @@ export const VolumesLanding = () => {
   const handleDelete = (volume: Volume) => {
     navigate({
       params: { action: 'delete', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -100,7 +105,7 @@ export const VolumesLanding = () => {
   const handleDetails = (volume: Volume) => {
     navigate({
       params: { action: 'details', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -108,7 +113,7 @@ export const VolumesLanding = () => {
   const handleEdit = (volume: Volume) => {
     navigate({
       params: { action: 'edit', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -116,7 +121,7 @@ export const VolumesLanding = () => {
   const handleResize = (volume: Volume) => {
     navigate({
       params: { action: 'resize', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -124,7 +129,7 @@ export const VolumesLanding = () => {
   const handleClone = (volume: Volume) => {
     navigate({
       params: { action: 'clone', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -132,7 +137,7 @@ export const VolumesLanding = () => {
   const handleAttach = (volume: Volume) => {
     navigate({
       params: { action: 'attach', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
@@ -140,16 +145,16 @@ export const VolumesLanding = () => {
   const handleUpgrade = (volume: Volume) => {
     navigate({
       params: { action: 'upgrade', volumeId: volume.id },
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: `/volumes/$volumeId/$action`,
     });
   };
 
   const resetSearch = () => {
     navigate({
-      search: (prev) => ({
-        ...volumesSearchParams(prev),
-        query: undefined,
+      search: (prev: VolumesSearchParams) => ({
+        ...setVolumesSearchParams(prev),
+        query: '',
       }),
       to: '/volumes',
     });
@@ -157,9 +162,8 @@ export const VolumesLanding = () => {
 
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     navigate({
-      search: (prev) => ({
-        ...volumesSearchParams(prev),
-        page: undefined,
+      search: (prev: VolumesSearchParams) => ({
+        ...setVolumesSearchParams(prev),
         query: e.target.value,
       }),
       to: '/volumes',
@@ -168,7 +172,7 @@ export const VolumesLanding = () => {
 
   const navigateToVolumes = () => {
     navigate({
-      search: (prev) => volumesSearchParams(prev),
+      search: (prev: VolumesSearchParams) => setVolumesSearchParams(prev),
       to: '/volumes',
     });
   };
@@ -349,9 +353,3 @@ export const VolumesLanding = () => {
     </>
   );
 };
-
-export default VolumesLanding;
-
-export const volumesLandingLazyRoute = createLazyRoute('/')({
-  component: VolumesLanding,
-});
