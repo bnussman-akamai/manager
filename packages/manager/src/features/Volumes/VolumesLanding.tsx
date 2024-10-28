@@ -165,7 +165,8 @@ export const VolumesLanding = () => {
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     navigate({
       search: (prev: VolumesSearchParams) => ({
-        prev,
+        ...prev,
+        page: undefined,
         query: e.target.value,
       }),
       to: '/volumes',
