@@ -16,6 +16,8 @@ import {
 import { downloadFile } from 'src/utilities/downloadFile';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 import { CopyTooltip } from 'src/components/CopyTooltip/CopyTooltip';
+import copy from 'copy-to-clipboard';
+import { CircleProgress } from 'src/components/CircleProgress';
 
 interface Props {
   clusterId: number;
@@ -100,18 +102,19 @@ export const KubeConfigDisplay = (props: Props) => {
     setResetKubeConfigDialogOpen,
   } = props;
 
-  const [getData, setGetData] = React.useState<boolean>(false);
-
   const { enqueueSnackbar } = useSnackbar();
   const { classes, cx } = useStyles();
 
-  const { data, refetch } = useKubenetesKubeConfigQuery(clusterId, getData);
+  const { refetch, isFetching } = useKubenetesKubeConfigQuery(clusterId, false);
 
-  const token = data && data.match(/token:\s*(\S+)/);
+  const onGetToken = async () => {
+    const { data } = await refetch();
+    const token = data && data.match(/token:\s*(\S+)/);
+    if (token) {
+      copy(token[1]);
+    }
+  };
 
-  React.useEffect(() => {
-    setGetData(true);
-  }, []);
 
   const {
     data: endpoints,
@@ -180,17 +183,10 @@ export const KubeConfigDisplay = (props: Props) => {
             <DetailsIcon className={classes.kubeconfigIcons} />
             <Typography className={classes.kubeconfigFileText}>View</Typography>
           </Box>
-          {token && (
-            <Box className={classes.kubeconfigElement}>
-              <CopyTooltip
-                className={classes.kubeconfigIcons}
-                text={token[1]}
-              />
-              <Typography className={classes.kubeconfigFileText}>
-                Token
-              </Typography>
-            </Box>
-          )}
+          <Box className={classes.kubeconfigElement}>
+            {isFetching && <CircleProgress size="xs" />}
+            <Box onClick={onGetToken}>Copy Token</Box>
+          </Box>
           <Box
             className={classes.kubeconfigElement}
             onClick={() => setResetKubeConfigDialogOpen(true)}
