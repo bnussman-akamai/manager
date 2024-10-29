@@ -246,7 +246,7 @@ export const VolumesLanding = () => {
         label="Search"
         placeholder="Search Volumes"
         sx={{ mb: 2 }}
-        value={query}
+        value={query ?? ''}
       />
       <Table>
         <TableHead>
