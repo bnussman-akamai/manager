@@ -71,14 +71,11 @@ export const VolumesLanding = () => {
     preferenceKey,
   });
 
-  // const filter: Filter = {
-  //   ['+order']: order,
-  //   ['+order_by']: orderBy,
-  //   ...(query && {
-  //     label: { '+contains': query },
-  //   }),
-  // };
-  const volumeXFilters = buildVolumeXFilters(query);
+  const volumeXFilters = buildVolumeXFilters({
+    order,
+    orderBy,
+    query,
+  });
   const { data: volumes, error, isFetching, isLoading } = useVolumesQuery(
     {
       page: pagination.page,
