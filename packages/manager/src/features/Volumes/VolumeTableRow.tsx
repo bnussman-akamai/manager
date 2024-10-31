@@ -1,5 +1,4 @@
 import { Box } from '@linode/ui';
-// import { useNavigate } from '@tanstack/react-router';
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -95,7 +94,7 @@ export const VolumeTableRow = React.memo((props: Props) => {
       // to upgrade all of the Linode's volumes at once from the Linode details page
 
       history.push(`/linodes/${volume.linode_id}/storage?upgrade=true`);
-      // TODO: Tanstack Router - update hook
+      // TODO: Tanstack Router - update hook and remove history.push and history import
       // navigate({
       //   params: { linodeId: volume.linode_id },
       //   search: { upgrade: 'true' },
