@@ -23,6 +23,7 @@ import { VolumesActionMenu } from './VolumesActionMenu';
 
 import type { ActionHandlers } from './VolumesActionMenu';
 import type { Volume } from '@linode/api-v4';
+import type { TanStackLinkRoutingProps } from 'src/components/TanstackLinks';
 
 export const useStyles = makeStyles()({
   volumePath: {
@@ -35,6 +36,7 @@ interface Props {
   handlers: ActionHandlers;
   isBlockStorageEncryptionFeatureEnabled?: boolean;
   isDetailsPageRow?: boolean;
+  tanstackRouter?: TanStackLinkRoutingProps;
   volume: Volume;
 }
 
