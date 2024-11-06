@@ -6,7 +6,6 @@ import * as React from 'react';
 import KebabIcon from 'src/assets/icons/kebab.svg';
 import { TooltipIcon } from 'src/components/TooltipIcon';
 import { convertToKebabCase } from 'src/utilities/convertToKebobCase';
-
 export interface Action {
   disabled?: boolean;
   id?: string;
