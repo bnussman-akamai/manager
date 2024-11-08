@@ -23,7 +23,10 @@ import { useOrderV2 } from 'src/hooks/useOrderV2';
 import { usePaginationV2 } from 'src/hooks/usePaginationV2';
 import { useRestrictedGlobalGrantCheck } from 'src/hooks/useRestrictedGlobalGrantCheck';
 import { useVolumesQuery } from 'src/queries/volumes/volumes';
-import { buildVolumeXFilters } from 'src/routes/volumes';
+import {
+  VOLUME_TABLE_DEFAULT_ORDER,
+  VOLUME_TABLE_DEFAULT_ORDER_BY,
+} from 'src/routes/volumes/constants';
 import { VOLUME_TABLE_PREFERENCE_KEY } from 'src/routes/volumes/constants';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 
@@ -38,7 +41,7 @@ import { VolumeDetailsDrawer } from './VolumeDetailsDrawer';
 import { VolumesLandingEmptyState } from './VolumesLandingEmptyState';
 import { VolumeTableRow } from './VolumeTableRow';
 
-import type { Volume } from '@linode/api-v4';
+import type { Filter, Volume } from '@linode/api-v4';
 import type { VolumesSearchParams } from 'src/routes/volumes/index';
 
 export const VolumesLanding = () => {
@@ -62,24 +65,27 @@ export const VolumesLanding = () => {
     initialRoute: {
       from: '/volumes',
       search: {
-        order: 'desc',
-        orderBy: 'label',
+        order: VOLUME_TABLE_DEFAULT_ORDER,
+        orderBy: VOLUME_TABLE_DEFAULT_ORDER_BY,
       },
     },
     preferenceKey: VOLUME_TABLE_PREFERENCE_KEY,
   });
 
-  const volumeXFilters = buildVolumeXFilters({
-    order,
-    orderBy,
-    query,
-  });
+  const filter: Filter = {
+    ['+order']: order,
+    ['+order_by']: orderBy,
+    ...(query && {
+      label: { '+contains': query },
+    }),
+  };
+
   const { data: volumes, error, isFetching, isLoading } = useVolumesQuery(
     {
       page: pagination.page,
       page_size: pagination.pageSize,
     },
-    volumeXFilters
+    filter
   );
 
   const {
@@ -153,9 +159,9 @@ export const VolumesLanding = () => {
 
   const resetSearch = () => {
     navigate({
-      search: (prev: VolumesSearchParams) => ({
+      search: (prev) => ({
         ...prev,
-        query: '',
+        query: undefined,
       }),
       to: '/volumes',
     });
@@ -163,10 +169,10 @@ export const VolumesLanding = () => {
 
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     navigate({
-      search: (prev: VolumesSearchParams) => ({
+      search: (prev) => ({
         ...prev,
         page: undefined,
-        query: e.target.value,
+        query: e.target.value || undefined,
       }),
       to: '/volumes',
     });
@@ -174,7 +180,7 @@ export const VolumesLanding = () => {
 
   const navigateToVolumes = () => {
     navigate({
-      search: (prev: VolumesSearchParams) => prev,
+      search: (prev) => prev,
       to: '/volumes',
     });
   };
@@ -234,6 +240,7 @@ export const VolumesLanding = () => {
               </IconButton>
             </InputAdornment>
           ),
+          sx: { mb: 2 },
         }}
         onChange={debounce(400, (e) => {
           onSearch(e);
@@ -241,7 +248,6 @@ export const VolumesLanding = () => {
         hideLabel
         label="Search"
         placeholder="Search Volumes"
-        sx={{ mb: 2 }}
         value={query ?? ''}
       />
       <Table>
