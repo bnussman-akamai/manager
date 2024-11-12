@@ -25,7 +25,7 @@ export const useSpecificTypes = (types: string[], enabled = true) => {
 
   return useQueries({
     queries: types.map<UseQueryOptions<LinodeType, APIError[]>>((type) => ({
-      enabled,
+      enabled: enabled && Boolean(type), // Don't enable the query if `type` is an empty string.
       ...linodeQueries.types._ctx.type(type),
       ...queryPresets.oneTimeFetch,
       initialData() {
