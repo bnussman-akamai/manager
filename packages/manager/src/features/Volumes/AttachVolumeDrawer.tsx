@@ -54,7 +54,7 @@ export const AttachVolumeDrawer = React.memo((props: Props) => {
 
   const { data } = useVolumeQuery(
     params.volumeId ?? -1,
-    params.volumeId !== undefined
+    volumeFromProps === undefined && params.volumeId !== undefined
   );
 
   const volume = data ?? volumeFromProps;
