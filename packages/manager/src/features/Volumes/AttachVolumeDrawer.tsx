@@ -1,5 +1,6 @@
 import { Box, FormHelperText, Notice } from '@linode/ui';
 import { styled } from '@mui/material/styles';
+import { useParams } from '@tanstack/react-router';
 import { useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
@@ -13,7 +14,10 @@ import { useIsBlockStorageEncryptionFeatureEnabled } from 'src/components/Encryp
 import { LinodeSelect } from 'src/features/Linodes/LinodeSelect/LinodeSelect';
 import { useEventsPollingActions } from 'src/queries/events/events';
 import { useGrants } from 'src/queries/profile/profile';
-import { useAttachVolumeMutation } from 'src/queries/volumes/volumes';
+import {
+  useAttachVolumeMutation,
+  useVolumeQuery,
+} from 'src/queries/volumes/volumes';
 import { getAPIErrorFor } from 'src/utilities/getAPIErrorFor';
 
 import { ConfigSelect } from './VolumeDrawer/ConfigSelect';
@@ -36,7 +40,7 @@ const AttachVolumeValidationSchema = object({
 });
 
 export const AttachVolumeDrawer = React.memo((props: Props) => {
-  const { open, volume } = props;
+  const { open, volume: volumeFromProps } = props;
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -45,6 +49,15 @@ export const AttachVolumeDrawer = React.memo((props: Props) => {
   const { data: grants } = useGrants();
 
   const { error, mutateAsync: attachVolume } = useAttachVolumeMutation();
+
+  const params = useParams({ strict: false });
+
+  const { data } = useVolumeQuery(
+    params.volumeId ?? -1,
+    params.volumeId !== undefined
+  );
+
+  const volume = data ?? volumeFromProps;
 
   const {
     isBlockStorageEncryptionFeatureEnabled,

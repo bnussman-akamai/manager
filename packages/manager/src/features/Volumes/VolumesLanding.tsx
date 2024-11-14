@@ -98,14 +98,14 @@ export const VolumesLanding = () => {
   const selectedVolume = volumes?.data.find((v) => v.id === params.volumeId);
 
   // TODO: Tanstack Router - remove this once we are fully migrated and can implement that logic at the route level
-  React.useEffect(() => {
-    if (params.volumeId && !isFetching && !selectedVolume) {
-      enqueueSnackbar('Volume not found', {
-        variant: 'error',
-      });
-      navigate({ to: '/volumes' });
-    }
-  }, [params.volumeId, isFetching, selectedVolume, navigate, enqueueSnackbar]);
+  // React.useEffect(() => {
+  //   if (params.volumeId && !isFetching && !selectedVolume) {
+  //     enqueueSnackbar('Volume not found', {
+  //       variant: 'error',
+  //     });
+  //     navigate({ to: '/volumes' });
+  //   }
+  // }, [params.volumeId, isFetching, selectedVolume, navigate, enqueueSnackbar]);
 
   const handleDetach = (volume: Volume) => {
     navigate({
