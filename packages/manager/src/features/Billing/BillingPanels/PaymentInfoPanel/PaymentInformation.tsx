@@ -59,7 +59,7 @@ const PaymentInformation = (props: Props) => {
 
   const doDelete = () => {
     setDeleteLoading(true);
-    deletePaymentMethod(deletePaymentMethodSelection!.id)
+    deletePaymentMethod(deletePaymentMethodSelection?.id ?? -1)
       .then(() => {
         setDeleteLoading(false);
         closeDeleteDialog();

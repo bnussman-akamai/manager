@@ -1,4 +1,4 @@
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import { defineConfig } from 'vitest/config';
 import { URL } from 'url';
@@ -6,12 +6,23 @@ import { URL } from 'url';
 // ESM-friendly alternative to `__dirname`.
 const DIRNAME = new URL('.', import.meta.url).pathname;
 
+const ReactCompilerConfig = {
+  target: '18',
+};
+
 export default defineConfig({
   build: {
     outDir: 'build',
   },
   envPrefix: 'REACT_APP_',
-  plugins: [react(), svgr({ exportAsDefault: true })],
+  plugins: [
+    react({
+      babel: {
+        plugins: [['babel-plugin-react-compiler', ReactCompilerConfig]],
+      },
+    }),
+    svgr({ exportAsDefault: true }),
+  ],
   resolve: {
     alias: {
       src: `${DIRNAME}/src`,
