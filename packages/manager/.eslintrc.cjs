@@ -13,7 +13,6 @@ module.exports = {
     'plugin:sonarjs/recommended',
     'plugin:ramda/recommended',
     'plugin:cypress/recommended',
-    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
     'plugin:testing-library/react',
     'plugin:perfectionist/recommended-natural',
   ],
@@ -149,7 +148,6 @@ module.exports = {
     'sonarjs',
     'ramda',
     'cypress',
-    'prettier',
     'testing-library',
     'scanjs-rules',
     'xss',
@@ -260,8 +258,6 @@ module.exports = {
     'perfectionist/sort-object-types': 'warn',
     'perfectionist/sort-objects': 'warn',
     'perfectionist/sort-union-types': 'warn',
-    // make prettier issues warnings
-    'prettier/prettier': 'warn',
     // radix requires to give the base in parseInt https://eslint.org/docs/rules/radix
     radix: 'error',
     // ramda

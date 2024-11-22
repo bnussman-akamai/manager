@@ -23,9 +23,8 @@ export const RebuildImageDrawer = (props: Props) => {
   const { image, onClose, open } = props;
 
   const history = useHistory();
-  const {
-    permissionedLinodes: availableLinodes,
-  } = useImageAndLinodeGrantCheck();
+  const { permissionedLinodes: availableLinodes } =
+    useImageAndLinodeGrantCheck();
 
   const { control, formState, handleSubmit, reset } = useForm<{
     linodeId: number;
