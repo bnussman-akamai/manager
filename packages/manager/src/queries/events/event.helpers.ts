@@ -7,7 +7,11 @@ export const isInProgressEvent = (event: Event) => {
     return false;
   }
 
-  return event.percent_complete < 100;
+  return (
+    event.percent_complete < 100 ||
+    event.status === 'started' ||
+    event.status === 'scheduled'
+  );
 };
 
 export const isEventInProgressDiskImagize = (event: Event): boolean => {
