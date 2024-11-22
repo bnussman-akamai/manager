@@ -44,5 +44,13 @@
   "include": [
     "src",
     "package.json"
+  ],
+  "references": [
+    {
+      "path": "../validation"
+    },
+    {
+      "path": "../api-v4"
+    }
   ]
 }
