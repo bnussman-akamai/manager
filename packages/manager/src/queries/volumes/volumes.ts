@@ -33,8 +33,13 @@ import type {
   Volume,
   VolumeRequestPayload,
 } from '@linode/api-v4';
-import type { APIError, ResourcePage } from '@linode/api-v4/lib/types';
-import type { Filter, Params, PriceType } from '@linode/api-v4/src/types';
+import type {
+  APIError,
+  Filter,
+  Params,
+  PriceType,
+  ResourcePage,
+} from '@linode/api-v4';
 
 export const volumeQueries = createQueryKeys('volumes', {
   linode: (linodeId: number) => ({
