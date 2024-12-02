@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormHelperText, Notice, Stack, TextField } from '@linode/ui';
 import { createSubnetSchema } from '@linode/validation';
 import * as React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, Resolver, useForm } from 'react-hook-form';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { Drawer } from 'src/components/Drawer';
@@ -56,7 +56,7 @@ export const SubnetCreateDrawer = (props: Props) => {
       label: '',
     },
     mode: 'onBlur',
-    resolver: yupResolver(createSubnetSchema),
+    resolver: yupResolver(createSubnetSchema) as Resolver<CreateSubnetPayload>,
   });
 
   const ipv4 = watch('ipv4');

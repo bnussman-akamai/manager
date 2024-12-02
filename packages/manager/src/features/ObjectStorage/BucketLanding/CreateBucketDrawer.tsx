@@ -3,7 +3,7 @@ import { Notice, TextField } from '@linode/ui';
 import { CreateBucketSchema } from '@linode/validation';
 import { styled } from '@mui/material/styles';
 import * as React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, Resolver, useForm } from 'react-hook-form';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { Drawer } from 'src/components/Drawer';
@@ -88,7 +88,7 @@ export const CreateBucketDrawer = (props: Props) => {
       label: '',
     },
     mode: 'onBlur',
-    resolver: yupResolver(CreateBucketSchema),
+    resolver: yupResolver(CreateBucketSchema) as Resolver<CreateObjectStorageBucketPayload>,
   });
 
   const watchCluster = watch('cluster');

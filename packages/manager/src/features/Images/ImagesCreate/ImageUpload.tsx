@@ -50,6 +50,7 @@ import type {
   ImageUploadNavigationState,
 } from './ImageUpload.utils';
 import type { AxiosError, AxiosProgressEvent } from 'axios';
+import type { Resolver } from 'react-hook-form';
 import type { Dispatch } from 'src/hooks/types';
 
 export const ImageUpload = () => {
@@ -78,7 +79,7 @@ export const ImageUpload = () => {
       label: location.state?.imageLabel,
     },
     mode: 'onBlur',
-    resolver: yupResolver(ImageUploadSchema),
+    resolver: yupResolver(ImageUploadSchema) as Resolver<ImageUploadFormData>,
   });
 
   const onSubmit = form.handleSubmit(async (values) => {

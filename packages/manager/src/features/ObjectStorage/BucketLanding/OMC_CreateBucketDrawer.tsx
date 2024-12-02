@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Notice, TextField, Typography } from '@linode/ui';
 import { CreateBucketSchema } from '@linode/validation';
 import * as React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, Resolver, useForm } from 'react-hook-form';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
@@ -122,7 +122,9 @@ export const OMC_CreateBucketDrawer = (props: Props) => {
       s3_endpoint: undefined,
     },
     mode: 'onBlur',
-    resolver: yupResolver(CreateBucketSchema),
+    resolver: yupResolver(
+      CreateBucketSchema
+    ) as Resolver<CreateObjectStorageBucketPayload>,
   });
 
   const watchRegion = watch('region');

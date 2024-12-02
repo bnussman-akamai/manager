@@ -72,8 +72,8 @@ export const ipv6Address = string().test({
   test: validateIP,
 });
 
-const controlPlaneACLOptionsSchema = object().shape({
-  enabled: boolean(),
+const controlPlaneACLOptionsSchema = object({
+  enabled: boolean().optional().notRequired(),
   'revision-id': string(),
   addresses: object().shape({
     ipv4: array().of(ipv4Address).nullable(true),
@@ -81,6 +81,6 @@ const controlPlaneACLOptionsSchema = object().shape({
   }),
 });
 
-export const kubernetesControlPlaneACLPayloadSchema = object().shape({
+export const kubernetesControlPlaneACLPayloadSchema = object({
   acl: controlPlaneACLOptionsSchema,
 });
