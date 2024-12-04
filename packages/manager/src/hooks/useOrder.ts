@@ -32,7 +32,10 @@ export const useOrder = (
   preferenceKey?: string,
   prefix?: string
 ) => {
-  const { data: preferences } = usePreferences();
+  const { data: orderPreference } = usePreferences(
+    (prefs) => prefs?.sortKeys,
+    Boolean(preferenceKey)
+  );
   const { mutateAsync: updatePreferences } = useMutatePreferences();
   const location = useLocation();
   const history = useHistory();
@@ -41,8 +44,8 @@ export const useOrder = (
   );
 
   const initialOrder = getInitialValuesFromUserPreferences(
-    preferenceKey || '',
-    preferences || {},
+    preferenceKey ?? '',
+    orderPreference,
     params,
     initial?.orderBy,
     initial?.order,
@@ -57,7 +60,7 @@ export const useOrder = (
       if (preferenceKey) {
         updatePreferences({
           sortKeys: {
-            ...(preferences?.sortKeys ?? {}),
+            ...(orderPreference ?? {}),
             [preferenceKey]: { order, orderBy },
           },
         });

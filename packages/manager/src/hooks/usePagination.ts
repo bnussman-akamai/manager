@@ -24,7 +24,10 @@ export const usePagination = (
   preferenceKey?: string,
   queryParamsPrefix?: string
 ): PaginationProps => {
-  const { data: preferences } = usePreferences();
+  const { data: preferences } = usePreferences(
+    (preferences) => preferences?.pageSizes,
+    Boolean(preferenceKey)
+  );
   const { mutateAsync: updatePreferences } = useMutatePreferences();
 
   const history = useHistory();
@@ -40,7 +43,7 @@ export const usePagination = (
   const searchParamPageSize = searchParams.get(pageSizeKey);
 
   const preferedPageSize = preferenceKey
-    ? preferences?.pageSizes?.[preferenceKey] ?? MIN_PAGE_SIZE
+    ? preferences?.[preferenceKey] ?? MIN_PAGE_SIZE
     : MIN_PAGE_SIZE;
 
   const page = searchParamPage ? Number(searchParamPage) : initialPage;
@@ -64,7 +67,7 @@ export const usePagination = (
     if (preferenceKey) {
       updatePreferences({
         pageSizes: {
-          ...(preferences?.pageSizes ?? {}),
+          ...(preferences ?? {}),
           [preferenceKey]: newPageSize,
         },
         [preferenceKey]: undefined, // This may seem weird, but this cleans up the old format so user's preferences don't get too big

@@ -1,18 +1,12 @@
 import { updateUserPreferences } from '@linode/api-v4';
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from '@tanstack/react-query';
-
-import { ManagerPreferences } from 'src/types/ManagerPreferences';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { queryPresets } from '../base';
 import { profileQueries } from './profile';
 
 import type { APIError } from '@linode/api-v4';
+import type { QueryClient } from '@tanstack/react-query';
+import type { ManagerPreferences } from 'src/types/ManagerPreferences';
 
 export const usePreferences = <TData = ManagerPreferences>(
   select?: (data: ManagerPreferences | undefined) => TData,

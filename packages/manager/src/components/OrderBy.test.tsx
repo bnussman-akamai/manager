@@ -62,11 +62,9 @@ describe('OrderBy', () => {
 
   describe('getInitialValuesFromUserPreferences', () => {
     const preferences = {
-      sortKeys: {
-        ['listening-services']: {
-          order: 'desc' as any,
-          orderBy: 'test-order',
-        },
+      ['listening-services']: {
+        order: 'desc' as any,
+        orderBy: 'test-order',
       },
     };
     it('should return values from query params if available', () => {

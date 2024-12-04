@@ -36,7 +36,9 @@ export const PreferenceToggle = <T,>(props: Props<T>) => {
     value,
   } = props;
 
-  const { data: preferences } = usePreferences();
+  const { data: preferences } = usePreferences(
+    (preferences) => preferences?.[preferenceKey]
+  );
 
   const { mutateAsync: updateUserPreferences } = useMutatePreferences();
 
