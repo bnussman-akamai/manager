@@ -41,10 +41,15 @@ export const DeletionDialog = React.memo((props: DeletionDialogProps) => {
     typeToConfirm,
     ...rest
   } = props;
-  const { data: preferences } = usePreferences();
+
+  const { data: typeToConfirmPref } = usePreferences(
+    (preferences) => preferences?.type_to_confirm
+  );
+
   const [confirmationText, setConfirmationText] = React.useState('');
-  const typeToConfirmRequired =
-    typeToConfirm && preferences?.type_to_confirm !== false;
+
+  const typeToConfirmRequired = typeToConfirm && typeToConfirmPref !== false;
+
   const renderActions = () => (
     <ActionsPanel
       primaryButtonProps={{

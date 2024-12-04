@@ -92,10 +92,14 @@ export const TypeToConfirmDialog = (props: CombinedProps) => {
 
   const [confirmText, setConfirmText] = React.useState('');
 
-  const { data: preferences } = usePreferences();
+  const { data: typeToConfirmPreference } = usePreferences(
+    (preferences) => preferences?.type_to_confirm
+  );
+
   const isPrimaryButtonDisabled =
-    (preferences?.type_to_confirm !== false && confirmText !== entity.name) ||
+    (typeToConfirmPreference !== false && confirmText !== entity.name) ||
     disableTypeToConfirmSubmit;
+
   const isTypeToConfirmInputDisabled = disableTypeToConfirmInput;
 
   React.useEffect(() => {
@@ -160,7 +164,7 @@ export const TypeToConfirmDialog = (props: CombinedProps) => {
         textFieldStyle={textFieldStyle}
         typographyStyle={typographyStyle}
         value={confirmText}
-        visible={preferences?.type_to_confirm}
+        visible={typeToConfirmPreference}
       />
     </ConfirmationDialog>
   );

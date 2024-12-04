@@ -54,7 +54,7 @@ export const getThemeFromPreferenceValue = (
 export const useColorMode = () => {
   // Make sure we are authenticated before we fetch preferences.
   const isAuthenticated = !!useAuthentication().token;
-  const { data: preferences } = usePreferences(isAuthenticated);
+  const { data: preferences } = usePreferences(undefined, isAuthenticated);
   const isSystemInDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const colorMode = getThemeFromPreferenceValue(

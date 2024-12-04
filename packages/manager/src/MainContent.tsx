@@ -30,6 +30,7 @@ import { sessionExpirationContext } from './context/sessionExpirationContext';
 import { switchAccountSessionContext } from './context/switchAccountSessionContext';
 import { useIsACLPEnabled } from './features/CloudPulse/Utils/utils';
 import { useIsDatabasesEnabled } from './features/Databases/utilities';
+import { useIsIAMEnabled } from './features/IAM/Shared/utilities';
 import { useIsPlacementGroupsEnabled } from './features/PlacementGroups/utils';
 import { useGlobalErrors } from './hooks/useGlobalErrors';
 import { useAccountSettings } from './queries/account/settings';
@@ -38,7 +39,6 @@ import { migrationRouter } from './routes';
 
 import type { Theme } from '@mui/material/styles';
 import type { AnyRouter } from '@tanstack/react-router';
-import { useIsIAMEnabled } from './features/IAM/Shared/utilities';
 
 const useStyles = makeStyles()((theme: Theme) => ({
   activationWrapper: {
@@ -205,7 +205,10 @@ const IAM = React.lazy(() =>
 
 export const MainContent = () => {
   const { classes, cx } = useStyles();
-  const { data: preferences } = usePreferences();
+
+  const { data: desktop_sidebar_open } = usePreferences(
+    (preferences) => preferences?.desktop_sidebar_open
+  );
   const { mutateAsync: updatePreferences } = useMutatePreferences();
 
   const globalErrors = useGlobalErrors();
@@ -286,11 +289,11 @@ export const MainContent = () => {
     return <MaintenanceScreen />;
   }
 
-  const desktopMenuIsOpen = preferences?.desktop_sidebar_open ?? false;
+  const desktopMenuIsOpen = desktop_sidebar_open ?? false;
 
   const desktopMenuToggle = () => {
     updatePreferences({
-      desktop_sidebar_open: !preferences?.desktop_sidebar_open,
+      desktop_sidebar_open: !desktopMenuIsOpen,
     });
   };
 

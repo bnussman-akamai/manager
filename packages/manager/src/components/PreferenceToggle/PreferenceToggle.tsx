@@ -24,6 +24,9 @@ interface Props<T> {
   value?: T;
 }
 
+/**
+ * @deprecated Don't use this. There are more simple ways to use preferences.
+ */
 export const PreferenceToggle = <T,>(props: Props<T>) => {
   const {
     children,

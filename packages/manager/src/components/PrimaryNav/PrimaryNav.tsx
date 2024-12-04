@@ -1,18 +1,19 @@
 import { Box } from '@linode/ui';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
-import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import Storage from 'src/assets/icons/entityIcons/bucket.svg';
 import Database from 'src/assets/icons/entityIcons/database.svg';
+import IAM from 'src/assets/icons/entityIcons/iam.svg';
 import Linode from 'src/assets/icons/entityIcons/linode.svg';
 import NodeBalancer from 'src/assets/icons/entityIcons/nodebalancer.svg';
 import Longview from 'src/assets/icons/longview.svg';
 import More from 'src/assets/icons/more.svg';
-import IAM from 'src/assets/icons/entityIcons/iam.svg';
 import { useIsACLPEnabled } from 'src/features/CloudPulse/Utils/utils';
 import { useIsDatabasesEnabled } from 'src/features/Databases/utilities';
+import { useIsIAMEnabled } from 'src/features/IAM/Shared/utilities';
 import { useIsPlacementGroupsEnabled } from 'src/features/PlacementGroups/utils';
 import { useFlags } from 'src/hooks/useFlags';
 import { useAccountSettings } from 'src/queries/account/settings';
@@ -32,7 +33,6 @@ import {
 import { linkIsActive } from './utils';
 
 import type { PrimaryLink as PrimaryLinkType } from './PrimaryLink';
-import { useIsIAMEnabled } from 'src/features/IAM/Shared/utilities';
 
 export type NavEntity =
   | 'Account'
@@ -91,9 +91,12 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
   const { isPlacementGroupsEnabled } = useIsPlacementGroupsEnabled();
   const { isDatabasesEnabled, isDatabasesV2Beta } = useIsDatabasesEnabled();
 
-  const { isIAMEnabled, isIAMBeta } = useIsIAMEnabled();
+  const { isIAMBeta, isIAMEnabled } = useIsIAMEnabled();
 
-  const { data: preferences } = usePreferences();
+  const { data } = usePreferences(
+    (preferneces) => preferneces?.collapsedSideNavProductFamilies
+  );
+
   const { mutateAsync: updatePreferences } = useMutatePreferences();
 
   const productFamilyLinkGroups: ProductFamilyLinkGroup<
@@ -253,9 +256,7 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
     ]
   );
 
-  const [collapsedAccordions, setCollapsedAccordions] = React.useState<
-    number[]
-  >(preferences?.collapsedSideNavProductFamilies ?? []);
+  const collapsedAccordions = data ?? [];
 
   const accordionClicked = (index: number) => {
     let updatedCollapsedAccordions;
@@ -266,13 +267,11 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
       updatePreferences({
         collapsedSideNavProductFamilies: updatedCollapsedAccordions,
       });
-      setCollapsedAccordions(updatedCollapsedAccordions);
     } else {
       updatedCollapsedAccordions = [...collapsedAccordions, index];
       updatePreferences({
         collapsedSideNavProductFamilies: updatedCollapsedAccordions,
       });
-      setCollapsedAccordions(updatedCollapsedAccordions);
     }
   };
 
