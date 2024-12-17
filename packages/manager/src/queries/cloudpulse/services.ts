@@ -4,9 +4,10 @@ import { queryFactory } from './queries';
 
 import type {
   APIError,
+  AvailableMetrics,
   JWEToken,
   JWETokenPayLoad,
-  MetricDefinitions,
+  ResourcePage,
   ServiceTypesList,
 } from '@linode/api-v4';
 
@@ -14,7 +15,7 @@ export const useGetCloudPulseMetricDefinitionsByServiceType = (
   serviceType: string | undefined,
   enabled: boolean
 ) => {
-  return useQuery<MetricDefinitions, APIError[]>({
+  return useQuery<ResourcePage<AvailableMetrics>, APIError[]>({
     ...queryFactory.metricsDefinitons(serviceType),
     enabled,
   });

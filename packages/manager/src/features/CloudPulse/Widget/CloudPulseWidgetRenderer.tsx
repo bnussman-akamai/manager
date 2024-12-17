@@ -21,7 +21,7 @@ import type {
   AvailableMetrics,
   Dashboard,
   JWEToken,
-  MetricDefinitions,
+  ResourcePage,
   TimeDuration,
   Widgets,
 } from '@linode/api-v4';
@@ -33,7 +33,7 @@ interface WidgetProps {
   isJweTokenFetching: boolean;
   jweToken?: JWEToken | undefined;
   manualRefreshTimeStamp?: number;
-  metricDefinitions: MetricDefinitions | undefined;
+  metricDefinitions: ResourcePage<AvailableMetrics> | undefined;
   preferences?: AclpConfig;
   resourceList: CloudPulseResources[] | undefined;
   resources: string[];

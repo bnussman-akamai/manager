@@ -47,7 +47,7 @@ export const MetricCriteriaField = (props: MetricCriteriaProps) => {
     metricDefinitions?.data
       .filter((item) =>
         metricCriteriaWatcher.some(
-          (criteria: MetricCriteriaForm) => criteria.metric === item.metric
+          (criteria) => criteria.metric === item.metric
         )
       )
       .map((item) => item.scrape_interval) || [];

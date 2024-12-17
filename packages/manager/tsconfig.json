@@ -7,9 +7,11 @@
 
     /* Modules */
     "baseUrl": ".",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "@linode/validation/*": ["../validation/lib/*"],
+      "@linode/api-v4/*": ["../api-v4/lib/*"]
     },
     "resolveJsonModule": true,
     "rootDir": ".",
@@ -41,6 +43,10 @@
     /* Optimizations */
     "incremental": true
   },
+  "references": [
+    { "path": "../api-v4" },
+    { "path": "../validation" },
+  ],
   "include": [
     "src",
     "package.json"
