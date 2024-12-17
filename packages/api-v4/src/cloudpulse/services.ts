@@ -1,15 +1,15 @@
-import { BETA_API_ROOT as API_ROOT } from 'src/constants';
+import { BETA_API_ROOT as API_ROOT } from '../constants';
 import Request, { setData, setMethod, setURL } from '../request';
 import {
+  AvailableMetrics,
   JWEToken,
   JWETokenPayLoad,
-  MetricDefinitions,
   ServiceTypesList,
 } from './types';
-import { ResourcePage as Page } from 'src/types';
+import { ResourcePage as Page } from '../types';
 
 export const getMetricDefinitionsByServiceType = (serviceType: string) => {
-  return Request<Page<MetricDefinitions>>(
+  return Request<Page<AvailableMetrics>>(
     setURL(
       `${API_ROOT}/monitor/services/${encodeURIComponent(
         serviceType

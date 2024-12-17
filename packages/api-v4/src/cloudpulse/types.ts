@@ -85,10 +85,6 @@ export interface AclpWidget {
   size: number;
 }
 
-export interface MetricDefinitions {
-  data: AvailableMetrics[];
-}
-
 export interface AvailableMetrics {
   label: string;
   metric: string;

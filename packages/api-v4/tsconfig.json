@@ -2,24 +2,28 @@
   "compilerOptions": {
     "target": "esnext",
     "types": ["vitest/globals"],
-    "module": "umd",
+    "module": "esnext",
     "emitDeclarationOnly": true,
     "declaration": true,
     "outDir": "./lib",
+    "rootDir": "src",
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "strict": true,
-    "baseUrl": ".",
     "noUnusedLocals": true,
     "declarationMap": true,
-    "incremental": true
+    "incremental": true,
+    "composite": true,
+    "paths": {
+      "@linode/validation*": ["../validation/lib/*"]
+    }
   },
   "include": [
     "src"
   ],
-  "exclude": [
-    "node_modules/**/*",
-    "**/__tests__/*"
+  "exclude": ["node_modules"],
+  "references": [
+    { "path": "../validation" }
   ]
 }

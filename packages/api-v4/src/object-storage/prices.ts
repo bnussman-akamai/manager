@@ -1,4 +1,4 @@
-import { Params, PriceType, ResourcePage } from 'src/types';
+import { Params, PriceType, ResourcePage } from '../types';
 import { API_ROOT } from '../constants';
 import Request, { setMethod, setParams, setURL } from '../request';
 

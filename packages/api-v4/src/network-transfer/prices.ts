@@ -1,6 +1,6 @@
-import { API_ROOT } from 'src/constants';
-import Request, { setMethod, setURL, setParams } from 'src/request';
-import { Params, PriceType, ResourcePage } from 'src/types';
+import { API_ROOT } from '../constants';
+import Request, { setMethod, setURL, setParams } from '../request';
+import { Params, PriceType, ResourcePage } from '../types';
 
 export const getNetworkTransferPrices = (params?: Params) =>
   Request<ResourcePage<PriceType>>(

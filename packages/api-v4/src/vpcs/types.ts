@@ -1,4 +1,4 @@
-import { Interface } from 'src/linodes';
+import { Interface } from '../linodes';
 
 export interface VPC {
   id: number;
