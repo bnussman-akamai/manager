@@ -65,11 +65,12 @@ export const KubernetesClusterRow = (props: Props) => {
           alignItems="center"
           direction="row"
           justifyContent="space-between"
+          spacing={1}
         >
           <Link tabIndex={0} to={`/kubernetes/clusters/${cluster.id}/summary`}>
             {cluster.label}
           </Link>
-          <ClusterChips cluster={cluster} sx={{ marginLeft: 1 }} />
+          <ClusterChips cluster={cluster} />
         </Stack>
       </TableCell>
       <Hidden mdDown>
