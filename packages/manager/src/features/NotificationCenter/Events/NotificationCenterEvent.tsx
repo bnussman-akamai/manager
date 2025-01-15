@@ -1,9 +1,8 @@
-import { Box } from '@linode/ui';
+import { Box, Typography } from '@linode/ui';
 import { useTheme } from '@mui/material';
 import * as React from 'react';
 
 import { BarPercent } from 'src/components/BarPercent';
-import { Typography } from 'src/components/Typography';
 import {
   formatProgressEvent,
   getEventMessage,
@@ -44,7 +43,7 @@ export const NotificationCenterEvent = React.memo(
       return null;
     }
 
-    const { progressEventDisplay, showProgress } = formatProgressEvent(event);
+    const { progressEventDate, showProgress } = formatProgressEvent(event);
 
     return (
       <NotificationEventStyledBox
@@ -74,7 +73,7 @@ export const NotificationCenterEvent = React.memo(
             />
           )}
           <Typography sx={{ fontSize: '0.8rem' }}>
-            {progressEventDisplay} | {username}
+            {progressEventDate} | {username}
           </Typography>
         </Box>
       </NotificationEventStyledBox>

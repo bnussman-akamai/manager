@@ -1,9 +1,9 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { Notice } from './Notice';
-import { expect, describe, it, vi } from 'vitest';
 import { renderWithTheme } from '../../utilities/testHelpers';
+import { Notice } from './Notice';
 
 describe('Notice Component', () => {
   it('renders without errors with proper spacing', () => {
@@ -46,13 +46,18 @@ describe('Notice Component', () => {
     expect(container.firstChild).toHaveClass('custom-class');
   });
 
-  it('applies dataTestId props', () => {
-    const { getByTestId } = renderWithTheme(
-      <Notice dataTestId="test-id" variant="success" />
-    );
+  it('applies a default test-id based on the variant', () => {
+    const { getByTestId } = renderWithTheme(<Notice variant="success" />);
 
     expect(getByTestId('notice-success')).toBeInTheDocument();
-    expect(getByTestId('test-id')).toBeInTheDocument();
+  });
+
+  it('applies the dataTestId prop', () => {
+    const { getByTestId } = renderWithTheme(
+      <Notice dataTestId="my-custom-test-id" variant="success" />
+    );
+
+    expect(getByTestId('my-custom-test-id')).toBeInTheDocument();
   });
 
   it('applies variant prop', () => {

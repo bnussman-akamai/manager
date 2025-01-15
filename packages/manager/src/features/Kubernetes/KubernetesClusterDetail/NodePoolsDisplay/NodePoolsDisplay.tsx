@@ -1,9 +1,8 @@
-import { Button, CircleProgress, Stack } from '@linode/ui';
+import { Button, CircleProgress, Stack, Typography } from '@linode/ui';
 import React, { useState } from 'react';
 import { Waypoint } from 'react-waypoint';
 
 import { ErrorState } from 'src/components/ErrorState/ErrorState';
-import { Typography } from 'src/components/Typography';
 import { useAllKubernetesNodePoolQuery } from 'src/queries/kubernetes';
 import { useSpecificTypes } from 'src/queries/types';
 import { extendTypesQueryResult } from 'src/utilities/extendType';
@@ -105,7 +104,7 @@ export const NodePoolsDisplay = (props: Props) => {
       {poolsError && <ErrorState errorText={poolsError[0].reason} />}
       <Stack spacing={2}>
         {_pools?.map((thisPool) => {
-          const { disk_encryption, id, nodes } = thisPool;
+          const { disk_encryption, id, nodes, tags } = thisPool;
 
           const thisPoolType = types?.find(
             (thisType) => thisType.id === thisPool.type
@@ -132,12 +131,14 @@ export const NodePoolsDisplay = (props: Props) => {
                 setIsRecycleNodeOpen(true);
               }}
               autoscaler={thisPool.autoscaler}
+              clusterId={clusterID}
               encryptionStatus={disk_encryption}
               handleClickResize={handleOpenResizeDrawer}
               isOnlyNodePool={pools?.length === 1}
               key={id}
               nodes={nodes ?? []}
               poolId={thisPool.id}
+              tags={tags}
               typeLabel={typeLabel}
             />
           );

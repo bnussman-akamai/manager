@@ -1,9 +1,8 @@
+import { Typography } from '@linode/ui';
 import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
 import { makeStyles } from 'tss-react/mui';
-
-import { Typography } from 'src/components/Typography';
 
 import type { Theme } from '@mui/material/styles';
 
@@ -14,22 +13,22 @@ interface Color {
 
 const useStyles = makeStyles()((theme: Theme) => ({
   alias: {
-    color: '#32363c',
+    color: theme.tokens.color.Neutrals[90],
     fontFamily: '"UbuntuMono", monospace, sans-serif',
     fontSize: '0.875rem',
   },
   color: {
-    color: '#888f91',
+    color: theme.tokens.color.Neutrals[60],
     fontFamily: '"UbuntuMono", monospace, sans-serif',
     fontSize: '0.875rem',
   },
   root: {
     '& h2': {
-      color: '#32363c',
+      color: theme.tokens.color.Neutrals[90],
     },
   },
   swatch: {
-    border: '1px solid #888f91',
+    border: `1px solid ${theme.tokens.color.Neutrals[60]}`,
     borderRadius: 3,
     height: theme.spacing(4.5),
     margin: '0px 16px',

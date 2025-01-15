@@ -1,18 +1,29 @@
-import { Tooltip } from '../Tooltip';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import _Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import * as React from 'react';
 
 import { ReloadIcon } from '../../assets';
-
 import { rotate360 } from '../../foundations';
 import { omittedProps } from '../../utilities';
+import { Tooltip } from '../Tooltip';
 
 import type { ButtonProps as _ButtonProps } from '@mui/material/Button';
 import type { SxProps, Theme } from '@mui/material/styles';
 
 export type ButtonType = 'outlined' | 'primary' | 'secondary';
+
+const buttonTypeToColor: Record<ButtonType, _ButtonProps['color']> = {
+  outlined: 'secondary', // We're treating this as a secondary
+  primary: 'primary',
+  secondary: 'secondary',
+} as const;
+
+const buttonTypeToVariant: Record<ButtonType, _ButtonProps['variant']> = {
+  outlined: 'outlined',
+  primary: 'contained',
+  secondary: 'contained',
+} as const;
 
 export interface ButtonProps extends _ButtonProps {
   /**
@@ -59,9 +70,6 @@ const StyledButton = styled(_Button, {
     'buttonType',
   ]),
 })<ButtonProps>(({ theme, ...props }) => ({
-  ...(props.buttonType === 'secondary' && {
-    color: theme.textColors.linkActiveLight,
-  }),
   ...(props.compactX && {
     minWidth: 50,
     paddingLeft: 0,
@@ -78,10 +86,6 @@ const StyledButton = styled(_Button, {
       height: `${theme.spacing(2)}`,
       margin: '0 auto',
       width: `${theme.spacing(2)}`,
-    },
-    '&:disabled': {
-      backgroundColor:
-        props.buttonType === 'primary' && theme.palette.text.primary,
     },
   }),
 }));
@@ -104,6 +108,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       buttonType = 'secondary',
       children,
       className,
+      color,
       compactX,
       compactY,
       disabled,
@@ -116,15 +121,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const color = buttonType === 'primary' ? 'primary' : 'secondary';
     const showTooltip = disabled && Boolean(tooltipText);
-
-    const variant =
-      buttonType === 'primary' || buttonType === 'secondary'
-        ? 'contained'
-        : buttonType === 'outlined'
-        ? 'outlined'
-        : 'text';
 
     const handleTooltipAnalytics = () => {
       if (tooltipAnalyticsEvent) {
@@ -154,7 +151,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-disabled={disabled}
         buttonType={buttonType}
         className={className}
-        color={color}
+        color={(color === 'error' && color) || buttonTypeToColor[buttonType]}
         compactX={compactX}
         compactY={compactY}
         data-testid={rest['data-testid'] || 'button'}
@@ -165,7 +162,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onKeyDown={disabled ? handleDisabledKeyDown : rest.onKeyDown}
         ref={ref}
         sx={sx}
-        variant={variant}
+        variant={buttonTypeToVariant[buttonType] || 'text'}
       >
         <Span data-testid="loadingIcon">
           {loading ? <ReloadIcon /> : children}

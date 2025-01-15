@@ -1,7 +1,7 @@
 import type { Region, RegionSite } from '../regions';
 import type { IPAddress, IPRange } from '../networking/types';
 import type { SSHKey } from '../profile/types';
-import type { PlacementGroupPayload } from '../placement-groups/types';
+import type { LinodePlacementGroupPayload } from '../placement-groups/types';
 
 export type Hypervisor = 'kvm' | 'zen';
 
@@ -20,7 +20,7 @@ export interface Linode {
   id: number;
   alerts: LinodeAlerts;
   backups: LinodeBackups;
-  capabilities?: LinodeCapabilities[]; // @TODO BSE: Remove optionality once BSE is fully rolled out
+  capabilities: LinodeCapabilities[];
   created: string;
   disk_encryption?: EncryptionStatus; // @TODO LDE: Remove optionality once LDE is fully rolled out
   region: string;
@@ -30,7 +30,7 @@ export interface Linode {
   ipv6: string | null;
   label: string;
   lke_cluster_id: number | null;
-  placement_group?: PlacementGroupPayload; // If not in a placement group, this will be excluded from the response.
+  placement_group?: LinodePlacementGroupPayload; // If not in a placement group, this will be excluded from the response.
   type: string | null;
   status: LinodeStatus;
   updated: string;
@@ -55,7 +55,10 @@ export interface LinodeBackups {
   last_successful: string | null;
 }
 
-export type LinodeCapabilities = 'Block Storage Encryption' | 'SMTP Enabled';
+export type LinodeCapabilities =
+  | 'Block Storage Encryption'
+  | 'SMTP Enabled'
+  | 'Block Storage Performance B1';
 
 export type Window =
   | 'Scheduling'

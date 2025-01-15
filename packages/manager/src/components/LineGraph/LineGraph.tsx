@@ -2,6 +2,7 @@
  * ONLY USED IN LONGVIEW
  * Delete when Lonview is sunsetted, along with AccessibleGraphData
  */
+import { Typography } from '@linode/ui';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Chart } from 'chart.js';
@@ -11,7 +12,6 @@ import * as React from 'react';
 import { humanizeLargeData } from 'src/components/AreaChart/utils';
 import { TableCell } from 'src/components/TableCell';
 import { TableRow } from 'src/components/TableRow';
-import { Typography } from 'src/components/Typography';
 import { setUpCharts } from 'src/utilities/charts';
 import { roundTo } from 'src/utilities/roundTo';
 
@@ -271,9 +271,9 @@ export const LineGraph = (props: LineGraphProps) => {
         ],
       },
       tooltips: {
-        backgroundColor: '#fbfbfb',
-        bodyFontColor: '#32363C',
-        borderColor: '#999',
+        backgroundColor: theme.tokens.color.Neutrals[5],
+        bodyFontColor: theme.tokens.color.Neutrals[90],
+        borderColor: theme.tokens.color.Neutrals[50],
         borderWidth: 0.5,
         callbacks: {
           label: _formatTooltip(data, formatTooltip, _tooltipUnit),

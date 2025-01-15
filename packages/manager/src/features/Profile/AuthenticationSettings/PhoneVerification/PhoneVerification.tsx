@@ -1,4 +1,4 @@
-import { Box, Button, InputAdornment, TextField } from '@linode/ui';
+import { Box, Button, InputAdornment, TextField, Typography } from '@linode/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useFormik } from 'formik';
 import { parsePhoneNumber } from 'libphonenumber-js';
@@ -7,7 +7,6 @@ import * as React from 'react';
 
 import { LinkButton } from 'src/components/LinkButton';
 import { MaskableText } from 'src/components/MaskableText/MaskableText';
-import { Typography } from 'src/components/Typography';
 import {
   profileQueries,
   updateProfileData,
@@ -275,13 +274,13 @@ export const PhoneVerification = ({
                   }))}
                   slotProps={{
                     paper: {
-                      sx: {
-                        border: '1px solid #3683dc',
+                      sx: (theme) => ({
+                        border: `1px solid ${theme.tokens.color.Ultramarine[80]}`,
                         maxHeight: '285px',
                         overflow: 'hidden',
                         textWrap: 'nowrap',
                         width: 'fit-content',
-                      },
+                      }),
                     },
                   }}
                   textFieldProps={{

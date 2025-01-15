@@ -16,6 +16,7 @@ export const linode1: Linode = {
       window: 'W2',
     },
   },
+  capabilities: [],
   created: '2017-12-07T19:12:58',
   group: 'active',
   hypervisor: 'kvm',
@@ -28,6 +29,7 @@ export const linode1: Linode = {
   placement_group: {
     id: 1,
     label: 'pg-1',
+    migrating_to: null,
     placement_group_policy: 'strict',
     placement_group_type: 'anti_affinity:local',
   },
@@ -64,6 +66,7 @@ export const linode2: Linode = {
       window: 'Scheduling',
     },
   },
+  capabilities: [],
   created: '2018-02-22T16:11:07',
   group: 'inactive',
   hypervisor: 'kvm',
@@ -76,6 +79,7 @@ export const linode2: Linode = {
   placement_group: {
     id: 1,
     label: 'pg-1',
+    migrating_to: null,
     placement_group_policy: 'strict',
     placement_group_type: 'anti_affinity:local',
   },
@@ -112,6 +116,7 @@ export const linode3: Linode = {
       window: 'Scheduling',
     },
   },
+  capabilities: [],
   created: '2018-02-22T16:11:07',
   group: 'inactive',
   hypervisor: 'kvm',
@@ -124,6 +129,7 @@ export const linode3: Linode = {
   placement_group: {
     id: 1,
     label: 'pg-1',
+    migrating_to: null,
     placement_group_policy: 'strict',
     placement_group_type: 'anti_affinity:local',
   },
@@ -160,6 +166,7 @@ export const linode4: Linode = {
       window: 'Scheduling',
     },
   },
+  capabilities: [],
   created: '2018-02-22T16:11:07',
   group: 'inactive',
   hypervisor: 'kvm',
@@ -172,6 +179,7 @@ export const linode4: Linode = {
   placement_group: {
     id: 1,
     label: 'pg-1',
+    migrating_to: null,
     placement_group_policy: 'strict',
     placement_group_type: 'anti_affinity:local',
   },

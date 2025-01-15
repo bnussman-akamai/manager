@@ -73,12 +73,18 @@ export interface CloudPulseResourceTypeMapFlag {
   dimensionKey: string;
   maxResourceSelections?: number;
   serviceType: string;
+  supportedRegionIds?: string;
 }
 
 interface gpuV2 {
   egressBanner: boolean;
   planDivider: boolean;
   transferBanner: boolean;
+}
+
+interface AcceleratedPlansFlag {
+  linodePlans: boolean;
+  lkePlans: boolean;
 }
 
 interface DesignUpdatesBannerFlag extends BaseFeatureFlag {
@@ -92,6 +98,7 @@ interface AclpAlerting {
   recentActivity: boolean;
 }
 export interface Flags {
+  acceleratedPlans: AcceleratedPlansFlag;
   aclp: AclpFlag;
   aclpAlerting: AclpAlerting;
   aclpReadEndpoint: string;
@@ -110,6 +117,7 @@ export interface Flags {
   disallowImageUploadToNonObjRegions: boolean;
   gecko2: GeckoFeatureFlag;
   gpuv2: gpuV2;
+  iam: BetaFeatureFlag;
   imageServiceGen2: boolean;
   imageServiceGen2Ga: boolean;
   ipv6Sharing: boolean;
@@ -133,6 +141,7 @@ export interface Flags {
   taxId: BaseFeatureFlag;
   taxes: Taxes;
   tpaProviders: Provider[];
+  udp: boolean;
 }
 
 interface MarketplaceAppOverride {
@@ -223,6 +232,7 @@ export type ProductInformationBannerLocation =
   | 'Databases'
   | 'Domains'
   | 'Firewalls'
+  | 'Identity and Access'
   | 'Images'
   | 'Kubernetes'
   | 'LinodeCreate' // Use for Marketplace banners

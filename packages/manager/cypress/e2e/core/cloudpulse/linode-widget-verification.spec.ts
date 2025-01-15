@@ -26,7 +26,6 @@ import { mockGetAccount } from 'support/intercepts/account';
 import { mockGetLinodes } from 'support/intercepts/linodes';
 import { mockGetUserPreferences } from 'support/intercepts/profile';
 import { mockGetRegions } from 'support/intercepts/regions';
-import { extendRegion } from 'support/util/regions';
 import { CloudPulseMetricsResponse } from '@linode/api-v4';
 import { generateRandomMetricsData } from 'support/util/cloudpulse';
 import { Interception } from 'cypress/types/net-stubbing';
@@ -46,7 +45,23 @@ import { formatToolTip } from 'src/features/CloudPulse/Utils/unitConversion';
  */
 const expectedGranularityArray = ['Auto', '1 day', '1 hr', '5 min'];
 const timeDurationToSelect = 'Last 24 Hours';
-const flags : Partial<Flags> = {aclp: {enabled: true, beta: true}}
+const flags: Partial<Flags> = {
+  aclp: { enabled: true, beta: true },
+  aclpResourceTypeMap: [
+    {
+      dimensionKey: 'LINODE_ID',
+      maxResourceSelections: 10,
+      serviceType: 'linode',
+      supportedRegionIds: 'us-ord',
+    },
+    {
+      dimensionKey: 'cluster_id',
+      maxResourceSelections: 10,
+      serviceType: 'dbaas',
+      supportedRegionIds: '',
+    },
+  ],
+};
 const {
   metrics,
   id,
@@ -69,15 +84,13 @@ const dashboard = dashboardFactory.build({
   }),
 });
 
-const metricDefinitions = {
-  data: metrics.map(({ title, name, unit }) =>
-    dashboardMetricFactory.build({
-      label: title,
-      metric: name,
-      unit,
-    })
-  ),
-};
+const metricDefinitions = metrics.map(({ title, name, unit }) =>
+  dashboardMetricFactory.build({
+    label: title,
+    metric: name,
+    unit,
+  })
+);
 
 const mockLinode = linodeFactory.build({
   label: resource,
@@ -85,14 +98,18 @@ const mockLinode = linodeFactory.build({
 });
 
 const mockAccount = accountFactory.build();
-const mockRegion = extendRegion(
-  regionFactory.build({
-    capabilities: ['Linodes'],
-    id: 'us-ord',
-    label: 'Chicago, IL',
-    country: 'us',
-  })
-);
+
+const mockRegion = regionFactory.build({
+  capabilities: ['Linodes'],
+  id: 'us-ord',
+  label: 'Chicago, IL',
+});
+
+const extendedMockRegion = regionFactory.build({
+  capabilities: ['Managed Databases'],
+  id: 'us-east',
+  label: 'Newark,NL',
+});
 const metricsAPIResponsePayload = cloudPulseMetricsResponseFactory.build({
   data: generateRandomMetricsData(timeDurationToSelect, '5 min'),
 });
@@ -161,7 +178,7 @@ describe('Integration Tests for Linode Dashboard ', () => {
     mockGetUserPreferences({});
 
     // navigate to the cloudpulse page
-    cy.visitWithLogin('monitor/cloudpulse');
+    cy.visitWithLogin('monitor');
 
     // Wait for the services and dashboard API calls to complete before proceeding
     cy.wait(['@fetchServices', '@fetchDashboard']);
@@ -170,18 +187,41 @@ describe('Integration Tests for Linode Dashboard ', () => {
     ui.autocomplete
       .findByLabel('Dashboard')
       .should('be.visible')
-      .type(`${dashboardName}{enter}`)
-      .should('be.visible');
+      .type(dashboardName);
+
+    ui.autocompletePopper
+      .findByTitle(dashboardName)
+      .should('be.visible')
+      .click();
 
     // Select a time duration from the autocomplete input.
     ui.autocomplete
       .findByLabel('Time Range')
       .should('be.visible')
-      .type(`${timeDurationToSelect}{enter}`)
-      .should('be.visible');
+      .type(timeDurationToSelect);
+
+    ui.autocompletePopper
+      .findByTitle(timeDurationToSelect)
+      .should('be.visible')
+      .click();
+
+    ui.regionSelect.find().click();
+
+    //  Select a region from the dropdown.
+    ui.regionSelect.find().click();
+
+    ui.regionSelect.find().type(extendedMockRegion.label);
+
+    // Since Linode does not support this region, we expect it to not be in the dropdown.
+
+    ui.autocompletePopper.find().within(() => {
+      cy.findByText(
+        `${extendedMockRegion.label} (${extendedMockRegion.id})`
+      ).should('not.exist');
+    });
 
     // Select a region from the dropdown.
-    ui.regionSelect.find().click().type(`${region}{enter}`);
+    ui.regionSelect.find().click().clear().type(`${region}{enter}`);
 
     // Select a resource from the autocomplete input.
     ui.autocomplete
@@ -191,6 +231,7 @@ describe('Integration Tests for Linode Dashboard ', () => {
       .click();
 
     cy.findByText(resource).should('be.visible');
+
     // Wait for all metrics query requests to resolve.
     cy.wait(['@getMetrics', '@getMetrics', '@getMetrics', '@getMetrics']);
   });
@@ -238,7 +279,7 @@ describe('Integration Tests for Linode Dashboard ', () => {
           });
 
           //validate the widget areachart is present
-          cy.findByTestId('areachart-wrapper').within(() => {
+          cy.get('.recharts-responsive-container').within(() => {
             const expectedWidgetValues = getWidgetLegendRowValuesFromResponse(
               metricsAPIResponsePayload,
               testData.title,
@@ -295,7 +336,7 @@ describe('Integration Tests for Linode Dashboard ', () => {
           });
 
           //validate the widget areachart is present
-          cy.findByTestId('areachart-wrapper').within(() => {
+          cy.get('.recharts-responsive-container').within(() => {
             const expectedWidgetValues = getWidgetLegendRowValuesFromResponse(
               metricsAPIResponsePayload,
               testData.title,
@@ -368,7 +409,7 @@ describe('Integration Tests for Linode Dashboard ', () => {
             .should('be.enabled')
             .click();
           cy.get('@widget').should('be.visible');
-          cy.findByTestId('areachart-wrapper').within(() => {
+          cy.get('.recharts-responsive-container').within(() => {
             const expectedWidgetValues = getWidgetLegendRowValuesFromResponse(
               metricsAPIResponsePayload,
               testData.title,
@@ -401,7 +442,7 @@ describe('Integration Tests for Linode Dashboard ', () => {
             .click({ force: true });
           cy.get('@widget').should('be.visible');
 
-          cy.findByTestId('areachart-wrapper').within(() => {
+          cy.get('.recharts-responsive-container').within(() => {
             const expectedWidgetValues = getWidgetLegendRowValuesFromResponse(
               metricsAPIResponsePayload,
               testData.title,

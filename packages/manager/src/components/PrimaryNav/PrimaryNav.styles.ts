@@ -1,10 +1,9 @@
-import { Box, Divider, omittedProps } from '@linode/ui';
+import { Accordion, Box, Divider, omittedProps } from '@linode/ui';
 import { styled } from '@mui/material/styles';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Link } from 'react-router-dom';
 
 import AkamaiLogo from 'src/assets/logo/akamai-logo.svg';
-import { Accordion } from 'src/components/Accordion';
 import { SIDEBAR_WIDTH } from 'src/components/PrimaryNav/SideMenu';
 
 export const StyledGrid = styled(Grid, {
@@ -109,7 +108,7 @@ export const StyledAccordion = styled(Accordion, {
   ({ theme, ...props }) => ({
     '& h3': {
       '& p': {
-        color: '#B8B8B8',
+        color: theme.tokens.color.Neutrals[50],
         transition: theme.transitions.create(['opacity']),
         ...(props.isCollapsed && {
           opacity: 0,
@@ -117,7 +116,9 @@ export const StyledAccordion = styled(Accordion, {
       },
       // product family icon
       '& svg': {
-        color: props.isActiveProductFamily ? '#00B159' : theme.color.grey4,
+        color: props.isActiveProductFamily
+          ? theme.tokens.color.Green[70]
+          : theme.color.grey4,
         height: 20,
         marginRight: 14,
         transition: theme.transitions.create(['color']),

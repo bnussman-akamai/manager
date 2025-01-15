@@ -1,81 +1,98 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Paper, TextField } from '@linode/ui';
-import { createAlertDefinitionSchema } from '@linode/validation';
+import { Paper, TextField, Typography } from '@linode/ui';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { Breadcrumb } from 'src/components/Breadcrumb/Breadcrumb';
-import { Typography } from 'src/components/Typography';
 import { useCreateAlertDefinition } from 'src/queries/cloudpulse/alerts';
 
+import { MetricCriteriaField } from './Criteria/MetricCriteria';
+import { TriggerConditions } from './Criteria/TriggerConditions';
 import { CloudPulseAlertSeveritySelect } from './GeneralInformation/AlertSeveritySelect';
+import { EngineOption } from './GeneralInformation/EngineOption';
+import { CloudPulseRegionSelect } from './GeneralInformation/RegionSelect';
+import { CloudPulseMultiResourceSelect } from './GeneralInformation/ResourceMultiSelect';
+import { CloudPulseServiceSelect } from './GeneralInformation/ServiceTypeSelect';
+import { CreateAlertDefinitionFormSchema } from './schemas';
+import { filterFormValues } from './utilities';
 
 import type {
   CreateAlertDefinitionForm,
-  CreateAlertDefinitionPayload,
-  MetricCriteria,
-  TriggerCondition,
-} from '@linode/api-v4/lib/cloudpulse/types';
+  MetricCriteriaForm,
+  TriggerConditionForm,
+} from './types';
+import type { ObjectSchema } from 'yup';
 
-const triggerConditionInitialValues: TriggerCondition = {
-  evaluation_period_seconds: 0,
-  polling_interval_seconds: 0,
+const triggerConditionInitialValues: TriggerConditionForm = {
+  criteria_condition: 'ALL',
+  evaluation_period_seconds: null,
+  polling_interval_seconds: null,
   trigger_occurrences: 0,
 };
-const criteriaInitialValues: MetricCriteria[] = [
-  {
-    aggregation_type: null,
-    dimension_filters: [],
-    metric: '',
-    operator: null,
-    value: 0,
-  },
-];
+const criteriaInitialValues: MetricCriteriaForm = {
+  aggregation_type: null,
+  dimension_filters: [],
+  metric: null,
+  operator: null,
+  threshold: 0,
+};
 const initialValues: CreateAlertDefinitionForm = {
   channel_ids: [],
-  engine_type: '',
+  engineType: null,
+  entity_ids: [],
   label: '',
   region: '',
-  resource_ids: [],
-  rule_criteria: { rules: criteriaInitialValues },
-  service_type: '',
+  rule_criteria: {
+    rules: [criteriaInitialValues],
+  },
+  serviceType: null,
   severity: null,
-  triggerCondition: triggerConditionInitialValues,
+  tags: [''],
+  trigger_conditions: triggerConditionInitialValues,
 };
 
 const overrides = [
   {
     label: 'Definitions',
-    linkTo: '/monitor/cloudpulse/alerts/definitions',
+    linkTo: '/monitor/alerts/definitions',
     position: 1,
   },
   {
     label: 'Details',
-    linkTo: `/monitor/cloudpulse/alerts/definitions/create`,
+    linkTo: `/monitor/alerts/definitions/create`,
     position: 2,
   },
 ];
 export const CreateAlertDefinition = () => {
   const history = useHistory();
-  const alertCreateExit = () =>
-    history.push('/monitor/cloudpulse/alerts/definitions');
+  const alertCreateExit = () => history.push('/monitor/alerts/definitions');
 
-  const formMethods = useForm<CreateAlertDefinitionPayload>({
+  const formMethods = useForm<CreateAlertDefinitionForm>({
     defaultValues: initialValues,
     mode: 'onBlur',
-    resolver: yupResolver(createAlertDefinitionSchema),
+    resolver: yupResolver(
+      CreateAlertDefinitionFormSchema as ObjectSchema<CreateAlertDefinitionForm>
+    ),
   });
 
-  const { control, formState, handleSubmit, setError } = formMethods;
+  const { control, formState, getValues, handleSubmit, setError } = formMethods;
   const { enqueueSnackbar } = useSnackbar();
-  const { mutateAsync: createAlert } = useCreateAlertDefinition();
+  const { mutateAsync: createAlert } = useCreateAlertDefinition(
+    getValues('serviceType')!
+  );
 
+  /**
+   * The maxScrapeInterval variable will be required for the Trigger Conditions part of the Critieria section.
+   */
+  const [maxScrapeInterval, setMaxScrapeInterval] = React.useState<number>(0);
+
+  const serviceTypeWatcher = useWatch({ control, name: 'serviceType' });
   const onSubmit = handleSubmit(async (values) => {
     try {
-      await createAlert(values);
+      await createAlert(filterFormValues(values));
       enqueueSnackbar('Alert successfully created', {
         variant: 'success',
       });
@@ -85,6 +102,9 @@ export const CreateAlertDefinition = () => {
         if (error.field) {
           setError(error.field, { message: error.reason });
         } else {
+          enqueueSnackbar(`Alert failed: ${error.reason}`, {
+            variant: 'error',
+          });
           setError('root', { message: error.reason });
         }
       }
@@ -131,7 +151,27 @@ export const CreateAlertDefinition = () => {
             control={control}
             name="description"
           />
+          <CloudPulseServiceSelect name="serviceType" />
+          {serviceTypeWatcher === 'dbaas' && <EngineOption name="engineType" />}
+          <CloudPulseRegionSelect name="region" />
+          <CloudPulseMultiResourceSelect
+            engine={useWatch({ control, name: 'engineType' })}
+            name="entity_ids"
+            region={useWatch({ control, name: 'region' })}
+            serviceType={serviceTypeWatcher}
+          />
           <CloudPulseAlertSeveritySelect name="severity" />
+          <MetricCriteriaField
+            setMaxInterval={(interval: number) =>
+              setMaxScrapeInterval(interval)
+            }
+            name="rule_criteria.rules"
+            serviceType={serviceTypeWatcher!}
+          />
+          <TriggerConditions
+            maxScrapingInterval={maxScrapeInterval}
+            name="trigger_conditions"
+          />
           <ActionsPanel
             primaryButtonProps={{
               label: 'Submit',

@@ -1,24 +1,24 @@
 import { appendConfigInterface } from '@linode/api-v4';
 import {
+  Autocomplete,
   Box,
   Button,
   Checkbox,
+  FormControlLabel,
   FormHelperText,
   Notice,
   TextField,
   TooltipIcon,
+  Typography,
 } from '@linode/ui';
 import { useTheme } from '@mui/material/styles';
 import { useFormik } from 'formik';
 import * as React from 'react';
 
-import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
 import { DownloadCSV } from 'src/components/DownloadCSV/DownloadCSV';
 import { Drawer } from 'src/components/Drawer';
-import { FormControlLabel } from 'src/components/FormControlLabel';
 import { Link } from 'src/components/Link';
 import { RemovableSelectionsListTable } from 'src/components/RemovableSelectionsList/RemovableSelectionsListTable';
-import { Typography } from 'src/components/Typography';
 import { LinodeSelect } from 'src/features/Linodes/LinodeSelect/LinodeSelect';
 import {
   VPC_AUTO_ASSIGN_IPV4_TOOLTIP,

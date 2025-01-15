@@ -1,8 +1,12 @@
-import { Box, FormHelperText, TextField, omittedProps } from '@linode/ui';
+import {
+  Autocomplete,
+  Box,
+  FormHelperText,
+  TextField,
+  Typography,
+  omittedProps,
+} from '@linode/ui';
 import { styled } from '@mui/material/styles';
-
-import { Autocomplete } from 'src/components/Autocomplete/Autocomplete';
-import { Typography } from 'src/components/Typography';
 
 export const StyledCodeSentMessageBox = styled(Box, {
   label: 'StyledCodeSentMessageBox',
@@ -35,7 +39,8 @@ export const StyledInputContainer = styled(Box, {
   label: 'StyledInputContainer',
   shouldForwardProp: omittedProps(['isPhoneInputFocused']),
 })<{ isPhoneInputFocused: boolean }>(({ isPhoneInputFocused, theme }) => ({
-  backgroundColor: theme.name === 'dark' ? '#343438' : undefined,
+  backgroundColor:
+    theme.name === 'dark' ? theme.tokens.color.Neutrals[90] : undefined,
   border:
     theme.name === 'light'
       ? `1px solid ${theme.tokens.color.Neutrals[40]}`
@@ -45,11 +50,11 @@ export const StyledInputContainer = styled(Box, {
   ...(isPhoneInputFocused &&
     (theme.name === 'light'
       ? {
-          borderColor: '#3683dc',
-          boxShadow: '0 0 2px 1px #e1edfa',
+          borderColor: theme.tokens.color.Ultramarine[70],
+          boxShadow: `0 0 2px 1px ${theme.tokens.color.Ultramarine[20]}`,
         }
       : {
-          borderColor: '#3683dc',
+          borderColor: theme.tokens.color.Ultramarine[70],
           boxShadow: `0 0 2px 1px ${theme.tokens.color.Neutrals.Black}`,
         })),
 }));

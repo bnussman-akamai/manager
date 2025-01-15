@@ -1,8 +1,7 @@
-import { omittedProps } from '../../utilities';
 import { styled } from '@mui/material/styles';
 
 import { PlusSignIcon } from '../../assets/icons';
-
+import { omittedProps } from '../../utilities';
 import { Button } from './Button';
 
 /**
@@ -38,7 +37,7 @@ export const StyledPlusIcon = styled(PlusSignIcon, {
 })(({ theme, ...props }) => ({
   color: props.disabled
     ? theme.name === 'dark'
-      ? '#5c6470'
+      ? theme.tokens.color.Neutrals[70]
       : theme.color.disabledText
     : theme.color.tagIcon,
   height: '10px',

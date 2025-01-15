@@ -1,5 +1,5 @@
 import { rebuildLinode } from '@linode/api-v4';
-import { Box, Checkbox, Divider } from '@linode/ui';
+import { Box, Checkbox, Divider, Typography } from '@linode/ui';
 import { RebuildLinodeSchema } from '@linode/validation/lib/linodes.schema';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Formik } from 'formik';
@@ -11,7 +11,6 @@ import { useLocation } from 'react-router-dom';
 import { AccessPanel } from 'src/components/AccessPanel/AccessPanel';
 import { ImageSelect } from 'src/components/ImageSelect/ImageSelect';
 import { TypeToConfirm } from 'src/components/TypeToConfirm/TypeToConfirm';
-import { Typography } from 'src/components/Typography';
 import { useFlags } from 'src/hooks/useFlags';
 import { useEventsPollingActions } from 'src/queries/events/events';
 import { usePreferences } from 'src/queries/profile/preferences';
@@ -83,9 +82,9 @@ export const RebuildFromImage = (props: Props) => {
   } = props;
 
   const {
-    data: preferences,
+    data: typeToConfirmPreference,
     isLoading: isLoadingPreferences,
-  } = usePreferences();
+  } = usePreferences((preferences) => preferences?.type_to_confirm ?? true);
 
   const { checkForNewEvents } = useEventsPollingActions();
 
@@ -127,7 +126,7 @@ export const RebuildFromImage = (props: Props) => {
   }, [shouldReuseUserData]);
 
   const submitButtonDisabled =
-    preferences?.type_to_confirm !== false && confirmationText !== linodeLabel;
+    Boolean(typeToConfirmPreference) && confirmationText !== linodeLabel;
 
   const handleFormSubmit = (
     { authorized_users, image, root_pass }: RebuildFromImageForm,
@@ -316,7 +315,7 @@ export const RebuildFromImage = (props: Props) => {
                   title="Confirm"
                   typographyStyle={{ marginBottom: 8 }}
                   value={confirmationText}
-                  visible={preferences?.type_to_confirm}
+                  visible={typeToConfirmPreference}
                 />
 
                 <StyledActionsPanel

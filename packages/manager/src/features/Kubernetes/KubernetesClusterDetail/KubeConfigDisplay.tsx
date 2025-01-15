@@ -1,4 +1,4 @@
-import { Box, CircleProgress, Stack } from '@linode/ui';
+import { Box, CircleProgress, Stack, Typography } from '@linode/ui';
 import copy from 'copy-to-clipboard';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
@@ -9,10 +9,9 @@ import CopyIcon from 'src/assets/icons/copy.svg';
 import DownloadIcon from 'src/assets/icons/lke-download.svg';
 import ResetIcon from 'src/assets/icons/reset.svg';
 import { MaskableText } from 'src/components/MaskableText/MaskableText';
-import { Typography } from 'src/components/Typography';
 import {
   useAllKubernetesClusterAPIEndpointsQuery,
-  useKubenetesKubeConfigQuery,
+  useKubernetesKubeConfigQuery,
 } from 'src/queries/kubernetes';
 import { downloadFile } from 'src/utilities/downloadFile';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
@@ -38,14 +37,14 @@ const useStyles = makeStyles()((theme: Theme) => ({
     pointerEvents: 'none',
   },
   kubeconfigElement: {
+    '&:first-of-type': {
+      borderLeft: 'none',
+    },
     '&:hover': {
       opacity: 0.7,
     },
-    '&:last-child': {
-      borderRight: 'none',
-    },
     alignItems: 'center',
-    borderRight: '1px solid #c4c4c4',
+    borderLeft: `1px solid ${theme.tokens.color.Neutrals[40]}`,
     cursor: 'pointer',
     display: 'flex',
   },
@@ -53,6 +52,8 @@ const useStyles = makeStyles()((theme: Theme) => ({
     alignItems: 'center',
     color: theme.palette.primary.main,
     display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(1),
   },
   kubeconfigFileText: {
     color: theme.textColors.linkActiveLight,
@@ -104,7 +105,7 @@ export const KubeConfigDisplay = (props: Props) => {
   const { enqueueSnackbar } = useSnackbar();
   const { classes, cx } = useStyles();
 
-  const { isFetching, refetch: getKubeConfig } = useKubenetesKubeConfigQuery(
+  const { isFetching, refetch: getKubeConfig } = useKubernetesKubeConfigQuery(
     clusterId,
     false
   );
@@ -153,9 +154,11 @@ export const KubeConfigDisplay = (props: Props) => {
   };
 
   const getEndpointToDisplay = (endpoints: string[]) => {
-    // Per discussions with the API team and UX, we should display only the endpoint with port 443, so we are matching on that.
-    return endpoints.find((thisResponse) =>
-      thisResponse.match(/linodelke\.net:443$/i)
+    // We are returning the endpoint with port 443 to be the most user-friendly, but if it doesn't exist, return the first endpoint available
+    return (
+      endpoints.find((thisResponse) =>
+        thisResponse.match(/linodelke\.net:443$/i)
+      ) ?? endpoints[0]
     );
   };
 

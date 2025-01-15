@@ -1,4 +1,4 @@
-import { Box, CircleProgress, Paper } from '@linode/ui';
+import { Box, CircleProgress, Paper, Typography } from '@linode/ui';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
 import * as React from 'react';
@@ -7,7 +7,6 @@ import { useParams } from 'react-router-dom';
 import PendingIcon from 'src/assets/icons/pending.svg';
 import { AreaChart } from 'src/components/AreaChart/AreaChart';
 import { ErrorState } from 'src/components/ErrorState/ErrorState';
-import { Typography } from 'src/components/Typography';
 import { formatBitsPerSecond } from 'src/features/Longview/shared/utilities';
 import {
   useNodeBalancerQuery,
@@ -108,7 +107,7 @@ export const TablesPanel = () => {
             {
               data: metrics,
               format: formatNumber,
-              legendColor: 'purple',
+              legendColor: theme.graphs.purple,
               legendTitle: 'Connections',
             },
           ]}
@@ -196,13 +195,13 @@ export const TablesPanel = () => {
             {
               data: getMetrics(trafficIn),
               format: formatBitsPerSecond,
-              legendColor: 'darkGreen',
+              legendColor: theme.graphs.darkGreen,
               legendTitle: 'Traffic In',
             },
             {
               data: getMetrics(trafficOut),
               format: formatBitsPerSecond,
-              legendColor: 'lightGreen',
+              legendColor: theme.graphs.lightGreen,
               legendTitle: 'Traffic Out',
             },
           ]}
@@ -265,8 +264,8 @@ const StyledTitle = styled(Typography, {
 
 export const StyledBottomLegend = styled('div', {
   label: 'StyledBottomLegend',
-})(() => ({
-  color: '#777',
+})(({ theme }) => ({
+  color: theme.tokens.color.Neutrals[70],
   fontSize: 14,
 }));
 

@@ -51,6 +51,11 @@ export interface DashboardProperties {
    * optional flag to check whether changes should be stored in preferences or not (in case this component is reused)
    */
   savePref?: boolean;
+
+  /**
+   * Selected tags for the dashboard
+   */
+  tags?: string[];
 }
 
 export const CloudPulseDashboard = (props: DashboardProperties) => {
@@ -67,7 +72,7 @@ export const CloudPulseDashboard = (props: DashboardProperties) => {
 
   const getJweTokenPayload = (): JWETokenPayLoad => {
     return {
-      resource_ids: resourceList?.map((resource) => Number(resource.id)) ?? [],
+      entity_ids: resources?.map((resource) => Number(resource)) ?? [],
     };
   };
 
@@ -100,11 +105,11 @@ export const CloudPulseDashboard = (props: DashboardProperties) => {
   const {
     data: jweToken,
     isError: isJweTokenError,
-    isLoading: isJweTokenLoading,
+    isFetching: isJweTokenFetching,
   } = useCloudPulseJWEtokenQuery(
     dashboard?.service_type,
     getJweTokenPayload(),
-    Boolean(resourceList)
+    Boolean(resources) && !isDashboardLoading && !isDashboardApiError
   );
 
   if (isDashboardApiError) {
@@ -123,12 +128,7 @@ export const CloudPulseDashboard = (props: DashboardProperties) => {
     return renderErrorState('Error loading the definitions of metrics.');
   }
 
-  if (
-    isMetricDefinitionLoading ||
-    isDashboardLoading ||
-    isResourcesLoading ||
-    isJweTokenLoading
-  ) {
+  if (isMetricDefinitionLoading || isDashboardLoading || isResourcesLoading) {
     return <CircleProgress />;
   }
 
@@ -137,6 +137,7 @@ export const CloudPulseDashboard = (props: DashboardProperties) => {
       additionalFilters={additionalFilters}
       dashboard={dashboard}
       duration={duration}
+      isJweTokenFetching={isJweTokenFetching}
       jweToken={jweToken}
       manualRefreshTimeStamp={manualRefreshTimeStamp}
       metricDefinitions={metricDefinitions}

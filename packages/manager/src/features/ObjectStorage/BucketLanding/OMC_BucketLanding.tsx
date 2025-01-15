@@ -1,4 +1,4 @@
-import { CircleProgress, Notice } from '@linode/ui';
+import { CircleProgress, Notice, Typography } from '@linode/ui';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
 import { makeStyles } from 'tss-react/mui';
@@ -9,13 +9,12 @@ import { Link } from 'src/components/Link';
 import OrderBy from 'src/components/OrderBy';
 import { TransferDisplay } from 'src/components/TransferDisplay/TransferDisplay';
 import { TypeToConfirmDialog } from 'src/components/TypeToConfirmDialog/TypeToConfirmDialog';
-import { Typography } from 'src/components/Typography';
+import { useObjectStorageRegions } from 'src/features/ObjectStorage/hooks/useObjectStorageRegions';
 import { useOpenClose } from 'src/hooks/useOpenClose';
 import {
   useDeleteBucketWithRegionMutation,
   useObjectStorageBuckets,
 } from 'src/queries/object-storage/queries';
-import { isBucketError } from 'src/queries/object-storage/requests';
 import { useProfile } from 'src/queries/profile/profile';
 import {
   sendDeleteBucketEvent,
@@ -28,7 +27,7 @@ import { BucketDetailsDrawer } from './BucketDetailsDrawer';
 import { BucketLandingEmptyState } from './BucketLandingEmptyState';
 import { BucketTable } from './BucketTable';
 
-import type { APIError, ObjectStorageBucket, Region } from '@linode/api-v4';
+import type { APIError, ObjectStorageBucket } from '@linode/api-v4';
 import type { Theme } from '@mui/material/styles';
 
 const useStyles = makeStyles()((theme: Theme) => ({
@@ -39,6 +38,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 
 export const OMC_BucketLanding = () => {
   const { data: profile } = useProfile();
+  const { availableStorageRegions } = useObjectStorageRegions();
 
   const isRestrictedUser = profile?.restricted;
 
@@ -110,9 +110,34 @@ export const OMC_BucketLanding = () => {
   }, [removeBucketConfirmationDialog]);
 
   // @TODO OBJGen2 - We could clean this up when OBJ Gen2 is in GA.
-  const unavailableRegions = objectStorageBucketsResponse?.errors
-    ?.map((error) => (isBucketError(error) ? error.region : error.endpoint))
-    .filter((region): region is Region => region !== undefined);
+  const unavailableRegionLabels = React.useMemo(() => {
+    const errors = objectStorageBucketsResponse?.errors;
+
+    if (!errors) {
+      return [];
+    }
+
+    // Using a Map to store unique region-label pairs
+    // In our case, this handles deduplication automatically
+    const regionMap = new Map<string, string>();
+
+    // Single pass through errors to collect all region labels
+    errors.forEach((error) => {
+      if ('endpoint' in error && error.endpoint) {
+        const regionLabel = availableStorageRegions?.find(
+          (region) => region.id === error.endpoint.region
+        )?.label;
+
+        if (regionLabel) {
+          regionMap.set(error.endpoint.region, regionLabel);
+        }
+      } else if ('region' in error && error.region?.label) {
+        regionMap.set(error.region.label, error.region.label);
+      }
+    });
+
+    return Array.from(regionMap.values());
+  }, [objectStorageBucketsResponse, availableStorageRegions]);
 
   if (isRestrictedUser) {
     return <RenderEmpty />;
@@ -134,8 +159,8 @@ export const OMC_BucketLanding = () => {
   if (objectStorageBucketsResponse?.buckets.length === 0) {
     return (
       <>
-        {unavailableRegions && unavailableRegions.length > 0 && (
-          <UnavailableRegionsDisplay unavailableRegions={unavailableRegions} />
+        {unavailableRegionLabels && unavailableRegionLabels.length > 0 && (
+          <UnavailableRegionsDisplay regionLabels={unavailableRegionLabels} />
         )}
         <RenderEmpty />
       </>
@@ -149,8 +174,8 @@ export const OMC_BucketLanding = () => {
   return (
     <React.Fragment>
       <DocumentTitleSegment segment="Buckets" />
-      {unavailableRegions && unavailableRegions.length > 0 && (
-        <UnavailableRegionsDisplay unavailableRegions={unavailableRegions} />
+      {unavailableRegionLabels && unavailableRegionLabels.length > 0 && (
+        <UnavailableRegionsDisplay regionLabels={unavailableRegionLabels} />
       )}
       <Grid xs={12}>
         <OrderBy data={buckets} order={'asc'} orderBy={'label'}>
@@ -172,7 +197,9 @@ export const OMC_BucketLanding = () => {
             style={{ marginTop: 18, textAlign: 'center', width: '100%' }}
             variant="body1"
           >
-            Total storage used: {readableBytes(totalUsage).formatted}
+            Total storage used:{' '}
+            {/* to convert from binary units (GiB) to decimal units (GB) we need to pass the base10 flag */}
+            {readableBytes(totalUsage, { base10: true }).formatted}
           </Typography>
         ) : null}
         <TransferDisplay spacingTop={buckets.length > 1 ? 8 : 18} />
@@ -185,6 +212,7 @@ export const OMC_BucketLanding = () => {
           type: 'Bucket',
         }}
         errors={error}
+        expand
         label={'Bucket Name'}
         loading={isLoading}
         onClick={removeBucket}
@@ -228,14 +256,14 @@ const RenderEmpty = () => {
   return <BucketLandingEmptyState />;
 };
 
-interface UnavailableRegionsDisplayProps {
-  unavailableRegions: Region[];
+interface UnavailableRegionLabelsProps {
+  regionLabels: string[];
 }
 
 const UnavailableRegionsDisplay = React.memo(
-  ({ unavailableRegions }: UnavailableRegionsDisplayProps) => {
-    const regionsAffected = unavailableRegions.map(
-      (unavailableRegion) => unavailableRegion.label
+  ({ regionLabels }: UnavailableRegionLabelsProps) => {
+    const regionsAffected = regionLabels.map(
+      (unavailableRegion) => unavailableRegion
     );
 
     return <Banner regionsAffected={regionsAffected} />;
@@ -258,8 +286,8 @@ const Banner = React.memo(({ regionsAffected }: BannerProps) => {
           : `${regionsAffected[0]}.`}
         <ul>
           {moreThanOneRegionAffected &&
-            regionsAffected.map((thisRegion) => (
-              <li key={thisRegion}>{thisRegion}</li>
+            regionsAffected.map((thisRegion, idx) => (
+              <li key={`${thisRegion}-${idx}`}>{thisRegion}</li>
             ))}
         </ul>
         If you have buckets in{' '}

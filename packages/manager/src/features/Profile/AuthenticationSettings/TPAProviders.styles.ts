@@ -1,8 +1,6 @@
-import { Button, Notice, Paper } from '@linode/ui';
+import { Button, Notice, Paper, Typography } from '@linode/ui';
 import { styled } from '@mui/material/styles';
 import Grid from '@mui/material/Unstable_Grid2';
-
-import { Typography } from 'src/components/Typography';
 
 export const StyledRootContainer = styled(Paper, {
   label: 'StyledRootContainer',
@@ -53,7 +51,10 @@ export const StyledButton = styled(Button, {
   '&:hover': {
     backgroundColor: theme.color.grey6,
   },
-  backgroundColor: theme.name === 'light' ? '#f5f6f7' : '#444',
+  backgroundColor:
+    theme.name === 'light'
+      ? theme.tokens.color.Ultramarine[5]
+      : theme.tokens.color.Ultramarine[80],
   borderRadius: 1,
   marginTop: theme.spacing(),
   minHeight: 70,

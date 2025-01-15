@@ -7,8 +7,8 @@ import {
   getNodeBalancerConfigs,
   updateNodeBalancerConfig,
   updateNodeBalancerConfigNode,
-} from '@linode/api-v4/lib/nodebalancers';
-import { Box, Button } from '@linode/ui';
+} from '@linode/api-v4';
+import { Accordion, Box, Button, Typography } from '@linode/ui';
 import { styled } from '@mui/material/styles';
 import {
   append,
@@ -25,12 +25,10 @@ import * as React from 'react';
 import { withRouter } from 'react-router-dom';
 import { compose as composeC } from 'recompose';
 
-import { Accordion } from 'src/components/Accordion';
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { ConfirmationDialog } from 'src/components/ConfirmationDialog/ConfirmationDialog';
 import { DocumentTitleSegment } from 'src/components/DocumentTitle';
 import PromiseLoader from 'src/components/PromiseLoader/PromiseLoader';
-import { Typography } from 'src/components/Typography';
 import { withQueryClient } from 'src/containers/withQueryClient.container';
 import { nodebalancerQueries } from 'src/queries/nodebalancers';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
@@ -39,7 +37,6 @@ import { scrollErrorIntoView } from 'src/utilities/scrollErrorIntoView';
 import { NodeBalancerConfigPanel } from '../NodeBalancerConfigPanel';
 import { lensFrom } from '../NodeBalancerCreate';
 import {
-  clampNumericString,
   createNewNodeBalancerConfig,
   createNewNodeBalancerConfigNode,
   nodeForRequest,
@@ -52,12 +49,13 @@ import type {
   NodeBalancerConfigFieldsWithStatus,
   NodeBalancerConfigNodeFields,
 } from '../types';
-import type { Grants } from '@linode/api-v4';
 import type {
+  APIError,
+  Grants,
   NodeBalancerConfig,
   NodeBalancerConfigNode,
-} from '@linode/api-v4/lib/nodebalancers';
-import type { APIError, ResourcePage } from '@linode/api-v4/lib/types';
+  ResourcePage,
+} from '@linode/api-v4';
 import type { Lens } from 'ramda';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { PromiseLoaderResponse } from 'src/components/PromiseLoader/PromiseLoader';
@@ -627,13 +625,13 @@ class NodeBalancerConfigurations extends React.Component<
         success={panelMessages[idx]}
       >
         <NodeBalancerConfigPanel
-          onHealthCheckAttemptsChange={this.updateStateWithClamp(
+          onHealthCheckAttemptsChange={this.updateState(
             L.healthCheckAttemptsLens
           )}
-          onHealthCheckIntervalChange={this.updateStateWithClamp(
+          onHealthCheckIntervalChange={this.updateState(
             L.healthCheckIntervalLens
           )}
-          onHealthCheckTimeoutChange={this.updateStateWithClamp(
+          onHealthCheckTimeoutChange={this.updateState(
             L.healthCheckTimeoutLens
           )}
           onHealthCheckTypeChange={this.updateState(
@@ -1079,15 +1077,6 @@ class NodeBalancerConfigurations extends React.Component<
   ) => (value: any) => {
     this.clearMessages();
     this.setState(set(lens, value), L && callback ? callback(L) : undefined);
-  };
-
-  updateStateWithClamp = (
-    lens: Lens,
-    L?: { [key: string]: Lens },
-    callback?: (L: { [key: string]: Lens }) => () => void
-  ) => (value: any) => {
-    const clampedValue = clampNumericString(0, Number.MAX_SAFE_INTEGER)(value);
-    this.updateState(lens, L, callback)(clampedValue);
   };
 
   render() {

@@ -1,13 +1,11 @@
-import { Notice } from '@linode/ui';
+import { Notice, Typography } from '@linode/ui';
 import { styled } from '@mui/material/styles';
 import Grid from '@mui/material/Unstable_Grid2';
-
-import { Typography } from 'src/components/Typography';
 
 export const StyledResultsWrapper = styled('div', {
   label: 'StyledResultsWrapper',
 })(({ theme }) => ({
-  borderTop: '1px solid #D6D7D9',
+  borderTop: `1px solid ${theme.tokens.color.Neutrals[30]}`,
   fontSize: '0.875rem',
   lineHeight: '1.125rem',
   marginLeft: theme.spacing(),
@@ -63,7 +61,10 @@ export const StyledImageGrid = styled(Grid, {
   label: 'StyledImageGrid',
 })(({ theme }) => ({
   '& svg': {
-    color: theme.name === 'light' ? '#ededf4' : '#83868c',
+    color:
+      theme.name === 'light'
+        ? theme.tokens.color.Neutrals[10]
+        : theme.tokens.color.Neutrals[60],
   },
   alignItems: 'center',
   display: 'flex',

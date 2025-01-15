@@ -1,4 +1,4 @@
-import { CircleProgress } from '@linode/ui';
+import { CircleProgress, Typography } from '@linode/ui';
 import { createLazyRoute } from '@tanstack/react-router';
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -21,7 +21,6 @@ import { TableHead } from 'src/components/TableHead';
 import { TableRow } from 'src/components/TableRow';
 import { TableSortCell } from 'src/components/TableSortCell';
 import { TransferDisplay } from 'src/components/TransferDisplay/TransferDisplay';
-import { Typography } from 'src/components/Typography';
 import { useOrder } from 'src/hooks/useOrder';
 import { usePagination } from 'src/hooks/usePagination';
 import { useKubernetesClustersQuery } from 'src/queries/kubernetes';
@@ -33,7 +32,7 @@ import { DeleteKubernetesClusterDialog } from '../KubernetesClusterDetail/Delete
 import UpgradeVersionModal from '../UpgradeVersionModal';
 import { KubernetesEmptyState } from './KubernetesLandingEmptyState';
 
-import type { KubeNodePoolResponse } from '@linode/api-v4';
+import type { KubeNodePoolResponse, KubernetesTier } from '@linode/api-v4';
 
 interface ClusterDialogState {
   loading: boolean;
@@ -48,6 +47,7 @@ interface UpgradeDialogState {
   open: boolean;
   selectedClusterID: number;
   selectedClusterLabel: string;
+  selectedClusterTier: KubernetesTier;
 }
 
 const defaultDialogState = {
@@ -64,6 +64,7 @@ const defaultUpgradeDialogState = {
   open: false,
   selectedClusterID: 0,
   selectedClusterLabel: '',
+  selectedClusterTier: 'standard' as KubernetesTier,
 };
 
 const preferenceKey = 'kubernetes';
@@ -114,6 +115,7 @@ export const KubernetesLanding = () => {
   const openUpgradeDialog = (
     clusterID: number,
     clusterLabel: string,
+    clusterTier: KubernetesTier,
     currentVersion: string
   ) => {
     setUpgradeDialogState({
@@ -121,6 +123,7 @@ export const KubernetesLanding = () => {
       open: true,
       selectedClusterID: clusterID,
       selectedClusterLabel: clusterLabel,
+      selectedClusterTier: clusterTier,
     });
   };
 
@@ -171,10 +174,10 @@ export const KubernetesLanding = () => {
       {isDiskEncryptionFeatureEnabled && (
         <DismissibleBanner
           preferenceKey={DISK_ENCRYPTION_UPDATE_PROTECT_CLUSTERS_BANNER_KEY}
-          sx={{ margin: '1rem 0 1rem 0' }}
+          spacingBottom={8}
           variant="info"
         >
-          <Typography>
+          <Typography fontSize="inherit">
             {DISK_ENCRYPTION_UPDATE_PROTECT_CLUSTERS_COPY}
           </Typography>
         </DismissibleBanner>
@@ -245,6 +248,7 @@ export const KubernetesLanding = () => {
                 openUpgradeDialog(
                   cluster.id,
                   cluster.label,
+                  cluster?.tier ?? 'standard', // TODO LKE: remove fallback once LKE-E is in GA and tier is required
                   cluster.k8s_version
                 )
               }
@@ -273,6 +277,7 @@ export const KubernetesLanding = () => {
       <UpgradeVersionModal
         clusterID={upgradeDialog.selectedClusterID}
         clusterLabel={upgradeDialog.selectedClusterLabel}
+        clusterTier={upgradeDialog.selectedClusterTier}
         currentVersion={upgradeDialog.currentVersion}
         isOpen={upgradeDialog.open}
         onClose={closeUpgradeDialog}

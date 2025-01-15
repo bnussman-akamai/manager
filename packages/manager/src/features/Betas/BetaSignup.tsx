@@ -1,4 +1,4 @@
-import { Checkbox, CircleProgress, Paper, Stack } from '@linode/ui';
+import { Checkbox, CircleProgress, Paper, Stack, Typography } from '@linode/ui';
 import {
   createLazyRoute,
   useNavigate,
@@ -11,12 +11,11 @@ import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { HighlightedMarkdown } from 'src/components/HighlightedMarkdown/HighlightedMarkdown';
 import { LandingHeader } from 'src/components/LandingHeader/LandingHeader';
 import { NotFound } from 'src/components/NotFound';
-import { Typography } from 'src/components/Typography';
 import { useCreateAccountBetaMutation } from 'src/queries/account/betas';
 import { useBetaQuery } from 'src/queries/betas';
 
 export const BetaSignup = () => {
-  const betaAgreement = `# Early Adopter Testing Program
+  const betaAgreement = `### Early Adopter Testing Program
 This Early Adopter Testing Program Service Level Agreement (the “EAP”) is between Linode LLC (“Linode”) and
 you, the customer who requests access and participation (the “Participant”) to the Linode Early Access Program
 (the “Program”). This EAP is attached to and amends the master services agreement between you and Linode

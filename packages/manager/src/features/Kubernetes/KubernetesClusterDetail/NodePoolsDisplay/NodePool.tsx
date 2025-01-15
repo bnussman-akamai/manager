@@ -1,9 +1,15 @@
-import { Box, Paper, Stack, StyledActionButton, Tooltip } from '@linode/ui';
+import {
+  Box,
+  Paper,
+  Stack,
+  StyledActionButton,
+  Tooltip,
+  Typography,
+} from '@linode/ui';
 import * as React from 'react';
 
 import { ActionMenu } from 'src/components/ActionMenu/ActionMenu';
 import { Hidden } from 'src/components/Hidden';
-import { Typography } from 'src/components/Typography';
 
 import { NodeTable } from './NodeTable';
 
@@ -15,6 +21,7 @@ import type { EncryptionStatus } from '@linode/api-v4/lib/linodes/types';
 
 interface Props {
   autoscaler: AutoscaleSettings;
+  clusterId: number;
   encryptionStatus: EncryptionStatus | undefined;
   handleClickResize: (poolId: number) => void;
   isOnlyNodePool: boolean;
@@ -24,12 +31,14 @@ interface Props {
   openRecycleAllNodesDialog: (poolId: number) => void;
   openRecycleNodeDialog: (nodeID: string, linodeLabel: string) => void;
   poolId: number;
+  tags: string[];
   typeLabel: string;
 }
 
 export const NodePool = (props: Props) => {
   const {
     autoscaler,
+    clusterId,
     encryptionStatus,
     handleClickResize,
     isOnlyNodePool,
@@ -39,6 +48,7 @@ export const NodePool = (props: Props) => {
     openRecycleAllNodesDialog,
     openRecycleNodeDialog,
     poolId,
+    tags,
     typeLabel,
   } = props;
 
@@ -128,10 +138,12 @@ export const NodePool = (props: Props) => {
         </Hidden>
       </Paper>
       <NodeTable
+        clusterId={clusterId}
         encryptionStatus={encryptionStatus}
         nodes={nodes}
         openRecycleNodeDialog={openRecycleNodeDialog}
         poolId={poolId}
+        tags={tags}
         typeLabel={typeLabel}
       />
     </Box>

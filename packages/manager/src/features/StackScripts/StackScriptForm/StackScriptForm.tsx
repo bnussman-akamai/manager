@@ -1,9 +1,8 @@
-import { InputAdornment, Paper, TextField } from '@linode/ui';
+import { InputAdornment, Paper, TextField, Typography } from '@linode/ui';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
 
 import { ImageSelect } from 'src/components/ImageSelect/ImageSelect';
-import { Typography } from 'src/components/Typography';
 import { getAPIErrorFor } from 'src/utilities/getAPIErrorFor';
 
 import {
@@ -94,23 +93,6 @@ export const StackScriptForm = React.memo((props: Props) => {
             rows={1}
             value={description.value}
           />
-          <ImageSelect
-            textFieldProps={{
-              required: true,
-              tooltipText:
-                'Select which images are compatible with this StackScript. "Any/All" allows you to use private images.',
-            }}
-            anyAllOption
-            data-qa-stackscript-target-select
-            disabled={disabled}
-            errorText={hasErrorFor('images')}
-            label="Target Images"
-            multiple
-            onChange={onSelectChange}
-            placeholder="Select image(s)"
-            value={selectedImages}
-            variant="public"
-          />
         </StyledGridWithTips>
         <StyledGridWithTips>
           <StyledNotice>
@@ -127,6 +109,23 @@ export const StackScriptForm = React.memo((props: Props) => {
           </StyledNotice>
         </StyledGridWithTips>
       </Grid>
+      <ImageSelect
+        textFieldProps={{
+          required: true,
+          tooltipText:
+            'Select which images are compatible with this StackScript. "Any/All" allows you to use private images.',
+        }}
+        anyAllOption
+        data-qa-stackscript-target-select
+        disabled={disabled}
+        errorText={hasErrorFor('images')}
+        label="Target Images"
+        multiple
+        onChange={onSelectChange}
+        placeholder="Select image(s)"
+        value={selectedImages}
+        variant="public"
+      />
       <TextField
         InputProps={{ sx: { maxWidth: '100%' } }}
         data-qa-stackscript-script

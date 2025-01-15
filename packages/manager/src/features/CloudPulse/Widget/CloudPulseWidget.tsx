@@ -25,7 +25,7 @@ import type { FilterValueType } from '../Dashboard/CloudPulseDashboardLanding';
 import type { CloudPulseResources } from '../shared/CloudPulseResourcesSelect';
 import type { Widgets } from '@linode/api-v4';
 import type {
-  AvailableMetrics,
+  MetricDefinition,
   TimeDuration,
   TimeGranularity,
 } from '@linode/api-v4';
@@ -51,12 +51,12 @@ export interface CloudPulseWidgetProperties {
   /**
    * token to fetch metrics data
    */
-  authToken: string;
+  authToken?: string;
 
   /**
    * metrics defined of this widget
    */
-  availableMetrics: AvailableMetrics | undefined;
+  availableMetrics: MetricDefinition | undefined;
 
   /**
    * time duration to fetch the metrics data in this widget
@@ -64,14 +64,19 @@ export interface CloudPulseWidgetProperties {
   duration: TimeDuration;
 
   /**
+   * entity ids selected by user to show metrics for
+   */
+  entityIds: string[];
+
+  /**
    * Any error to be shown in this widget
    */
   errorLabel?: string;
 
   /**
-   * resources ids selected by user to show metrics for
+   * Jwe token fetching status check
    */
-  resourceIds: string[];
+  isJweTokenFetching: boolean;
 
   /**
    * List of resources available of selected service type
@@ -136,7 +141,8 @@ export const CloudPulseWidget = (props: CloudPulseWidgetProperties) => {
     authToken,
     availableMetrics,
     duration,
-    resourceIds,
+    entityIds,
+    isJweTokenFetching,
     resources,
     savePref,
     serviceType,
@@ -224,7 +230,7 @@ export const CloudPulseWidget = (props: CloudPulseWidgetProperties) => {
     {
       ...getCloudPulseMetricRequest({
         duration,
-        resourceIds,
+        entityIds,
         resources,
         widget,
       }),
@@ -232,7 +238,7 @@ export const CloudPulseWidget = (props: CloudPulseWidgetProperties) => {
     },
     {
       authToken,
-      isFlags: Boolean(flags),
+      isFlags: Boolean(flags && !isJweTokenFetching),
       label: widget.label,
       timeStamp,
       url: flags.aclpReadEndpoint!,
@@ -326,13 +332,17 @@ export const CloudPulseWidget = (props: CloudPulseWidgetProperties) => {
                 ? metricsApiCallError ?? 'Error while rendering graph'
                 : undefined
             }
+            loading={
+              isLoading ||
+              metricsApiCallError === jweTokenExpiryError ||
+              isJweTokenFetching
+            } // keep loading until we are trying to fetch the refresh token
             areas={areas}
             ariaLabel={ariaLabel ? ariaLabel : ''}
             data={data}
             dotRadius={1.5}
             height={424}
             legendRows={legendRows}
-            loading={isLoading || metricsApiCallError === jweTokenExpiryError} // keep loading until we fetch the refresh token
             showDot
             showLegend={data.length !== 0}
             timezone={timezone}

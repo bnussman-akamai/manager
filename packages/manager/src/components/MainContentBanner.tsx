@@ -1,10 +1,9 @@
-import { Box } from '@linode/ui';
+import { Box, Typography } from '@linode/ui';
 import Close from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import * as React from 'react';
 
 import { Link } from 'src/components/Link';
-import { Typography } from 'src/components/Typography';
 import { useFlags } from 'src/hooks/useFlags';
 import {
   useMutatePreferences,
@@ -28,12 +27,14 @@ export const MainContentBanner = React.memo(() => {
 
   const flags = useFlags();
 
-  const { data: preferences } = usePreferences();
+  const { data: mainContentBannerPreferences } = usePreferences(
+    (preferences) => preferences?.main_content_banner_dismissal
+  );
   const { mutateAsync: updatePreferences } = useMutatePreferences();
 
   const handleDismiss = (key: string) => {
     const existingMainContentBannerDismissal =
-      preferences?.main_content_banner_dismissal ?? {};
+      mainContentBannerPreferences ?? {};
 
     updatePreferences({
       main_content_banner_dismissal: {
@@ -45,7 +46,7 @@ export const MainContentBanner = React.memo(() => {
 
   const hasDismissedBanner =
     flags.mainContentBanner?.key !== undefined &&
-    preferences?.main_content_banner_dismissal?.[flags.mainContentBanner.key];
+    mainContentBannerPreferences?.[flags.mainContentBanner.key];
 
   if (
     !flags.mainContentBanner ||

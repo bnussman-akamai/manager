@@ -1,9 +1,8 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 
-import { StyledLinkButton } from './StyledLinkButton';
-
 import { Button } from './Button';
+import { StyledLinkButton } from './StyledLinkButton';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -57,6 +56,14 @@ export const Default: Story = {
 export const Secondary: Story = {
   args: {
     buttonType: 'secondary',
+  },
+  render: (args) => <Button {...args} />,
+};
+
+export const SecondaryWarning: Story = {
+  args: {
+    buttonType: 'secondary',
+    color: 'error',
   },
   render: (args) => <Button {...args} />,
 };

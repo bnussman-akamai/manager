@@ -1,11 +1,10 @@
-import { Box } from '@linode/ui';
+import { Box, Typography } from '@linode/ui';
 import React from 'react';
-
-import { Typography } from 'src/components/Typography';
 
 import { StyledPlanSummarySpan } from '../DatabaseDetail/DatabaseResize/DatabaseResize.style';
 import { useIsDatabasesEnabled } from '../utilities';
 import { StyledSpan } from './DatabaseCreate.style';
+import { getSuffix } from './utilities';
 
 import type {
   ClusterSize,
@@ -67,18 +66,16 @@ export const DatabaseSummarySection = (props: Props) => {
       ) : (
         <span>{currentPlanPrice}</span>
       )}
-      <Typography
-        component="span"
-        // sx={(theme) => ({ marginRight: theme.spacing(1) })}
-      >
+      <Typography component="span">
         {currentClusterSize} Node
-        {currentClusterSize > 1 ? 's - HA ' : ' '}
+        {getSuffix(isNewDatabase, currentClusterSize)}
       </Typography>
       {currentNodePrice}
     </Box>
   ) : (
     'Please specify your cluster configuration'
   );
+
   const resizeSummary = (
     <Box
       sx={(theme: Theme) => ({
@@ -94,17 +91,9 @@ export const DatabaseSummarySection = (props: Props) => {
               : resizeData.plan}
           </StyledPlanSummarySpan>{' '}
           {isNewDatabase && <StyledSpan>{resizeData.basePrice}</StyledSpan>}
-          <Typography
-            sx={
-              isNewDatabase
-                ? (theme) => ({ marginRight: theme.spacing(1) })
-                : null
-            }
-            component="span"
-          >
+          <Typography component="span">
             {resizeData.numberOfNodes} Node
-            {resizeData.numberOfNodes > 1 ? 's' : ''}
-            {!isNewDatabase ? ': ' : ' - HA '}
+            {getSuffix(isNewDatabase, resizeData.numberOfNodes)}
           </Typography>
           {resizeData.price}
         </>

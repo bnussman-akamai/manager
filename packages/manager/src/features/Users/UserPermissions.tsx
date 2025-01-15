@@ -4,7 +4,16 @@ import {
   updateGrants,
   updateUser,
 } from '@linode/api-v4/lib/account';
-import { Box, CircleProgress, Notice, Paper } from '@linode/ui';
+import {
+  Box,
+  CircleProgress,
+  FormControlLabel,
+  Notice,
+  Paper,
+  Select,
+  Toggle,
+  Typography,
+} from '@linode/ui';
 import Grid from '@mui/material/Unstable_Grid2';
 import { enqueueSnackbar } from 'notistack';
 import { compose, flatten, lensPath, omit, set } from 'ramda';
@@ -12,15 +21,12 @@ import * as React from 'react';
 
 import { ActionsPanel } from 'src/components/ActionsPanel/ActionsPanel';
 import { DocumentTitleSegment } from 'src/components/DocumentTitle';
-import { FormControlLabel } from 'src/components/FormControlLabel';
 import { SelectionCard } from 'src/components/SelectionCard/SelectionCard';
 import { SafeTabPanel } from 'src/components/Tabs/SafeTabPanel';
 import { Tab } from 'src/components/Tabs/Tab';
 import { TabList } from 'src/components/Tabs/TabList';
 import { TabPanels } from 'src/components/Tabs/TabPanels';
 import { Tabs } from 'src/components/Tabs/Tabs';
-import { Toggle } from 'src/components/Toggle/Toggle';
-import { Typography } from 'src/components/Typography';
 import { withFeatureFlags } from 'src/containers/flags.container';
 import { withQueryClient } from 'src/containers/withQueryClient.container';
 import { PARENT_USER, grantTypeMap } from 'src/features/Account/constants';
@@ -36,7 +42,6 @@ import {
   StyledHeaderGrid,
   StyledPaper,
   StyledPermPaper,
-  StyledSelect,
   StyledUnrestrictedGrid,
 } from './UserPermissions.styles';
 import { UserPermissionsEntitySection } from './UserPermissionsEntitySection';
@@ -50,8 +55,8 @@ import type {
   User,
 } from '@linode/api-v4/lib/account';
 import type { APIError } from '@linode/api-v4/lib/types';
+import type { SelectOptionType } from '@linode/ui';
 import type { QueryClient } from '@tanstack/react-query';
-import type { Item } from 'src/components/EnhancedSelect/Select';
 import type { WithFeatureFlagProps } from 'src/containers/flags.container';
 import type { WithQueryClientProps } from 'src/containers/withQueryClient.container';
 interface Props {
@@ -593,17 +598,26 @@ class UserPermissions extends React.Component<CombinedProps, State> {
             </Typography>
           </Grid>
           <Grid style={{ marginTop: 5 }}>
-            <StyledSelect
-              defaultValue={defaultPerm}
+            <Select
+              sx={{
+                '& > .MuiBox-root': {
+                  '& label': {
+                    position: 'relative',
+                    right: 10,
+                    top: -4,
+                  },
+                  alignItems: 'center',
+                  display: 'flex',
+                },
+              }}
+              value={{
+                label: defaultPerm?.label ?? '',
+                value: defaultPerm?.value ?? '',
+              }}
               id="setall"
-              inline
-              isClearable={false}
               label="Set all permissions to:"
-              name="setall"
-              noMarginTop
-              onChange={this.setAllEntitiesTo}
+              onChange={(_, value) => this.setAllEntitiesTo(value)}
               options={permOptions}
-              small
             />
           </Grid>
         </Grid>
@@ -774,13 +788,13 @@ class UserPermissions extends React.Component<CombinedProps, State> {
       });
   };
 
-  setAllEntitiesTo = (e: Item<string>) => {
-    const value = e.value === 'null' ? null : e.value;
+  setAllEntitiesTo = (e: SelectOptionType | null | undefined) => {
+    const value = e?.value === 'null' ? null : e?.value;
     this.entityPerms.map((entity: GrantType) =>
       this.entitySetAllTo(entity, value as GrantLevel)()
     );
     this.setState({
-      setAllPerm: e.value as 'null' | 'read_only' | 'read_write',
+      setAllPerm: e?.value as 'null' | 'read_only' | 'read_write',
     });
   };
 

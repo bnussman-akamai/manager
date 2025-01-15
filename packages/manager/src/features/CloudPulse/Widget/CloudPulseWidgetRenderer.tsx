@@ -18,10 +18,10 @@ import type {
 } from './CloudPulseWidget';
 import type {
   AclpConfig,
-  AvailableMetrics,
   Dashboard,
   JWEToken,
-  MetricDefinitions,
+  MetricDefinition,
+  ResourcePage,
   TimeDuration,
   Widgets,
 } from '@linode/api-v4';
@@ -30,9 +30,10 @@ interface WidgetProps {
   additionalFilters?: CloudPulseMetricsAdditionalFilters[];
   dashboard?: Dashboard | undefined;
   duration: TimeDuration;
+  isJweTokenFetching: boolean;
   jweToken?: JWEToken | undefined;
   manualRefreshTimeStamp?: number;
-  metricDefinitions: MetricDefinitions | undefined;
+  metricDefinitions: ResourcePage<MetricDefinition> | undefined;
   preferences?: AclpConfig;
   resourceList: CloudPulseResources[] | undefined;
   resources: string[];
@@ -55,6 +56,7 @@ export const RenderWidgets = React.memo(
       additionalFilters,
       dashboard,
       duration,
+      isJweTokenFetching,
       jweToken,
       manualRefreshTimeStamp,
       metricDefinitions,
@@ -73,8 +75,9 @@ export const RenderWidgets = React.memo(
         authToken: '',
         availableMetrics: undefined,
         duration,
+        entityIds: resources,
         errorLabel: 'Error occurred while loading data.',
-        resourceIds: resources,
+        isJweTokenFetching: false,
         resources: [],
         serviceType: dashboard?.service_type ?? '',
         timeStamp: manualRefreshTimeStamp,
@@ -123,7 +126,7 @@ export const RenderWidgets = React.memo(
     if (
       !dashboard.service_type ||
       !Boolean(resources.length > 0) ||
-      !jweToken?.token ||
+      (!isJweTokenFetching && !jweToken?.token) ||
       !Boolean(resourceList?.length)
     ) {
       return renderPlaceHolder(
@@ -140,7 +143,7 @@ export const RenderWidgets = React.memo(
           if (widget) {
             // find the metric defintion of the widget label
             const availMetrics = metricDefinitions?.data.find(
-              (availMetrics: AvailableMetrics) =>
+              (availMetrics: MetricDefinition) =>
                 widget.label === availMetrics.label
             );
             const cloudPulseWidgetProperties = getCloudPulseGraphProperties({
@@ -162,6 +165,7 @@ export const RenderWidgets = React.memo(
                 {...cloudPulseWidgetProperties}
                 authToken={jweToken?.token}
                 availableMetrics={availMetrics}
+                isJweTokenFetching={isJweTokenFetching}
                 resources={resourceList!}
                 savePref={savePref}
               />

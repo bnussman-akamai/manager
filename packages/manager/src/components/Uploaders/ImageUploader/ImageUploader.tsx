@@ -1,11 +1,10 @@
-import { Box, Button, Stack } from '@linode/ui';
+import { Box, Button, Stack, Typography } from '@linode/ui';
 import { styled } from '@mui/material';
 import { Duration } from 'luxon';
 import * as React from 'react';
 import { useDropzone } from 'react-dropzone';
 
 import { BarPercent } from 'src/components/BarPercent';
-import { Typography } from 'src/components/Typography';
 import { MAX_FILE_SIZE_IN_BYTES } from 'src/components/Uploaders/reducer';
 import { readableBytes } from 'src/utilities/unitConversions';
 
@@ -97,7 +96,7 @@ export const ImageUploader = React.memo((props: Props) => {
 });
 
 const Dropzone = styled('div')<{ active: boolean }>(({ active, theme }) => ({
-  borderColor: 'gray',
+  borderColor: theme.tokens.color.Neutrals[60],
   borderStyle: 'dashed',
   borderWidth: 1,
   display: 'flex',

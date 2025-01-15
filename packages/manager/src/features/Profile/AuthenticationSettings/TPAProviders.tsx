@@ -1,4 +1,4 @@
-import { Box, Divider } from '@linode/ui';
+import { Box, Divider, Typography } from '@linode/ui';
 import { useTheme } from '@mui/material/styles';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from 'react';
@@ -8,7 +8,6 @@ import AkamaiWaveOnlyIcon from 'src/assets/icons/providers/akamai-logo-rgb-waveO
 import GitHubIcon from 'src/assets/icons/providers/github-logo.svg';
 import GoogleIcon from 'src/assets/icons/providers/google-logo.svg';
 import { Link } from 'src/components/Link';
-import { Typography } from 'src/components/Typography';
 import { useFlags } from 'src/hooks/useFlags';
 
 import { TPADialog } from './TPADialog';
@@ -104,7 +103,7 @@ export const TPAProviders = (props: Props) => {
                     >
                       <ProviderIcon
                         style={{
-                          color: '#939598',
+                          color: theme.tokens.color.Neutrals[50],
                           height: 32,
                           marginRight: theme.spacing(2),
                           width: 32,

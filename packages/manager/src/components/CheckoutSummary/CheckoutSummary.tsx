@@ -1,11 +1,10 @@
-import { Paper } from '@linode/ui';
+import { Paper, Typography } from '@linode/ui';
 import { useTheme } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
 
-import { Typography } from '../Typography';
 import { SummaryItem } from './SummaryItem';
 
 import type { Theme } from '@mui/material/styles';
@@ -82,7 +81,7 @@ const StyledSummary = styled(Grid2)(({ theme }) => ({
       '&:last-child': {
         borderRight: 'none',
       },
-      borderRight: 'solid 1px #9DA4A6',
+      borderRight: `solid 1px ${theme.tokens.color.Neutrals[50]}`,
     },
   },
 }));

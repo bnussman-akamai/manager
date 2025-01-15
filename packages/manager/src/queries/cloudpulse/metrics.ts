@@ -18,7 +18,7 @@ export const useCloudPulseMetricsQuery = (
   serviceType: string,
   request: CloudPulseMetricsRequest,
   obj: {
-    authToken: string;
+    authToken?: string;
     isFlags: boolean;
     label: string;
     timeStamp: number | undefined;
@@ -29,7 +29,7 @@ export const useCloudPulseMetricsQuery = (
 
   const query = useQuery<CloudPulseMetricsResponse, APIError[]>({
     ...queryFactory.metrics(
-      obj.authToken,
+      obj.authToken ?? '',
       obj.url,
       serviceType,
       request,
@@ -52,12 +52,12 @@ export const useCloudPulseMetricsQuery = (
       const currentJWEtokenCache:
         | JWEToken
         | undefined = queryClient.getQueryData(
-        queryFactory.token(serviceType, { resource_ids: [] }).queryKey
+        queryFactory.token(serviceType, { entity_ids: [] }).queryKey
       );
       if (currentJWEtokenCache?.token === obj.authToken) {
         queryClient.invalidateQueries(
           {
-            queryKey: queryFactory.token(serviceType, { resource_ids: [] })
+            queryKey: queryFactory.token(serviceType, { entity_ids: [] })
               .queryKey,
           },
           {

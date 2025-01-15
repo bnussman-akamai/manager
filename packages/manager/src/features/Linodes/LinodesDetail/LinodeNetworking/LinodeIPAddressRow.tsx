@@ -1,4 +1,4 @@
-import { CircleProgress } from '@linode/ui';
+import { CircleProgress, Typography } from '@linode/ui';
 import { styled } from '@mui/material/styles';
 import { parse as parseIP } from 'ipaddr.js';
 import * as React from 'react';
@@ -6,7 +6,6 @@ import * as React from 'react';
 import { CopyTooltip } from 'src/components/CopyTooltip/CopyTooltip';
 import { LinkButton } from 'src/components/LinkButton';
 import { TableCell } from 'src/components/TableCell';
-import { Typography } from 'src/components/Typography';
 import { StyledTableRow } from 'src/features/Linodes/LinodeEntityDetail.styles';
 import { useLinodeQuery } from 'src/queries/linodes/linodes';
 import { useLinodeIPsQuery } from 'src/queries/linodes/networking';
@@ -53,7 +52,9 @@ export const LinodeIPAddressRow = (props: LinodeIPAddressRowProps) => {
   } = props;
 
   const { data: ips } = useLinodeIPsQuery(linodeId);
-  const { data: preferences } = usePreferences();
+  const { data: maskSensitiveDataPreference } = usePreferences(
+    (preferences) => preferences?.maskSensitiveData
+  );
 
   const isOnlyPublicIP =
     ips?.ipv4.public.length === 1 && type === 'IPv4 – Public';
@@ -72,7 +73,7 @@ export const LinodeIPAddressRow = (props: LinodeIPAddressRowProps) => {
         <CopyTooltip
           copyableText
           disabled={isVPCOnlyLinode}
-          masked={Boolean(preferences?.maskSensitiveData)}
+          masked={Boolean(maskSensitiveDataPreference)}
           maskedTextLength={type.includes('IPv6') ? 'ipv6' : 'ipv4'}
           text={address}
         />

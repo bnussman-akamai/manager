@@ -1,11 +1,17 @@
-import { Box, CircleProgress, Divider, Notice, Paper } from '@linode/ui';
+import {
+  Box,
+  CircleProgress,
+  Divider,
+  Notice,
+  Paper,
+  Typography,
+} from '@linode/ui';
 import { useSnackbar } from 'notistack';
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { ErrorState } from 'src/components/ErrorState/ErrorState';
 import { TypeToConfirmDialog } from 'src/components/TypeToConfirmDialog/TypeToConfirmDialog';
-import { Typography } from 'src/components/Typography';
 import { determineInitialPlanCategoryTab } from 'src/features/components/PlansPanel/utils';
 import { DatabaseNodeSelector } from 'src/features/Databases/DatabaseCreate/DatabaseNodeSelector';
 import { DatabaseSummarySection } from 'src/features/Databases/DatabaseCreate/DatabaseSummarySection';
@@ -21,6 +27,7 @@ import {
   StyledPlansPanel,
   StyledResizeButton,
 } from './DatabaseResize.style';
+import { isSmallerOrEqualCurrentPlan } from './DatabaseResize.utils';
 
 import type {
   ClusterSize,
@@ -75,7 +82,7 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
   const onResize = () => {
     const payload: UpdateDatabasePayload = {};
 
-    if (clusterSize && clusterSize > database.cluster_size && isDatabasesV2GA) {
+    if (clusterSize && isDatabasesV2GA) {
       payload.cluster_size = clusterSize;
     }
 
@@ -95,8 +102,9 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
     <>
       <Typography variant="h2">Resize a Database Cluster</Typography>
       <Typography sx={{ marginTop: '4px' }}>
-        Adapt the cluster to your needs by resizing to a larger plan. Clusters
-        cannot be resized to smaller plans.
+        {isNewDatabaseGA
+          ? 'Adapt the cluster to your needs by resizing it to a smaller or larger plan.'
+          : 'Adapt the cluster to your needs by resizing to a larger plan. Clusters cannot be resized to smaller plans.'}
       </Typography>
     </>
   );
@@ -104,8 +112,7 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
   const selectedEngine = database.engine.split('/')[0] as Engine;
 
   const summaryText = React.useMemo(() => {
-    const nodeSelected = clusterSize && clusterSize > database.cluster_size;
-
+    const nodeSelected = clusterSize && clusterSize !== database.cluster_size;
     const isSamePlanSelected = selectedPlanId === database.type;
     if (!dbTypes) {
       return undefined;
@@ -167,13 +174,19 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
     if (!dbTypes) {
       return [];
     }
+
     return dbTypes.map((type: DatabaseType) => {
       const { label } = type;
       const formattedLabel = formatStorageUnits(label);
-      const nodePricing = type.engines[selectedEngine].find(
-        (cluster: DatabaseClusterSizeObject) =>
-          cluster.quantity === database.cluster_size
+
+      const nodePricing = type.engines[
+        selectedEngine
+      ].find((cluster: DatabaseClusterSizeObject) =>
+        selectedTab === 1 && database.cluster_size === 2
+          ? cluster.quantity === 3
+          : cluster.quantity === clusterSize
       );
+
       const price = nodePricing?.price ?? {
         hourly: null,
         monthly: null,
@@ -190,7 +203,7 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
         subHeadings,
       };
     });
-  }, [database.cluster_size, dbTypes, selectedEngine]);
+  }, [database.cluster_size, dbTypes, selectedEngine, selectedTab]);
 
   const currentPlan = displayTypes?.find((type) => type.id === database.type);
 
@@ -201,13 +214,13 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
       currentPlan?.heading
     );
     setSelectedTab(initialTab);
-  }, [database.type, displayTypes]);
+  }, []);
 
-  const currentPlanDisk = currentPlan ? currentPlan.disk : 0;
-  const disabledPlans = displayTypes?.filter((type) =>
-    type.class === 'dedicated'
-      ? type.disk < currentPlanDisk
-      : type.disk <= currentPlanDisk
+  const disabledPlans = isSmallerOrEqualCurrentPlan(
+    currentPlan?.id,
+    database?.used_disk_size_gb,
+    displayTypes,
+    isNewDatabaseGA
   );
   const isDisabledSharedTab = database.cluster_size === 2;
 
@@ -243,7 +256,7 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
         setSelectedPlanId(database.type);
         setClusterSize(database.cluster_size);
       } else {
-        setClusterSize(undefined);
+        setClusterSize(3);
         setSelectedPlanId(undefined);
       }
     }
@@ -268,13 +281,16 @@ export const DatabaseResize = ({ database, disabled = false }: Props) => {
       </Paper>
       <Paper sx={{ marginTop: 2 }}>
         <StyledPlansPanel
+          disabledTabs={
+            !isNewDatabaseGA && isDisabledSharedTab ? ['shared'] : []
+          }
           currentPlanHeading={currentPlan?.heading}
           data-qa-select-plan
           disabled={disabled}
           disabledSmallerPlans={disabledPlans}
-          disabledTabs={isDisabledSharedTab ? ['shared'] : []}
           handleTabChange={handleTabChange}
           header="Choose a Plan"
+          isLegacyDatabase={!isNewDatabaseGA}
           onSelect={(selected: string) => setSelectedPlanId(selected)}
           selectedId={selectedPlanId}
           tabDisabledMessage="Resizing a 2-node cluster is only allowed with Dedicated plans."

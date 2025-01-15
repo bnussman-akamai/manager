@@ -1,8 +1,7 @@
-import { IconButton, omittedProps } from '@linode/ui';
+import { IconButton, Typography, omittedProps } from '@linode/ui';
 import { styled } from '@mui/material/styles';
 
 import { TableRow } from 'src/components/TableRow';
-import { Typography } from 'src/components/Typography';
 
 export const StyledTagHeaderRow = styled(TableRow, {
   label: 'StyledTagHeaderRow',
@@ -44,7 +43,7 @@ export const StyledToggleButton = styled(IconButton, {
   },
   '&:focus': {
     // Browser default until we get styling direction for focus states
-    outline: '1px dotted #999',
+    outline: `1px dotted ${theme.tokens.color.Neutrals[50]}`,
   },
   '&:hover': {
     backgroundColor: theme.palette.grey[300],
