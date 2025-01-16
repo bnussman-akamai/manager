@@ -60,6 +60,7 @@ import { RebuildImageDrawer } from './RebuildImageDrawer';
 import type { Handlers as ImageHandlers } from './ImagesActionMenu';
 import type { Filter, ImageStatus } from '@linode/api-v4';
 import type { Theme } from '@mui/material/styles';
+import { ImageEncryptionBanner } from './ImageEncryptionBanner';
 
 const searchParamKey = 'query';
 
@@ -420,6 +421,7 @@ export const ImagesLanding = () => {
   return (
     <React.Fragment>
       <DocumentTitleSegment segment="Images" />
+      <ImageEncryptionBanner />
       <LandingHeader
         buttonDataAttrs={{
           tooltipText: getRestrictedResourceText({
