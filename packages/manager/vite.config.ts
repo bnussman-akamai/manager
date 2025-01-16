@@ -39,5 +39,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/testSetup.ts',
+    server: {
+      deps: {
+        inline: ['@emotion/styled'],
+      },
+    },
   },
 });
