@@ -134,6 +134,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     'linode',
     'firewall',
     'stackscript',
+    'placement_group',
     'image',
     'volume',
     'nodebalancer',
@@ -246,6 +247,7 @@ class UserPermissions extends React.Component<CombinedProps, State> {
     'add_longview',
     'add_nodebalancers',
     'add_stackscripts',
+    'add_placement_groups',
     'add_volumes',
     'add_vpcs',
     'cancel_account',
@@ -465,7 +467,8 @@ class UserPermissions extends React.Component<CombinedProps, State> {
   };
 
   renderGlobalPerm = (perm: GlobalGrantTypes, checked: boolean) => {
-    const permDescriptionMap: Partial<Record<GlobalGrantTypes, string>> = {
+    const permDescriptionMap: Record<GlobalGrantTypes, string> = {
+      account_access: '',
       add_databases: 'Can add Databases to this account ($)',
       add_domains: 'Can add Domains using the DNS Manager',
       add_firewalls: 'Can add Firewalls to this account',
@@ -473,18 +476,14 @@ class UserPermissions extends React.Component<CombinedProps, State> {
       add_linodes: 'Can add Linodes to this account ($)',
       add_longview: 'Can add Longview clients to this account',
       add_nodebalancers: 'Can add NodeBalancers to this account ($)',
+      add_placement_groups: 'Can add Placement Groups to this account',
       add_stackscripts: 'Can create StackScripts under this account',
       add_volumes: 'Can add Block Storage Volumes to this account ($)',
       add_vpcs: 'Can add VPCs to this account',
       cancel_account: 'Can cancel the entire account',
-      longview_subscription:
-        'Can modify this account\u{2019}s Longview subscription ($)',
+      child_account_access: 'Enable child account access',
+      longview_subscription: 'Can modify this account\u{2019}s Longview subscription ($)',
     };
-
-    if (this.state.userType === 'parent') {
-      permDescriptionMap['child_account_access'] =
-        'Enable child account access';
-    }
 
     return (
       <Grid className="py0" key={perm} sm={6} xs={12}>

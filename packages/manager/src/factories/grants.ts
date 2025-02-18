@@ -1,5 +1,6 @@
-import { Grant, Grants } from '@linode/api-v4/lib/account';
 import Factory from 'src/factories/factoryProxy';
+
+import type { Grant, Grants } from '@linode/api-v4';
 
 export const grantFactory = Factory.Sync.makeFactory<Grant>({
   id: Factory.each((i) => i),
@@ -38,6 +39,7 @@ export const grantsFactory = Factory.Sync.makeFactory<Grants>({
     add_linodes: true,
     add_longview: true,
     add_nodebalancers: true,
+    add_placement_groups: true,
     add_stackscripts: true,
     add_volumes: true,
     add_vpcs: true,
@@ -73,6 +75,7 @@ export const grantsFactory = Factory.Sync.makeFactory<Grants>({
       permissions: 'read_only',
     },
   ],
+  placement_group: [],
   stackscript: [
     {
       id: 123,

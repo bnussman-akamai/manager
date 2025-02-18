@@ -1,18 +1,18 @@
+import type { GrantType } from '@linode/api-v4';
+
 export const PARENT_USER = 'parent user';
 export const ADMINISTRATOR = 'account administrator';
 export const CUSTOMER_SUPPORT = 'customer support';
 
-export const grantTypeMap = {
-  account: 'Account',
+export const grantTypeMap: Record<GrantType, string> = {
   database: 'Databases',
   domain: 'Domains',
   firewall: 'Firewalls',
   image: 'Images',
   linode: 'Linodes',
-  lkeCluster: 'LKE Clusters', // Note: Not included in the user's grants returned from the API.
   longview: 'Longview Clients',
   nodebalancer: 'NodeBalancers',
-  placementGroups: 'Placement Groups',
+  placement_group: 'Placement Groups',
   stackscript: 'StackScripts',
   volume: 'Volumes',
   vpc: 'VPCs',
