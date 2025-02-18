@@ -17,3 +17,12 @@ export const fadeIn = keyframes`
     opacity: 1;
   }
 `;
+
+export const pulse = keyframes`
+  0% {
+    box-shadow: 0 0 0 0px red;
+  }
+  100% {
+    box-shadow: 0 0 0 10px red;
+  }
+`;

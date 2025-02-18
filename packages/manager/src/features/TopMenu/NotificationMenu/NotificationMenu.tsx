@@ -1,8 +1,7 @@
-import { Box, Chip, Divider, Typography, rotate360 } from '@linode/ui';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import { IconButton } from '@mui/material';
+import { Box, Divider, Typography } from '@linode/ui';
+import { Badge, IconButton } from '@mui/material';
 import Popover from '@mui/material/Popover';
-import { styled } from '@mui/material/styles';
+import { keyframes } from 'tss-react';
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -100,23 +99,26 @@ export const NotificationMenu = () => {
           onClick={handleNotificationMenuToggle}
           ref={anchorRef}
         >
-          <Bell height="24px" width="24px" />
-          {numNotifications > 0 && (
-            <StyledChip
-              adjustBorderRadius={
-                numNotifications > 9 || showInProgressEventIcon
-              }
-              icon={
-                Boolean(showInProgressEventIcon) ? (
-                  <StyledAutorenewIcon data-testid="in-progress-event-icon" />
-                ) : undefined
-              }
-              color="error"
-              data-testid="events-count-notification"
-              label={numNotifications > 9 ? '9+' : numNotifications}
-              size="small"
-            />
-          )}
+          <Badge
+            sx={(theme) => ({
+              '& .MuiBadge-badge': {
+                animation: `${keyframes`
+                  0% {
+                    box-shadow: 0 0 0 0px ${theme.tokens.accent.Negative.Primary};
+                  }
+                  70% {
+                    box-shadow: 0 0 0 5px rgba(255, 99, 71, 0.2);
+                  }
+                `} 1000ms ease infinite`,
+              },
+            })}
+            badgeContent={numNotifications}
+            color="error"
+            data-testid="events-count-notification"
+            max={9}
+          >
+            <Bell height="24px" width="24px" />
+          </Badge>
         </IconButton>
       </TopMenuTooltip>
       <Popover
@@ -179,33 +181,3 @@ export const NotificationMenu = () => {
     </>
   );
 };
-
-const StyledChip = styled(Chip, {
-  label: 'StyledEventNotificationChip',
-  shouldForwardProp: (prop) => prop !== 'adjustBorderRadius',
-})<{ adjustBorderRadius: boolean }>(({ theme, ...props }) => ({
-  '& .MuiChip-icon': {
-    margin: 0,
-    marginLeft: theme.tokens.spacing[10],
-  },
-  '& .MuiChip-label': {
-    padding: 0,
-  },
-  backgroundColor: theme.tokens.header.Badge.Background,
-  borderRadius: props.adjustBorderRadius ? theme.tokens.spacing[50] : '50%',
-  color: theme.tokens.header.Badge.Text,
-  flexDirection: 'row-reverse',
-  font: theme.tokens.typography.Label.Bold.Xs,
-  justifyContent: 'center',
-  left: 20,
-  padding: `${theme.tokens.spacing[20]} ${theme.tokens.spacing[30]}`,
-  position: 'absolute',
-  top: '-3px',
-}));
-
-export const StyledAutorenewIcon = styled(AutorenewIcon)(({ theme }) => ({
-  animation: `${rotate360} 2s linear infinite`,
-  fill: theme.tokens.header.Badge.Icon,
-  height: '12px',
-  width: '12px',
-}));
