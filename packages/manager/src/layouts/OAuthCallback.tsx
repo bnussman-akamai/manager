@@ -4,6 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 
 import { SplashScreen } from 'src/components/SplashScreen';
 import { CLIENT_ID, LOGIN_ROOT } from 'src/constants';
+import { redirectToLogin } from 'src/session';
 import {
   clearAuthCode,
   clearAuthToken,
@@ -11,7 +12,7 @@ import {
   setAuthToken,
 } from 'src/utilities/authentication';
 import { getQueryParamsFromQueryString } from 'src/utilities/queryParams';
-import { getEnvLocalStorageOverrides } from 'src/utilities/storage';
+import { authentication, getEnvLocalStorageOverrides } from 'src/utilities/storage';
 
 const localStorageOverrides = getEnvLocalStorageOverrides();
 const loginURL = localStorageOverrides?.loginRoot ?? LOGIN_ROOT;
@@ -22,6 +23,20 @@ export type OAuthQueryParams = {
   returnTo?: string;
   state: string; // nonce
 };
+
+export function useOAuth() {
+  const location = useLocation();
+  const hasToken = authentication.token.get();
+  const isLoading =
+    location.pathname.includes('/oauth/callback') ||
+    window.location.pathname.includes('/oauth/callback');
+
+  if (!hasToken && !window.location.pathname.includes('/oauth/callback')) {
+    redirectToLogin(window.location.pathname);
+  }
+
+  return { isLoading };
+}
 
 export const OAuthCallback = () => {
   const location = useLocation();
