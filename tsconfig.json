@@ -1,4 +1,10 @@
 {
+  "compilerOptions": {
+    "paths": {
+      "@linode/api-v4": ["./packages/api-v4/lib/index.d.ts"],
+      "@linode/validation": ["./packages/validation/lib/index.d.ts"]
+    }
+  },
   "references": [
     { "path": "./packages/api-v4" },
     { "path": "./packages/validation" },

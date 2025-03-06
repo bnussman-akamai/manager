@@ -12,7 +12,7 @@ import {
   resumeDatabase,
   suspendDatabase,
   updateDatabase,
-} from '@linode/api-v4/lib/databases';
+} from '@linode/api-v4';
 import { createQueryKeys } from '@lukemorales/query-key-factory';
 import {
   keepPreviousData,
