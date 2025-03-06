@@ -1,0 +1,44 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.enableJunitReport = void 0;
+// The name of the environment variable to read when checking report configuration.
+var envVarName = 'CY_TEST_JUNIT_REPORT';
+var capitalize = function (str) {
+    return "".concat(str.charAt(0).toUpperCase()).concat(str.slice(1));
+};
+/**
+ * Returns a plugin to enable JUnit reporting when `CY_TEST_JUNIT_REPORT` is defined.
+ *
+ * If no suite name is specified, this function will attempt to determine the
+ * suite name using the Cypress configuration object.
+ *
+ * @param suiteName - Optional suite name in the JUnit output.
+ *
+ * @returns Cypress configuration object.
+ */
+var enableJunitReport = function (suiteName, jenkinsMode) {
+    if (jenkinsMode === void 0) { jenkinsMode = false; }
+    return function (_on, config) {
+        if (!!config.env[envVarName]) {
+            // Use `suiteName` if it is specified.
+            // Otherwise, attempt to determine the test suite name using
+            // our Cypress configuration.
+            var testSuite = suiteName || config.env['cypress_test_suite'] || 'core';
+            var testSuiteName = "".concat(capitalize(testSuite), " Test Suite");
+            // Cypress doesn't know to look for modules in the root `node_modules`
+            // directory, so we have to pass a relative path.
+            // See also: https://github.com/cypress-io/cypress/issues/6406
+            config.reporter = 'node_modules/mocha-junit-reporter';
+            // See also: https://www.npmjs.com/package/mocha-junit-reporter#full-configuration-options
+            config.reporterOptions = {
+                mochaFile: 'cypress/results/test-results-[hash].xml',
+                rootSuiteTitle: 'Cloud Manager Cypress Tests',
+                testsuitesTitle: testSuiteName,
+                jenkinsMode: jenkinsMode,
+                suiteTitleSeparatedBy: jenkinsMode ? '→' : ' ',
+            };
+        }
+        return config;
+    };
+};
+exports.enableJunitReport = enableJunitReport;

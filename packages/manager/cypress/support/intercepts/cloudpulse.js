@@ -1,0 +1,270 @@
+"use strict";
+/**
+ * Intercepts request to metrics requests for a cloud pulse.
+ *
+ * @returns Cypress chainable.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mockUpdateAlertDefinitions = exports.mockCreateAlertDefinition = exports.mockGetAlertChannels = exports.mockGetAllAlertDefinitions = exports.mockGetAlertDefinitions = exports.mockGetCloudPulseDashboardByIdError = exports.mockGetCloudPulseDashboardsError = exports.mockGetCloudPulseTokenError = exports.mockGetCloudPulseServicesError = exports.mockGetCloudPulseMetricDefinitionsError = exports.mockCreateCloudPulseJWEToken = exports.mockGetCloudPulseDashboard = exports.mockCreateCloudPulseMetrics = exports.mockGetCloudPulseDashboards = exports.mockGetCloudPulseServices = exports.mockGetCloudPulseMetricDefinitions = void 0;
+var cloudpulse_1 = require("support/constants/cloudpulse");
+var errors_1 = require("support/util/errors");
+var intercepts_1 = require("support/util/intercepts");
+var paginate_1 = require("support/util/paginate");
+var random_1 = require("support/util/random");
+var response_1 = require("support/util/response");
+/**
+ * Intercepts GET requests for metric definitions.
+ *
+ * This function mocks the API response for requests to the endpoint
+ * `dashboardMetricsData`.
+ *
+ * @returns {Cypress.Chainable<null>} The chainable Cypress object.
+ */
+var mockGetCloudPulseMetricDefinitions = function (serviceType, metricDefinitions) {
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/metric-definitions")), (0, paginate_1.paginateResponse)(metricDefinitions));
+};
+exports.mockGetCloudPulseMetricDefinitions = mockGetCloudPulseMetricDefinitions;
+/**
+ * Mocks the API response for the '/monitor/services' endpoint with the provided service types.
+ * This function intercepts the GET request for the specified API and returns a mocked response
+ * with service types, either a single service type or multiple service types.
+ * @param {string | string[]} serviceTypes - A single service type (e.g., 'linode') or an array of service types
+ * @returns {Cypress.Chainable<null>} - Returns a Cypress chainable object to continue the test.
+ */
+var mockGetCloudPulseServices = function (serviceTypes) {
+    var services = serviceTypes.map(function (serviceType) { return ({
+        label: cloudpulse_1.cloudPulseServiceMap[serviceType] || 'dbaas',
+        service_type: serviceType,
+    }); });
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)('/monitor/services'), (0, paginate_1.paginateResponse)(services));
+};
+exports.mockGetCloudPulseServices = mockGetCloudPulseServices;
+/**
++ * Intercepts GET requests to fetch dashboards and mocks response.
++ *
++ * @param dashboards - Array of Dashboard objects with which to mock response.
++ * @param serviceType - Service type for which to intercept dashboard request.
++ *
++ * @returns The chainable Cypress object.
++ */
+var mockGetCloudPulseDashboards = function (serviceType, dashboards) {
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/dashboards")), (0, paginate_1.paginateResponse)(dashboards));
+};
+exports.mockGetCloudPulseDashboards = mockGetCloudPulseDashboards;
+/**
+ * Intercepts POST requests to the metrics endpoint with a custom mock response.
+ *
+ * This function allows you to specify a mock response for POST requests
+ *
+ * @param {any} mockResponse - The mock response to return for the intercepted request.
+ * @returns {Cypress.Chainable<null>} The chainable Cypress object.
+ */
+var mockCreateCloudPulseMetrics = function (serviceType, mockResponse) {
+    return cy.intercept('POST', "**/monitor/services/".concat(serviceType, "/metrics"), (0, response_1.makeResponse)(mockResponse));
+};
+exports.mockCreateCloudPulseMetrics = mockCreateCloudPulseMetrics;
+/**
+ * Mocks the API response for fetching a dashboard.
+ *
+ * This function uses Cypress's `cy.intercept` to intercept GET requests to a specific API endpoint
+ * and return a mock response. This is useful for testing how your application handles various
+ * responses without making actual network requests.
+ *
+ * @param {Dashboard} dashboard - The mock response data to return for the dashboard request.
+ * @param {number} id - The ID of the dashboard to mock the response for.
+ * @returns {Cypress.Chainable<null>} - Returns a Cypress chainable object, allowing for command chaining in tests.
+ */
+var mockGetCloudPulseDashboard = function (id, dashboard) {
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/dashboards/".concat(id)), (0, response_1.makeResponse)(dashboard));
+};
+exports.mockGetCloudPulseDashboard = mockGetCloudPulseDashboard;
+/**
+ * Mocks the API response for generating a JWE token for a specific service.
+ *
+ * This function sets up an interception for POST requests to the endpoint that generates
+ * JWE tokens for a particular service type. By returning a mock JWE token, you can test
+ * how your application handles authentication and authorization without making actual network
+ * requests to the backend service.
+ *
+ * @param {string} service_type - The type of service for which to mock the JWE token request.
+ * @returns {Cypress.Chainable<null>} - Returns a Cypress chainable object, enabling command chaining in tests.
+ */
+var mockCreateCloudPulseJWEToken = function (serviceType, token) {
+    var mockToken = token !== null && token !== void 0 ? token : (0, random_1.randomString)(62);
+    return cy.intercept('POST', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/token")), (0, response_1.makeResponse)({ token: mockToken }));
+};
+exports.mockCreateCloudPulseJWEToken = mockCreateCloudPulseJWEToken;
+/**
+ * Mocks an error response for the GET request to retrieve metric definitions
+ * for a specific service type in CloudPulse.
+ *
+ * This function intercepts the `GET` request made to the CloudPulse API and
+ * simulates an error response with a customizable error message and HTTP status code.
+ *
+ * @param {string} serviceType - The service type for which the metric definitions are being mocked.
+ * @param {string} errorMessage - The error message to include in the mock response body.
+ * @param {number} [status=500] - The HTTP status code for the mock response (defaults to 500 if not provided).
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object, indicating that the interception is part of a Cypress test chain.
+ */
+var mockGetCloudPulseMetricDefinitionsError = function (serviceType, errorMessage, status) {
+    if (status === void 0) { status = 500; }
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/metric-definitions")), (0, errors_1.makeErrorResponse)(errorMessage, status));
+};
+exports.mockGetCloudPulseMetricDefinitionsError = mockGetCloudPulseMetricDefinitionsError;
+/**
+ * Mocks an error response for the GET request to retrieve services in CloudPulse.
+ *
+ * This function intercepts the GET' request made to the CloudPulse API endpoint
+ * for fetching services and simulates an error response with a customizable error message
+ * and HTTP status code.
+ *
+ * @param {string} errorMessage - The error message to include in the mock response body.
+ * @param {number} [status=500] - The HTTP status code for the mock response (defaults to 500 if not provided).
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object, indicating that the interception is part of a Cypress test chain.
+ */
+var mockGetCloudPulseServicesError = function (errorMessage, status) {
+    if (status === void 0) { status = 500; }
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)('/monitor/services'), (0, errors_1.makeErrorResponse)(errorMessage, status));
+};
+exports.mockGetCloudPulseServicesError = mockGetCloudPulseServicesError;
+/**
+ * Mocks an error response for the POST request to retrieve a token for a specific service type in CloudPulse.
+ *
+ * This function intercepts the 'POST' request made to the CloudPulse API endpoint for retrieving a token
+ * for a specific service type and simulates an error response with a customizable error message and HTTP status code.
+ *
+ * @param {string} serviceType - The service type for which the token retrieval request is being mocked.
+ * @param {string} errorMessage - The error message to include in the mock response body.
+ * @param {number} [status=500] - The HTTP status code for the mock response (defaults to 500 if not provided).
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object, indicating that the interception is part of a Cypress test chain.
+ */
+var mockGetCloudPulseTokenError = function (serviceType, errorMessage, status) {
+    if (status === void 0) { status = 500; }
+    return cy.intercept('POST', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/token")), (0, errors_1.makeErrorResponse)(errorMessage, status));
+};
+exports.mockGetCloudPulseTokenError = mockGetCloudPulseTokenError;
+/**
+ * Mocks an error response for the GET request to retrieve dashboards for a specific service type in CloudPulse.
+ *
+ * This function intercepts the 'GET' request made to the CloudPulse API endpoint for retrieving dashboards
+ * for a specific service type and simulates an error response with a customizable error message and HTTP status code.
+ *
+ *  @param {string} serviceType - The service type for which the dashboards retrieval request is being mocked.
+ *  @param {string} errorMessage - The error message to include in the mock response body.
+ * @param {number} [status=500] - The HTTP status code for the mock response (defaults to 500 if not provided).
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object, indicating that the interception is part of a Cypress test chain.
+ */
+var mockGetCloudPulseDashboardsError = function (serviceType, errorMessage, status) {
+    if (status === void 0) { status = 500; }
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/dashboards")), (0, errors_1.makeErrorResponse)(errorMessage, status));
+};
+exports.mockGetCloudPulseDashboardsError = mockGetCloudPulseDashboardsError;
+/**
+ * Mocks an error response for the GET request to retrieve a specific dashboard by its ID in CloudPulse.
+ *
+ * This function intercepts the 'GET' request made to the CloudPulse API endpoint for retrieving a dashboard
+ * by its ID and simulates an error response with a customizable error message and HTTP status code.
+ *
+ * @param {string} id - The ID of the dashboard to be retrieved.
+ * @param {string} errorMessage - The error message to include in the mock response body.
+ * @param {number} [status=500] - The HTTP status code for the mock response (defaults to 500 if not provided).
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object, indicating that the interception is part of a Cypress test chain.
+ */
+var mockGetCloudPulseDashboardByIdError = function (id, errorMessage, status) {
+    if (status === void 0) { status = 500; }
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/dashboards/".concat(id)), (0, errors_1.makeErrorResponse)(errorMessage, status));
+};
+exports.mockGetCloudPulseDashboardByIdError = mockGetCloudPulseDashboardByIdError;
+/**
+ * Mocks the API response for retrieving alert definitions for a given service type and alert ID.
+ * This is useful for testing the behavior of the system when fetching alert definitions.
+ *
+ * @param {string} serviceType - The type of the service for which we are mocking the alert definition (e.g., 'dbaas').
+ * @param {number} id - The unique identifier for the alert definition to be retrieved.
+ * @param {Alert} alert - The mock alert object that should be returned by the API in place of a real response.
+ *
+ * @returns {Cypress.Chainable<null>} A Cypress chainable object that represents the intercepted API call.
+ */
+var mockGetAlertDefinitions = function (serviceType, id, alert) {
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/alert-definitions/").concat(id)), (0, response_1.makeResponse)(alert));
+};
+exports.mockGetAlertDefinitions = mockGetAlertDefinitions;
+/**
+ * Mocks the API response for retrieving all alert definitions from the monitoring service.
+ * This function intercepts a GET request to fetch alert definitions and returns a mock
+ * response, simulating the behavior of the real API by providing a list of alert definitions.
+ *
+ * The mock response is paginated, with a page size of 500, allowing the test to simulate
+ * the scenario where the system is retrieving a large set of alert definitions.
+ *
+ * @param {Alert[]} alert - An array of `Alert` objects to mock as the response. This should
+ *                          represent the alert definitions being fetched by the API.
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object that represents the intercepted
+ */
+var mockGetAllAlertDefinitions = function (alert) {
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)('/monitor/alert-definitions*'), (0, paginate_1.paginateResponse)(alert));
+};
+exports.mockGetAllAlertDefinitions = mockGetAllAlertDefinitions;
+/**
+ * Mocks the API response for retrieving all alert channels from the monitoring service.
+ * This function intercepts a GET request to fetch alert channels and returns a mock
+ * response, simulating the behavior of the real API by providing a list of alert channels.
+ *
+ * The mock response is created using the provided `channel` object, allowing the test
+ * to simulate various scenarios with different alert channel configurations.
+ *
+ * @param {NotificationChannel} channel - An object representing the notification channel to mock as the response.
+ *                                        This should represent the alert channel being fetched by the API.
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object that represents the intercepted request.
+ */
+var mockGetAlertChannels = function (channel) {
+    return cy.intercept('GET', (0, intercepts_1.apiMatcher)('/monitor/alert-channels*'), (0, paginate_1.paginateResponse)(channel));
+};
+exports.mockGetAlertChannels = mockGetAlertChannels;
+/**
+ * Mocks the API response for creating a new alert definition in the monitoring service.
+ * This function intercepts a POST request to create alert definitions and returns a mock
+ * response, simulating the behavior of the real API by returning the alert definition
+ * that was submitted in the request.
+ *
+ * The mock response is created using the provided `createAlertRequest` object, allowing
+ * the test to simulate various scenarios with different alert definitions.
+ *
+ * @param {string} serviceType - The type of service for which the alert definition is being created.
+ *                               This could be 'linode', 'dbaas', or another service type supported by the API.
+ * @param {CreateAlertDefinitionPayload} createAlertRequest
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object that represents the intercepted request.
+ */
+var mockCreateAlertDefinition = function (serviceType, createAlertRequest) {
+    return cy.intercept('POST', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/alert-definitions")), (0, paginate_1.paginateResponse)(createAlertRequest));
+};
+exports.mockCreateAlertDefinition = mockCreateAlertDefinition;
+/**
+ * Mocks the API response for updating an alert definition in the monitoring service.
+ * This function intercepts a `PUT` request to update a specific alert definition and returns a mock
+ * response, simulating the behavior of the real API by providing the updated alert object.
+ *
+ * The mock response allows the test to simulate the scenario where the system is successfully
+ * updating an alert definition without actually calling the backend API.
+ *
+ * @param {string} serviceType - The type of service (e.g., "web", "database") where the alert
+ *                               definition is being updated. This value is part of the URL in the request.
+ * @param {number} id - The unique identifier of the alert definition being updated. This ID is part
+ *                      of the URL in the request.
+ * @param {Alert} alert - The updated `Alert` object that will be returned as the mock response.
+ *                        This object represents the new alert definition.
+ *
+ * @returns {Cypress.Chainable<null>} - A Cypress chainable object that represents the intercepted
+ *                                     `PUT` request and the mock response.
+ */
+var mockUpdateAlertDefinitions = function (serviceType, id, alert) {
+    return cy.intercept('PUT', (0, intercepts_1.apiMatcher)("/monitor/services/".concat(serviceType, "/alert-definitions/").concat(id)), (0, response_1.makeResponse)(alert));
+};
+exports.mockUpdateAlertDefinitions = mockUpdateAlertDefinitions;
