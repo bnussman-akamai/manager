@@ -44,5 +44,12 @@
   "include": [
     "src",
     "package.json"
+  ],
+  "references": [
+    { "path": "../api-v4" },
+    { "path": "../validation" },
+    { "path": "../ui" },
+    { "path": "../utilities" },
+    { "path": "../search" },
   ]
 }
