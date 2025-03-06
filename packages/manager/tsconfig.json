@@ -19,7 +19,7 @@
 
     /* Emit */
     "sourceMap": true,
-    "noEmit": true,
+    "outDir": "./lib",
 
     /* Interop Constraints */
     "allowSyntheticDefaultImports": true,
@@ -39,7 +39,8 @@
     "skipLibCheck": true,
 
     /* Optimizations */
-    "incremental": true
+    "incremental": true,
+    "composite": true
   },
   "include": [
     "src",
