@@ -125,7 +125,7 @@ export const StackScriptForm = (props: Props) => {
             data-qa-stackscript-script
             disabled={disabled}
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             inputRef={field.ref}
             label="Script"
             multiline
@@ -149,7 +149,7 @@ export const StackScriptForm = (props: Props) => {
             data-qa-stackscript-revision
             disabled={disabled}
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             inputRef={field.ref}
             label="Revision Note"
             noMarginTop

@@ -29,7 +29,6 @@ export const PasswordInput = React.memo((props: Props) => {
     <Stack spacing={1}>
       <HideShowText
         {...rest}
-        fullWidth
         required={required}
         tooltipText={disabledReason}
         value={value}

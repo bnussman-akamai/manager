@@ -93,16 +93,7 @@ export const NetworkInterfaceType = () => {
                 ) => {
                   field.onChange(item?.value);
                 }}
-                sx={(theme) => ({
-                  [theme.breakpoints.up('md')]: {
-                    minWidth: '480px',
-                  },
-                })}
                 textFieldProps={{
-                  expand: true,
-                  sx: {
-                    width: '468px',
-                  },
                   tooltipText:
                     '@TODO Linode Interfaces - get copy for this tooltip',
                 }}

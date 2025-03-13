@@ -42,11 +42,6 @@ interface BaseProps {
    */
   errorText?: string;
   /**
-   * Makes the TextField use 100% of the available width
-   * @default false
-   */
-  expand?: boolean;
-  /**
    * Makes the error text have the absolute positioning
    * @default false
    */
@@ -137,7 +132,6 @@ export const TextField = (props: TextFieldProps) => {
     error,
     errorGroup,
     errorText,
-    expand,
     hasAbsoluteError,
     helperText,
     helperTextPosition = 'bottom',
@@ -356,7 +350,7 @@ export const TextField = (props: TextFieldProps) => {
               </InputAdornment>
             ),
             sx: {
-              ...(expand && {
+              ...(props.fullWidth && {
                 maxWidth: '100%',
               }),
             },

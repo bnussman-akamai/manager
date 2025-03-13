@@ -39,7 +39,7 @@ export const ImageUploadCLIDialog = (props: ImageUploadSuccessDialogProps) => {
         CopyTooltipProps={{
           onClickCallback: () => sendCLIClickEvent('Image Upload'),
         }}
-        expand
+        fullWidth
         hideLabel
         label="CLI Command"
         noMarginTop

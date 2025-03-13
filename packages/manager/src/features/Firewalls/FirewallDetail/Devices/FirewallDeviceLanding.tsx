@@ -109,7 +109,7 @@ export const FirewallDeviceLanding = React.memo(
                   filter(val);
                 }}
                 debounceTime={250}
-                expand={true}
+                fullWidth
                 hideLabel
                 label=""
                 placeholder={`Search ${formattedType}s`}

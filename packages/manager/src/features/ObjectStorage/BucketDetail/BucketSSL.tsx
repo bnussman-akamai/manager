@@ -111,8 +111,7 @@ const AddCertForm = (props: Props) => {
           <TextField
             data-testid="ssl-cert-input"
             errorText={errorMap.certificate}
-            expand
-            fullWidth={false}
+            fullWidth
             label="Certificate"
             multiline
             name="certificate"
@@ -125,7 +124,6 @@ const AddCertForm = (props: Props) => {
           <TextField
             data-testid="ssl-cert-input"
             errorText={errorMap.private_key}
-            expand
             fullWidth
             label="Private Key"
             multiline

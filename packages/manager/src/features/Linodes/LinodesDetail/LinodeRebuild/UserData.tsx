@@ -110,7 +110,7 @@ export const UserData = (props: Props) => {
             }}
             disabled={reuseUserData || disabled}
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             label="User Data"
             labelTooltipText="Compatible formats include cloud-config data and executable scripts."
             multiline

@@ -64,7 +64,7 @@ export const SupportTicketSMTPFields = () => {
           <TextField
             data-qa-ticket-use-case
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             label={SMTP_FIELD_NAME_TO_LABEL_MAP.useCase}
             multiline
             name="useCase"
@@ -81,7 +81,7 @@ export const SupportTicketSMTPFields = () => {
           <TextField
             data-qa-ticket-email-domains
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             label={SMTP_FIELD_NAME_TO_LABEL_MAP.emailDomains}
             multiline
             name="emailDomains"
@@ -98,7 +98,7 @@ export const SupportTicketSMTPFields = () => {
           <TextField
             data-qa-ticket-public-info
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             label={SMTP_FIELD_NAME_TO_LABEL_MAP.publicInfo}
             multiline
             name="publicInfo"

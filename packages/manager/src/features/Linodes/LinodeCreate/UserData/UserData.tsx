@@ -93,7 +93,7 @@ export const UserData = () => {
             }}
             disabled={isLinodeCreateRestricted}
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             label="User Data"
             labelTooltipText="Compatible formats include cloud-config data and executable scripts."
             multiline

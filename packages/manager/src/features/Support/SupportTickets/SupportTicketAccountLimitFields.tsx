@@ -141,7 +141,7 @@ export const SupportTicketAccountLimitFields = ({
             )}
             data-qa-ticket-use-case
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             multiline
             name="useCase"
             onChange={field.onChange}
@@ -157,7 +157,7 @@ export const SupportTicketAccountLimitFields = ({
           <TextField
             data-qa-ticket-public-info
             errorText={fieldState.error?.message}
-            expand
+            fullWidth
             label={ACCOUNT_LIMIT_FIELD_NAME_TO_LABEL_MAP.publicInfo}
             multiline
             name="publicInfo"

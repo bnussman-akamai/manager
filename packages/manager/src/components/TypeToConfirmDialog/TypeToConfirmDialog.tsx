@@ -239,7 +239,7 @@ export const TypeToConfirmDialog = (props: CombinedProps) => {
         }}
         data-testid={'dialog-confirm-text-input'}
         disabled={disableTypeToConfirmInput}
-        expand={expand}
+        fullWidth={expand}
         handleDeleteAccountServices={handleDeleteAccountServices}
         inputProps={inputProps}
         isCloseAccount={isCloseAccount}

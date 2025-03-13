@@ -11,7 +11,6 @@ import type { SxProps } from '@mui/material';
 
 export interface TypeToConfirmProps extends Omit<TextFieldProps, 'onChange'> {
   confirmationText?: JSX.Element | string;
-  expand?: boolean;
   handleDeleteAccountServices?: (
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
@@ -33,7 +32,6 @@ export interface TypeToConfirmProps extends Omit<TextFieldProps, 'onChange'> {
 export const TypeToConfirm = (props: TypeToConfirmProps) => {
   const {
     confirmationText,
-    expand,
     handleDeleteAccountServices,
     hideInstructions,
     isCloseAccount,
@@ -104,7 +102,6 @@ export const TypeToConfirm = (props: TypeToConfirmProps) => {
             onChange={(e) => onChange(e.target.value)}
             style={textFieldStyle}
             {...rest}
-            expand={expand}
           />
         </>
       ) : null}

@@ -18,7 +18,7 @@ export const TicketReply = (props: Props) => {
       }
       data-qa-ticket-description
       errorText={error}
-      expand
+      fullWidth
       hideLabel
       label="Enter your reply"
       multiline

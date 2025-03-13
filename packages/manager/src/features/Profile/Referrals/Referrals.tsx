@@ -73,13 +73,13 @@ export const Referrals = () => {
         </Grid>
         <>
           <Grid size={12}>
-            {allowReferral ? (
+            {allowReferral && (
               <CopyableTextField
-                expand
+                fullWidth
                 label="Your personal referral link"
                 value={url}
               />
-            ) : null}
+            )}
           </Grid>
           {allowReferral && total !== undefined && total > 0 ? (
             <StyledResultsWrapper>

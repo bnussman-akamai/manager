@@ -396,7 +396,7 @@ export const NodeBalancerConfigPanel = (
                 disabled={disabled}
                 errorGroup={forEdit ? `${configIdx}` : undefined}
                 errorText={errorMap.ssl_cert}
-                expand
+                fullWidth
                 label="SSL Certificate"
                 multiline
                 onChange={onSslCertificateChange}
@@ -417,7 +417,7 @@ export const NodeBalancerConfigPanel = (
                 disabled={disabled}
                 errorGroup={forEdit ? `${configIdx}` : undefined}
                 errorText={errorMap.ssl_key}
-                expand
+                fullWidth
                 label="Private Key"
                 multiline
                 onChange={onPrivateKeyChange}

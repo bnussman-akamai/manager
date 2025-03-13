@@ -96,7 +96,7 @@ export const DeletionDialog = React.memo((props: DeletionDialogProps) => {
         onChange={(input) => {
           setConfirmationText(input);
         }}
-        expand
+        fullWidth
         label={`${capitalize(entity)} Name:`}
         placeholder={label}
         value={confirmationText}

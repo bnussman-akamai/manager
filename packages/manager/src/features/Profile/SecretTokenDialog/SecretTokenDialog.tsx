@@ -117,7 +117,7 @@ export const SecretTokenDialog = (props: Props) => {
         <>
           <Box marginBottom="16px">
             <CopyableTextField
-              expand
+              fullWidth
               label={'Access Key'}
               showDownloadIcon
               spellCheck={false}
@@ -126,7 +126,7 @@ export const SecretTokenDialog = (props: Props) => {
           </Box>
           <Box marginBottom="16px">
             <CopyableTextField
-              expand
+              fullWidth
               label={'Secret Key'}
               showDownloadIcon
               spellCheck={false}
@@ -137,7 +137,7 @@ export const SecretTokenDialog = (props: Props) => {
       ) : value ? (
         <Box marginBottom="16px">
           <CopyableTextField
-            expand
+            fullWidth
             label={title}
             showDownloadIcon
             spellCheck={false}

@@ -128,7 +128,7 @@ const CloseAccountDialog = ({ closeDialog, open }: Props) => {
       <StyledCommentSectionWrapper>
         <TextField
           aria-label="Optional comments field"
-          expand
+          fullWidth
           label="Comments"
           multiline
           onChange={(e) => setComments(e.target.value)}
