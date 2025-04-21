@@ -98,9 +98,9 @@ export const AddLinodeDrawer = (props: Props) => {
     },
   });
 
-  const linodesWithMultipleInterfaces = allLinodes?.filter(
-    (linode) => linodesWithInterfaces[linode.id]?.interfaces.length > 1
-  );
+  const linodesWithMultipleInterfaces = Object.values(linodesWithInterfaces)
+    .filter(({ interfaces }) => interfaces.length > 1)
+    .map(({ linode }) => linode);
 
   const linodeOptions = allLinodes?.filter((linode) => {
     // Exclude read only Linodes
@@ -137,7 +137,11 @@ export const AddLinodeDrawer = (props: Props) => {
     useAddFirewallDeviceMutation();
 
   const [selectedLinodes, setSelectedLinodes] = React.useState<Linode[]>([]);
-  const [interfacesToAdd, setInterfacesToAdd] = React.useState<number[]>([]);
+
+  // Key is the Linode ID, value is the interfaces to add
+  const [interfacesToAdd, setInterfacesToAdd] = React.useState<
+    Record<number, number[]>
+  >([]);
 
   const [localError, setLocalError] = React.useState<string | undefined>(
     undefined
@@ -160,21 +164,26 @@ export const AddLinodeDrawer = (props: Props) => {
     // When a Linode uses Linode Interfaces and it only has one interface, we don't show the
     // Interface select for that Linode. Therefore, here, we need to make sure we add the single
     // interface if the linode is selected.
-    const interfaceIdsOfLinodesWithOnlyOneInterfaces: number[] = [];
+    let interfaceIds: number[] = [];
     for (const { linode, interfaces } of Object.values(linodesWithInterfaces)) {
       if (selectedLinodes.includes(linode) && interfaces.length === 1) {
-        interfaceIdsOfLinodesWithOnlyOneInterfaces.push(interfaces[0].id);
+        interfaceIds.push(interfaces[0].id);        
+      }
+    }
+
+    for (const linodeId in interfacesToAdd) {
+      if (selectedLinodes.some(l => l.id === Number(linodeId))) {
+        interfaceIds = [...interfaceIds, ...interfacesToAdd[linodeId]];
       }
     }
 
     const interfaceResults = await Promise.allSettled(
-      [...interfacesToAdd, ...interfaceIdsOfLinodesWithOnlyOneInterfaces].map(
-        (interfaceId) =>
-          addDevice({
-            firewallId: Number(id),
-            id: interfaceId,
-            type: 'interface',
-          })
+      interfaceIds.map((interfaceId) =>
+        addDevice({
+          firewallId: Number(id),
+          id: interfaceId,
+          type: 'interface',
+        })
       )
     );
 
@@ -331,12 +340,16 @@ export const AddLinodeDrawer = (props: Props) => {
                   key={linode.id}
                   label={`${linode.label} Interface`}
                   onChange={(e, option) => {
-                    setInterfacesToAdd((prev) => [...prev, option.id]);
+                    setInterfacesToAdd((prev) => {
+                      const newInterfacesToAdd = {...prev};
+                      newInterfacesToAdd[linode.id] = [option.id];
+                      return newInterfacesToAdd;
+                    });
                   }}
                   disableClearable
                   options={options}
                   placeholder="Select Interface"
-                  value={options.find((i) => interfacesToAdd.includes(i.id))}
+                  value={options.find((i) => interfacesToAdd[linode.id]?.includes(i.id))}
                 />
               );
             })}
