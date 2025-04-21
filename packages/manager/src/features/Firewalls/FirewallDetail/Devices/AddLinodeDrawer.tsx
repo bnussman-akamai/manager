@@ -73,6 +73,7 @@ export const AddLinodeDrawer = (props: Props) => {
     [grants, isRestrictedUser]
   );
 
+  // Key is Linode ID. Value is an object containing the Linode object and the Linode's interfaces
   const linodesWithInterfaces = useQueries({
     queries:
       linodesUsingLinodeInterfaces?.map(
@@ -80,15 +81,20 @@ export const AddLinodeDrawer = (props: Props) => {
           linodeQueries.linode(linode.id)._ctx.interfaces._ctx.interfaces
       ) ?? [],
     combine(result) {
-      return result.reduce<Record<number, LinodeInterfaces>>(
-        (acc, res, index) => {
-          if (res.data) {
-            acc[linodesUsingLinodeInterfaces![index].id] = res.data;
-          }
-          return acc;
-        },
-        {}
-      );
+      return result.reduce<
+        Record<
+          number,
+          { interfaces: LinodeInterfaces['interfaces']; linode: Linode }
+        >
+      >((acc, res, index) => {
+        if (res.data) {
+          acc[linodesUsingLinodeInterfaces![index].id] = {
+            interfaces: res.data.interfaces,
+            linode: linodesUsingLinodeInterfaces![index],
+          };
+        }
+        return acc;
+      }, {});
     },
   });
 
@@ -142,18 +148,33 @@ export const AddLinodeDrawer = (props: Props) => {
     const failedLinodes: Linode[] = [];
 
     const linodeResults = await Promise.allSettled(
-      selectedLinodes.map((linode) =>
-        addDevice({ firewallId: Number(id), id: linode.id, type: 'linode' })
-      )
+      selectedLinodes
+        .filter(
+          (selectedLinode) => selectedLinode.interface_generation !== 'linode'
+        )
+        .map((linode) =>
+          addDevice({ firewallId: Number(id), id: linode.id, type: 'linode' })
+        )
     );
 
+    // When a Linode uses Linode Interfaces and it only has one interface, we don't show the
+    // Interface select for that Linode. Therefore, here, we need to make sure we add the single
+    // interface if the linode is selected.
+    const interfaceIdsOfLinodesWithOnlyOneInterfaces: number[] = [];
+    for (const { linode, interfaces } of Object.values(linodesWithInterfaces)) {
+      if (selectedLinodes.includes(linode) && interfaces.length === 1) {
+        interfaceIdsOfLinodesWithOnlyOneInterfaces.push(interfaces[0].id);
+      }
+    }
+
     const interfaceResults = await Promise.allSettled(
-      interfacesToAdd.map((interfaceId) =>
-        addDevice({
-          firewallId: Number(id),
-          id: interfaceId,
-          type: 'interface',
-        })
+      [...interfacesToAdd, ...interfaceIdsOfLinodesWithOnlyOneInterfaces].map(
+        (interfaceId) =>
+          addDevice({
+            firewallId: Number(id),
+            id: interfaceId,
+            type: 'interface',
+          })
       )
     );
 
@@ -186,10 +207,11 @@ export const AddLinodeDrawer = (props: Props) => {
           }
         );
         return;
+      } else {
       }
     });
 
-    handleClose();
+    // handleClose();
   };
 
   const errorNotice = () => {
