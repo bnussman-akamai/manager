@@ -17,6 +17,7 @@ export interface InterfaceActionHandlers {
   onEdit: (interfaceId: number) => void;
   onShowDetails: (interfaceId: number) => void;
   onUnassignFirewall: (interfaceId: number) => void;
+  onAssignFirewall: (interfaceId: number) => void;
 }
 
 export const LinodeInterfaceActionMenu = (props: Props) => {
@@ -48,7 +49,12 @@ export const LinodeInterfaceActionMenu = (props: Props) => {
             title: 'Unassign Firewall',
           },
         ]
-      : []),
+      : [
+          {
+            onClick: () => handlers.onAssignFirewall(id),
+            title: 'Assign Firewall',
+          },
+        ]),
     { onClick: () => handlers.onDelete(id), title: 'Delete' },
   ];
 

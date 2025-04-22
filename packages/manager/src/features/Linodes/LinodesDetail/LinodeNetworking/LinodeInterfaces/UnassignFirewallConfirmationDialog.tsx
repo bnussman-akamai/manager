@@ -1,5 +1,6 @@
 import {
   firewallQueries,
+  linodeQueries,
   useLinodeInterfaceFirewallsQuery,
   useLinodeInterfaceQuery,
   useRemoveFirewallDeviceMutation,
@@ -97,6 +98,12 @@ export const UnassignFirewallConfirmationDialog = (props: Props) => {
           variant: 'success',
         }
       );
+      queryClient.invalidateQueries({
+        queryKey: linodeQueries
+          .linode(linodeId)
+          ._ctx.interfaces._ctx.interface(interfaceId ?? 0)._ctx.firewalls
+          .queryKey,
+      });
       handleClose();
     },
   });
@@ -104,7 +111,7 @@ export const UnassignFirewallConfirmationDialog = (props: Props) => {
   return (
     <ConfirmationDialog
       actions={
-        <Stack direction="row" pt={1}>
+        <Stack direction="row" pt={1} spacing={1}>
           <Button onClick={handleClose}>Cancel</Button>
           <Button
             buttonType="primary"

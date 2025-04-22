@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import { AddInterfaceDrawer } from './AddInterfaceDrawer/AddInterfaceDrawer';
+import { AssignFirewallDrawer } from './AssignFirewallDrawer';
 import { DeleteInterfaceDialog } from './DeleteInterfaceDialog';
 import { EditInterfaceDrawer } from './EditInterfaceDrawer/EditInterfaceDrawer';
 import { InterfaceDetailsDrawer } from './InterfaceDetailsDrawer/InterfaceDetailsDrawer';
@@ -24,6 +25,7 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [isUnassignDialogOpen, setIsUnassignDialogOpen] = useState(false);
+  const [isAssignDrawerOpen, setIsAssignDrawerOpen] = useState(false);
 
   const [selectedInterfaceId, setSelectedInterfaceId] = useState<number>();
 
@@ -45,6 +47,11 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
   const onUnassignFirewall = (interfaceId: number) => {
     setSelectedInterfaceId(interfaceId);
     setIsUnassignDialogOpen(true);
+  };
+
+  const onAssignFirewall = (interfaceId: number) => {
+    setSelectedInterfaceId(interfaceId);
+    setIsAssignDrawerOpen(true);
   };
 
   return (
@@ -70,7 +77,13 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
         </Stack>
       </Paper>
       <LinodeInterfacesTable
-        handlers={{ onDelete, onEdit, onShowDetails, onUnassignFirewall }}
+        handlers={{
+          onDelete,
+          onEdit,
+          onShowDetails,
+          onUnassignFirewall,
+          onAssignFirewall,
+        }}
         linodeId={linodeId}
       />
       <AddInterfaceDrawer
@@ -103,6 +116,12 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
         linodeId={linodeId}
         onClose={() => setIsUnassignDialogOpen(false)}
         open={isUnassignDialogOpen}
+      />
+      <AssignFirewallDrawer
+        interfaceId={selectedInterfaceId}
+        linodeId={linodeId}
+        onClose={() => setIsAssignDrawerOpen(false)}
+        open={isAssignDrawerOpen}
       />
       <Drawer
         onClose={() => setIsSettingsDrawerOpen(false)}
