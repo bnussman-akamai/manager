@@ -45,7 +45,12 @@ export const LinodeInterfaceTableRow = (props: Props) => {
         <DateTimeDisplay value={created} />
       </TableCell>
       <TableCell actionCell>
-        <LinodeInterfaceActionMenu handlers={handlers} id={id} type={type} />
+        <LinodeInterfaceActionMenu
+          handlers={handlers}
+          id={id}
+          linodeId={linodeId}
+          type={type}
+        />
       </TableCell>
     </TableRow>
   );

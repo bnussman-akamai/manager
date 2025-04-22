@@ -8,6 +8,7 @@ import { EditInterfaceDrawer } from './EditInterfaceDrawer/EditInterfaceDrawer';
 import { InterfaceDetailsDrawer } from './InterfaceDetailsDrawer/InterfaceDetailsDrawer';
 import { InterfaceSettingsForm } from './InterfaceSettingsForm';
 import { LinodeInterfacesTable } from './LinodeInterfacesTable';
+import { UnassignFirewallConfirmationDialog } from './UnassignFirewallConfirmationDialog';
 
 interface Props {
   linodeId: number;
@@ -22,6 +23,7 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
+  const [isUnassignDialogOpen, setIsUnassignDialogOpen] = useState(false);
 
   const [selectedInterfaceId, setSelectedInterfaceId] = useState<number>();
 
@@ -38,6 +40,11 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
   const onShowDetails = (interfaceId: number) => {
     setSelectedInterfaceId(interfaceId);
     history.replace(`${location.pathname}/interfaces/${interfaceId}`);
+  };
+
+  const onUnassignFirewall = (interfaceId: number) => {
+    setSelectedInterfaceId(interfaceId);
+    setIsUnassignDialogOpen(true);
   };
 
   return (
@@ -63,7 +70,7 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
         </Stack>
       </Paper>
       <LinodeInterfacesTable
-        handlers={{ onDelete, onEdit, onShowDetails }}
+        handlers={{ onDelete, onEdit, onShowDetails, onUnassignFirewall }}
         linodeId={linodeId}
       />
       <AddInterfaceDrawer
@@ -90,6 +97,12 @@ export const LinodeInterfaces = ({ linodeId, regionId }: Props) => {
         linodeId={linodeId}
         onClose={() => history.replace(`/linodes/${linodeId}/networking`)}
         open={location.pathname.includes('networking/interfaces')}
+      />
+      <UnassignFirewallConfirmationDialog
+        interfaceId={selectedInterfaceId}
+        linodeId={linodeId}
+        onClose={() => setIsUnassignDialogOpen(false)}
+        open={isUnassignDialogOpen}
       />
       <Drawer
         onClose={() => setIsSettingsDrawerOpen(false)}

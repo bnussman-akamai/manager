@@ -248,15 +248,12 @@ export const useAddFirewallDeviceMutation = () => {
   });
 };
 
-export const useRemoveFirewallDeviceMutation = (
-  firewallId: number,
-  deviceId: number,
-) => {
+export const useRemoveFirewallDeviceMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<{}, APIError[]>({
-    mutationFn: () => deleteFirewallDevice(firewallId, deviceId),
-    onSuccess() {
+  return useMutation<{}, APIError[], { deviceId: number; firewallId: number, }>({
+    mutationFn: ({ firewallId, deviceId }) => deleteFirewallDevice(firewallId, deviceId),
+    onSuccess(data, { deviceId, firewallId }) {
       // Invalidate firewall lists because GET /v4/firewalls returns all entities for each firewall
       queryClient.invalidateQueries({
         queryKey: firewallQueries.firewalls.queryKey,

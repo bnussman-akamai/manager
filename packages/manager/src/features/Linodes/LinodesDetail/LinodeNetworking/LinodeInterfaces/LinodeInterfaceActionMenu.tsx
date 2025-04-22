@@ -1,3 +1,4 @@
+import { useLinodeInterfaceFirewallsQuery } from '@linode/queries';
 import React from 'react';
 
 import { ActionMenu } from 'src/components/ActionMenu/ActionMenu';
@@ -7,6 +8,7 @@ import type { LinodeInterfaceType } from './utilities';
 interface Props {
   handlers: InterfaceActionHandlers;
   id: number;
+  linodeId: number;
   type: LinodeInterfaceType;
 }
 
@@ -14,10 +16,15 @@ export interface InterfaceActionHandlers {
   onDelete: (interfaceId: number) => void;
   onEdit: (interfaceId: number) => void;
   onShowDetails: (interfaceId: number) => void;
+  onUnassignFirewall: (interfaceId: number) => void;
 }
 
 export const LinodeInterfaceActionMenu = (props: Props) => {
-  const { handlers, id, type } = props;
+  const { handlers, id, type, linodeId } = props;
+
+  const { data: firewalls } = useLinodeInterfaceFirewallsQuery(linodeId, id);
+
+  const numberOfFirewalls = firewalls?.results ?? 0;
 
   const editOptions =
     type === 'VLAN'
@@ -34,6 +41,14 @@ export const LinodeInterfaceActionMenu = (props: Props) => {
       title: 'Edit',
       ...editOptions,
     },
+    ...(numberOfFirewalls > 0
+      ? [
+          {
+            onClick: () => handlers.onUnassignFirewall(id),
+            title: 'Unassign Firewall',
+          },
+        ]
+      : []),
     { onClick: () => handlers.onDelete(id), title: 'Delete' },
   ];
 
