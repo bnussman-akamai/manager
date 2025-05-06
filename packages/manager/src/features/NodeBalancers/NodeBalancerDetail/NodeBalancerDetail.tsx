@@ -1,7 +1,13 @@
 import {
+  getNodeBalancerConfigNodes,
+  getNodeBalancerConfigs,
+} from '@linode/api-v4';
+import {
   useGrants,
   useNodeBalancerQuery,
   useNodebalancerUpdateMutation,
+  useQuery,
+  useQueryClient,
 } from '@linode/queries';
 import { CircleProgress, ErrorState, Notice } from '@linode/ui';
 import { useMatch, useParams } from '@tanstack/react-router';
@@ -18,18 +24,18 @@ import { useIsResourceRestricted } from 'src/hooks/useIsResourceRestricted';
 import { useTabs } from 'src/hooks/useTabs';
 import { getErrorMap } from 'src/utilities/errorUtils';
 
-import NodeBalancerConfigurations from './NodeBalancerConfigurations';
+import { parseAddresses } from '../utils';
+import { NodeBalancerConfigurations } from './NodeBalancerConfigurations';
 import { NodeBalancerSettings } from './NodeBalancerSettings';
 import { NodeBalancerSummary } from './NodeBalancerSummary/NodeBalancerSummary';
 
-import type { NodeBalancerConfigurationsBaseProps } from './NodeBalancerConfigurations';
+import type { APIError } from '@linode/api-v4';
 
 export const NodeBalancerDetail = () => {
   const { id } = useParams({
     strict: false,
   });
   const [label, setLabel] = React.useState<string>();
-  const { data: grants } = useGrants();
 
   const { error: updateError, mutateAsync: updateNodeBalancer } =
     useNodebalancerUpdateMutation(Number(id));
@@ -125,11 +131,7 @@ export const NodeBalancerDetail = () => {
               <NodeBalancerSummary />
             </SafeTabPanel>
             <SafeTabPanel index={1}>
-              <NodeBalancerConfigurationWrapper
-                grants={grants}
-                nodeBalancerLabel={nodebalancer.label}
-                nodeBalancerRegion={nodebalancer.region}
-              />
+              <NodeBalancerConfigurationWrapper />
             </SafeTabPanel>
             <SafeTabPanel index={2}>
               <NodeBalancerSettings />
@@ -141,14 +143,54 @@ export const NodeBalancerDetail = () => {
   );
 };
 
-const NodeBalancerConfigurationWrapper = (
-  props: NodeBalancerConfigurationsBaseProps
-) => {
+const getConfigsWithNodes = (nodeBalancerId: number) => {
+  return getNodeBalancerConfigs(nodeBalancerId).then((configs) => {
+    return Promise.all(
+      configs.data.map((config) => {
+        return getNodeBalancerConfigNodes(nodeBalancerId, config.id).then(
+          ({ data: nodes }) => {
+            return {
+              ...config,
+              nodes: parseAddresses(nodes),
+            };
+          }
+        );
+      })
+    );
+  });
+};
+
+export type NodeBalancerConfigsWithNodes = Awaited<
+  ReturnType<typeof getConfigsWithNodes>
+>;
+
+const NodeBalancerConfigurationWrapper = () => {
   const { configId, id: nodeBalancerId } = useParams({
     strict: false,
   });
   const match = useMatch({
     strict: false,
+  });
+
+  const queryClient = useQueryClient();
+
+  const { data: grants } = useGrants();
+
+  const { data: nodebalancer } = useNodeBalancerQuery(Number(nodeBalancerId));
+
+  const { data, isPending, error } = useQuery<
+    NodeBalancerConfigsWithNodes,
+    APIError[]
+  >({
+    queryKey: [
+      'nodebalancers',
+      'nodebalancer',
+      nodeBalancerId,
+      'configs-with-nodes',
+    ],
+    queryFn: () => getConfigsWithNodes(Number(nodeBalancerId)),
+    refetchOnMount: true,
+    enabled: Boolean(nodeBalancerId),
   });
 
   if (
@@ -160,14 +202,23 @@ const NodeBalancerConfigurationWrapper = (
     return null;
   }
 
-  const matchProps = {
-    params: {
-      configId,
-      id: nodeBalancerId,
-    },
-  };
+  if (isPending) {
+    return <CircleProgress />;
+  }
+  if (error) {
+    return <ErrorState errorText={error[0].reason} />;
+  }
 
-  return <NodeBalancerConfigurations {...props} {...matchProps} />;
+  return (
+    <NodeBalancerConfigurations
+      configs={data}
+      grants={grants}
+      nodeBalancerLabel={nodebalancer?.label ?? ''}
+      nodeBalancerRegion={nodebalancer?.region ?? ''}
+      params={{ configId, id: Number(nodeBalancerId) }}
+      queryClient={queryClient}
+    />
+  );
 };
 
 export default NodeBalancerDetail;
