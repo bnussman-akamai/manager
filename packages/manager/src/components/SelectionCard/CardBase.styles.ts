@@ -40,7 +40,7 @@ export const CardBaseGrid = styled(Grid, {
   height: '100%',
   margin: 0,
   minHeight: 60,
-  padding: theme.spacing(1.5),
+  padding: theme.spacing(1),
   position: 'relative',
   transition:
     'background-color 225ms ease-in-out, border-color 225ms ease-in-out',
@@ -81,7 +81,7 @@ export const CardBaseHeading = styled('div', {
   columnGap: theme.spacing(2),
   display: 'flex',
   font: theme.font.bold,
-  fontSize: '1rem',
+  fontSize: '14px',
   wordBreak: 'break-word',
 }));
 

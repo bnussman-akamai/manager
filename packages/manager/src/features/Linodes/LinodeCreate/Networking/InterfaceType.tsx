@@ -106,13 +106,13 @@ export const InterfaceType = ({ index }: Props) => {
         aria-labelledby="network-connection-label"
         sx={{ display: 'block', marginBottom: '0px !important' }}
       >
-        <Grid2 container spacing={2}>
+        <Grid2 container spacing={1}>
           {interfaceTypes.map((interfaceType) => (
             <SelectionCard
               checked={field.value === interfaceType.purpose}
               gridSize={{
-                md: 3,
-                sm: 12,
+                md: 2.4,
+                sm: 4,
                 xs: 12,
               }}
               heading={interfaceType.label}
@@ -129,6 +129,7 @@ export const InterfaceType = ({ index }: Props) => {
                 />
               )}
               subheadings={[]}
+              sx={{ fontSize: '10px !important' }}
               sxCardBaseIcon={{ svg: { fontSize: '20px' } }}
             />
           ))}

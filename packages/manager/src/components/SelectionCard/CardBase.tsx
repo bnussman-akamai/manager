@@ -69,7 +69,7 @@ export const CardBase = (props: CardBaseProps) => {
   });
 
   return (
-    <CardBaseGrid checked={checked} container spacing={2} sx={sx}>
+    <CardBaseGrid checked={checked} container spacing={0.5} sx={sx}>
       {renderIcon && <CardBaseIcon sx={sxIcon}>{renderIcon()}</CardBaseIcon>}
       <CardBaseHeadings sx={sxHeading}>
         <CardBaseHeading

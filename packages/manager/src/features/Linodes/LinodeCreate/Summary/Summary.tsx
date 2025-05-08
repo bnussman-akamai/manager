@@ -93,12 +93,15 @@ export const Summary = () => {
     },
     {
       item: {
+<<<<<<< Updated upstream
         title: 'VLAN Attached',
       },
       show: Boolean(vlanLabel),
     },
     {
       item: {
+=======
+>>>>>>> Stashed changes
         title: 'Private IP',
       },
       show: privateIPEnabled,
@@ -111,13 +114,25 @@ export const Summary = () => {
     },
     {
       item: {
-        title: 'VPC Assigned',
+        title: 'VLAN',
+      },
+      show: hasVLAN,
+    },
+    {
+      item: {
+        title: 'VPC',
       },
       show: Boolean(vpcId),
     },
     {
       item: {
-        title: 'Firewall Assigned',
+        title: 'Public Internet',
+      },
+      show: linodeInterfaces?.some((i) => i.purpose === 'public'),
+    },
+    {
+      item: {
+        title: 'Firewall',
       },
       show: Boolean(firewallId),
     },
