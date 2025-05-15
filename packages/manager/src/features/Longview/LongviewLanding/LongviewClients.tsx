@@ -127,11 +127,12 @@ export const LongviewClients = (props: LongviewClientsCombinedProps) => {
       navigate({
         state: (prev) => ({
           ...prev,
-          title: 'Request for additional Longview clients',
+          supportTicketFormFields: {
+            title: 'Request for additional Longview clients',
+          },
         }),
         search: {
           dialogOpen: drawerOpen,
-          dialogTitle: 'Request for additional Longview clients',
         },
         to: '/support/tickets/open',
       });
