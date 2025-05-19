@@ -52,6 +52,7 @@ import { EditDomainDrawer } from './EditDomainDrawer';
 
 import type { Handlers as DomainHandlers } from './DomainActionMenu';
 import type { Domain } from '@linode/api-v4';
+import type { DomainState } from 'src/routes/domains';
 
 const DOMAIN_CREATE_ROUTE = '/domains/create';
 
@@ -68,7 +69,7 @@ export const DomainsLanding = (props: DomainsLandingProps) => {
   const match = useMatch({
     strict: false,
   });
-  const locationState = location.state;
+  const locationState = location.state as DomainState;
 
   const { enqueueSnackbar } = useSnackbar();
   const { data: profile } = useProfile();
