@@ -188,16 +188,31 @@ export interface ConfigInterfaceIPv4 {
 }
 
 export interface IPv6SLAAC {
-  address: string;
+  /**
+   * A IPv6 address
+   * @readonly
+   */
+  address?: string;
+  /**
+   * IPv6 network CIDR or "auto" to automaticllay allocate
+   * @default 'auto'
+   */
   range: string;
 }
 
 export interface ConfigInterfaceIPv6 {
-  is_public: boolean;
-  ranges: {
+  /**
+   * @default false
+   */
+  is_public?: boolean;
+  ranges?: {
+    /**
+     * IPv6 network CIDR or "auto" to automaticllay allocate
+     * @default 'auto'
+     */
     range?: string;
   }[];
-  slaac: IPv6SLAAC[];
+  slaac?: IPv6SLAAC[];
 }
 
 // The legacy interface type - for Configuration Profile Interfaces

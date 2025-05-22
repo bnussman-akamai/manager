@@ -82,7 +82,6 @@ const IPv4 = string()
 
 const IPv6 = string()
   .notRequired()
-  .nullable()
   .test({
     name: 'validateIPv6',
     message:
@@ -90,51 +89,9 @@ const IPv6 = string()
     test: (value) => test_vpcsValidateIP(value),
   });
 
-const ipv4ConfigInterface = object().when('purpose', {
-  is: 'vpc',
-  then: (schema) =>
-    schema
-      .shape({
-        vpc: IPv4,
-        nat_1_1: lazy((value) =>
-          value === 'any' ? string().notRequired().nullable() : IPv4,
-        ),
-      })
-      .when('ipv6', {
-        is: (value: unknown) => value === null || value === undefined,
-        then: (schema) => schema.required(VPC_INTERFACE_IP_RULE),
-      }),
-  otherwise: (schema) =>
-    schema
-      .nullable()
-      .test({
-        name: testnameDisallowedBasedOnPurpose('VPC'),
-        message: testmessageDisallowedBasedOnPurpose('vpc', 'ipv4.vpc'),
-        /*
-        Workaround to get test to fail if field is populated when it should not be based
-        on purpose (inspired by similar approach in firewalls.schema.ts for ports field).
-        Similarly-structured logic (return typeof xyz === 'undefined') throughout this
-        file serves the same purpose.
-      */
-        test: (value: any) => {
-          if (value?.vpc) {
-            return typeof value.vpc === 'undefined';
-          }
-
-          return true;
-        },
-      })
-      .test({
-        name: testnameDisallowedBasedOnPurpose('VPC'),
-        message: testmessageDisallowedBasedOnPurpose('vpc', 'ipv4.nat_1_1'),
-        test: (value: any) => {
-          if (value?.nat_1_1) {
-            return typeof value.nat_1_1 === 'undefined';
-          }
-
-          return true;
-        },
-      }),
+const ipv4ConfigInterface = object({
+  vpc: IPv4,
+  nat_1_1: IPv4,
 });
 
 const slaacSchema = object().shape({
@@ -145,6 +102,7 @@ const slaacSchema = object().shape({
       message: 'Must be a /64 IPv6 network CIDR',
       test: (value) => validateIPv6PrefixLengthIs64(value),
     }),
+  address: string(),
 });
 
 const IPv6ConfigInterfaceRangesSchema = object({
@@ -157,63 +115,17 @@ const IPv6ConfigInterfaceRangesSchema = object({
     }),
 });
 
-const ipv6ConfigInterface = object().when('purpose', {
-  is: 'vpc',
-  then: (schema) =>
-    schema
-      .shape({
-        slaac: array()
-          .of(slaacSchema)
-          .test({
-            name: 'slaac field must have zero or one entry',
-            message: 'ipv6.slaac field must have zero or one entry',
-            test: (value) =>
-              !value ? true : value?.length === 0 || value?.length === 1,
-          }),
-        ranges: array().of(IPv6ConfigInterfaceRangesSchema),
-        is_public: boolean(),
-      })
-      .notRequired()
-      .when('ipv4', {
-        is: (value: unknown) => value === null || value === undefined,
-        then: (schema) => schema.required(VPC_INTERFACE_IP_RULE),
-      }),
-  otherwise: (schema) =>
-    schema
-      .nullable()
-      .test({
-        name: testnameDisallowedBasedOnPurpose('VPC'),
-        message: testmessageDisallowedBasedOnPurpose('vpc', 'ipv6.slaac'),
-        test: (value: any) => {
-          if (value?.slaac) {
-            return typeof value.slaac === 'undefined';
-          }
-
-          return true;
-        },
-      })
-      .test({
-        name: testnameDisallowedBasedOnPurpose('VPC'),
-        message: testmessageDisallowedBasedOnPurpose('vpc', 'ipv6.ranges'),
-        test: (value: any) => {
-          if (value?.ranges) {
-            return typeof value.ranges === 'undefined';
-          }
-
-          return true;
-        },
-      })
-      .test({
-        name: testnameDisallowedBasedOnPurpose('VPC'),
-        message: testmessageDisallowedBasedOnPurpose('vpc', 'ipv6.is_public'),
-        test: (value: any) => {
-          if (value?.is_public) {
-            return typeof value.is_public === 'undefined';
-          }
-
-          return true;
-        },
-      }),
+const ipv6ConfigInterface = object({
+  slaac: array()
+    .of(slaacSchema)
+    .test({
+      name: 'slaac field must have zero or one entry',
+      message: 'ipv6.slaac field must have zero or one entry',
+      test: (value) =>
+        !value ? true : value?.length === 0 || value?.length === 1,
+    }),
+  ranges: array().of(IPv6ConfigInterfaceRangesSchema),
+  is_public: boolean(),
 });
 
 // This is the validation schema for legacy interfaces attached to configuration profiles
