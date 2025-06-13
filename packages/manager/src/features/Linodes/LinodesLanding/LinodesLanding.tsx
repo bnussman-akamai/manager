@@ -88,7 +88,6 @@ export interface LinodesLandingProps {
   handleRegionFilter: (regionFilter: RegionFilter) => void;
   LandingHeader?: React.ReactElement<any>;
   linodesData: LinodeWithMaintenance[];
-  linodesInTransition: Set<number>;
   linodesRequestError?: APIError[];
   linodesRequestLoading: boolean;
   regionFilter: RegionFilter;
@@ -194,7 +193,6 @@ class ListLinodes extends React.Component<CombinedProps, State> {
       grants,
       handleRegionFilter,
       linodesData,
-      linodesInTransition,
       linodesRequestError,
       linodesRequestLoading,
       profile,
@@ -373,10 +371,7 @@ class ListLinodes extends React.Component<CombinedProps, State> {
                           let _status: ExtendedStatus = linode.status;
                           if (linode.maintenance) {
                             _status = 'maintenance';
-                          } else if (linodesInTransition.has(linode.id)) {
-                            _status = 'busy';
                           }
-
                           return {
                             ...linode,
                             _statusPriority: statusToPriority(_status),

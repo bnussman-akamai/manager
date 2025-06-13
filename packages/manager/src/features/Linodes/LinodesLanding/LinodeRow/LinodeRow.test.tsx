@@ -4,21 +4,9 @@ import * as React from 'react';
 
 import { renderWithTheme, wrapWithTableBody } from 'src/utilities/testHelpers';
 
-import { LinodeRow, RenderFlag } from './LinodeRow';
+import { LinodeRow } from './LinodeRow';
 
 describe('LinodeRow', () => {
-  describe('when Linode has mutation', () => {
-    it('should render a Flag', () => {
-      const { getByLabelText } = renderWithTheme(
-        <RenderFlag mutationAvailable={true} />
-      );
-
-      expect(
-        getByLabelText('There is a free upgrade available for this Linode')
-      ).toBeVisible();
-    });
-  });
-
   it('should render a linode row', async () => {
     const linode = linodeFactory.build();
     const renderedLinode = (

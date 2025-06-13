@@ -6,19 +6,17 @@ import * as React from 'react';
 
 import { CopyTooltip } from 'src/components/CopyTooltip/CopyTooltip';
 import { Link } from 'src/components/Link';
-import { StatusIcon } from 'src/components/StatusIcon/StatusIcon';
 import { TableCell } from 'src/components/TableCell';
 import { TableRow } from 'src/components/TableRow';
-import { transitionText } from 'src/features/Linodes/transitions';
-import { useInProgressEvents } from 'src/queries/events/events';
+import { LinodeStatus } from 'src/features/Linodes/LinodesLanding/LinodeRow/LinodeStatus';
 
 import NodeActionMenu from './NodeActionMenu';
 
-import type { APIError } from '@linode/api-v4/lib/types';
+import type { APIError, Linode } from '@linode/api-v4/lib/types';
 
 export interface NodeRow {
   instanceId?: number;
-  instanceStatus?: string;
+  instanceStatus?: Linode['status'];
   ip?: string;
   label?: string;
   nodeId: string;
@@ -41,39 +39,17 @@ export const NodeRow = React.memo((props: NodeRowProps) => {
     label,
     linodeError,
     nodeId,
-    nodeStatus,
     openRecycleNodeDialog,
     typeLabel,
   } = props;
 
-  const { data: events } = useInProgressEvents();
   const { data: maskSensitiveDataPreference } = usePreferences(
     (preferences) => preferences?.maskSensitiveData
   );
 
-  const recentEvent = events?.find(
-    (event) =>
-      event.entity?.id === instanceId && event.entity?.type === 'linode'
-  );
-
   const linodeLink = instanceId ? `/linodes/${instanceId}` : undefined;
 
-  const nodeReadyAndInstanceRunning =
-    nodeStatus === 'ready' && instanceStatus === 'running';
-
-  const iconStatus =
-    nodeStatus === 'not_ready'
-      ? 'other'
-      : nodeReadyAndInstanceRunning
-        ? 'active'
-        : 'inactive';
-
   const displayLabel = label ?? typeLabel;
-
-  const displayStatus =
-    nodeStatus === 'not_ready'
-      ? 'Provisioning'
-      : transitionText(instanceStatus ?? '', instanceId ?? -1, recentEvent);
 
   const displayIP = ip ?? '';
 
@@ -107,12 +83,9 @@ export const NodeRow = React.memo((props: NodeRowProps) => {
           >
             Error retrieving status
           </Typography>
-        ) : (
-          <>
-            <StatusIcon status={iconStatus} />
-            {displayStatus}
-          </>
-        )}
+        ) : instanceId && instanceStatus ? (
+          <LinodeStatus id={instanceId} status={instanceStatus} />
+        ): null}
       </TableCell>
       <TableCell noWrap>
         {linodeError ? (

@@ -1,6 +1,6 @@
 import { EVENTS_LIST_FILTER } from 'src/features/Events/constants';
 
-import type { Event, EventAction, Filter } from '@linode/api-v4';
+import type { Event, Filter } from '@linode/api-v4';
 
 export const isInProgressEvent = (event: Event) => {
   if (event.percent_complete === null) {
@@ -23,9 +23,7 @@ export const isEventImageUpload = (event: Event): boolean => {
 };
 
 export const isEventRelevantToLinode = (event: Event, linodeId: number) =>
-  isPrimaryEntity(event, linodeId) ||
-  (isSecondaryEntity(event, linodeId) &&
-    isEventRelevantToLinodeAsSecondaryEntity(event));
+  isPrimaryEntity(event, linodeId) || isSecondaryEntity(event, linodeId);
 
 export const isPrimaryEntity = (event: Event, linodeId: number) =>
   event?.entity?.type === 'linode' && event?.entity?.id === linodeId;
@@ -33,20 +31,6 @@ export const isPrimaryEntity = (event: Event, linodeId: number) =>
 export const isSecondaryEntity = (event: Event, linodeId: number) =>
   event?.secondary_entity?.type === 'linode' &&
   event?.secondary_entity?.id === linodeId;
-
-// Some event types include a Linode as a `secondary_entity`. A subset of these
-// events should be included in the `eventsForLinode` selector since they are
-// relevant to that Linode.
-//
-// An example: `clone_linode` events include the source Linode as the `entity`
-// and the target Linode as the `secondary_entity`. In this case, we want the
-// consumer of the `eventsForLinode` selector to have access to these events so
-// it can do things like display progress bars.
-export const eventActionsForLinodeAsSecondaryEntity: EventAction[] = [
-  'linode_clone',
-];
-export const isEventRelevantToLinodeAsSecondaryEntity = (event: Event) =>
-  eventActionsForLinodeAsSecondaryEntity.includes(event?.action);
 
 /**
  * Because we're using one polling instance (without any API filter) and have many possible event infinite queires

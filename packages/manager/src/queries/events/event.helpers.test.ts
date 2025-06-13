@@ -7,7 +7,6 @@ import {
   generatePollingFilter,
   getExistingEventDataForPollingFilterGenerator,
   isEventRelevantToLinode,
-  isEventRelevantToLinodeAsSecondaryEntity,
   isInProgressEvent,
   isPrimaryEntity,
   isSecondaryEntity,
@@ -70,23 +69,6 @@ describe('isSecondaryEntity', () => {
   it("returns `true` when the linodeId matches the event's secondary_entity ID", () => {
     expect(isSecondaryEntity(event, 0)).toBe(false);
     expect(isSecondaryEntity(event, 1)).toBe(true);
-  });
-});
-
-describe('isEventRelevantToLinodeAsSecondaryEntity', () => {
-  const linodeCreateEvent = eventFactory.build({
-    action: 'linode_create',
-  });
-  const linodeCloneEvent = eventFactory.build({
-    action: 'linode_clone',
-  });
-  it('returns `true` if the event type is relevant to Linodes as secondary entities', () => {
-    expect(isEventRelevantToLinodeAsSecondaryEntity(linodeCreateEvent)).toBe(
-      false
-    );
-    expect(isEventRelevantToLinodeAsSecondaryEntity(linodeCloneEvent)).toBe(
-      true
-    );
   });
 });
 

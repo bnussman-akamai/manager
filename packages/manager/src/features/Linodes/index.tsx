@@ -9,13 +9,11 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { SuspenseLoader } from 'src/components/SuspenseLoader';
 import { useFlags } from 'src/hooks/useFlags';
-import { useInProgressEvents } from 'src/queries/events/events';
 import { addMaintenanceToLinodes } from 'src/utilities/linodes';
 import { storage } from 'src/utilities/storage';
 
 import { PENDING_MAINTENANCE_FILTER } from '../Account/Maintenance/utilities';
 import { regionFilterOptions } from './LinodesLanding/RegionTypeFilter';
-import { linodesInTransition } from './transitions';
 
 import type { RegionFilter } from 'src/utilities/storage';
 
@@ -83,8 +81,6 @@ export const LinodesLandingWrapper = React.memo(() => {
     (thisAccountMaintenance) => thisAccountMaintenance.entity.type === 'linode'
   );
 
-  const { data: events } = useInProgressEvents();
-
   const filteredLinodesData = addMaintenanceToLinodes(
     accountMaintenanceData ?? [],
     filteredLinodes ?? []
@@ -100,7 +96,6 @@ export const LinodesLandingWrapper = React.memo(() => {
       filteredLinodesLoading={filteredLinodesLoading}
       handleRegionFilter={handleRegionFilter}
       linodesData={filteredLinodesData}
-      linodesInTransition={linodesInTransition(events ?? [])}
       linodesRequestError={error ?? undefined}
       linodesRequestLoading={allLinodesLoading}
       regionFilter={regionFilter}
