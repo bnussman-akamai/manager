@@ -53,6 +53,11 @@ export const handleError = (
     { reason: DEFAULT_ERROR_MESSAGE },
   ];
 
+  // @ts-expect-error add some hidden properties to our APIError[]
+  errors.error = error;
+  // @ts-expect-error add some hidden properties to our APIError[]
+  errors.status = status;
+
   const apiInMaintenanceMode = !!error.response?.headers['x-maintenance-mode'];
 
   if (apiInMaintenanceMode) {

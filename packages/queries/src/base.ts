@@ -88,7 +88,7 @@ export type ItemsByID<T> = Record<string, T>;
  * @param error an unknown error
  * @returns If the error is a APIError[]
  */
-function getIsAPIErrorArray(error: unknown): error is APIError[] {
+export function getIsAPIErrorArray(error: unknown): error is APIError[] {
   if (!Array.isArray(error)) {
     return false;
   }
