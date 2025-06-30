@@ -53,10 +53,8 @@ export const handleError = (
     { reason: DEFAULT_ERROR_MESSAGE },
   ];
 
-  // @ts-expect-error add some hidden properties to our APIError[]
+  // @ts-expect-error add the original Axios as a hidden field on APIError[]
   errors.error = error;
-  // @ts-expect-error add some hidden properties to our APIError[]
-  errors.status = status;
 
   const apiInMaintenanceMode = !!error.response?.headers['x-maintenance-mode'];
 

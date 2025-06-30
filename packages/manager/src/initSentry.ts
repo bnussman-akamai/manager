@@ -6,11 +6,14 @@ import { APP_ROOT, SENTRY_URL } from 'src/constants';
 
 import packageJson from '../package.json';
 
+import type { APIError } from '@linode/api-v4';
+import type { AxiosError } from 'axios';
+
 /**
  * A custom error intended to only be used for Sentry logging.
  * Do not get this confused with the plain "APIError" TypeScript type.
  */
-export class APIError extends Error {
+export class SentryAPIError extends Error {
   public cause?: Error;
 
   constructor(message: string, cause?: Error) {
@@ -108,15 +111,19 @@ export const initSentry = () => {
       ],
       release: packageJson.version,
       beforeSend(event, hint) {
-        console.log("Event:", event);
-        console.log("Hint:", hint);
-
         if (getIsAPIErrorArray(hint.originalException)) {
+          // Unhandled `APIError[]`s may be thown. We do some special handling to make them
+          // slightly more readable in Sentry.
+          const axiosError = (
+            hint.originalException as Array<APIError> & { error: AxiosError }
+          )?.error;
+
           for (const error of hint.originalException) {
-            const e = new APIError(error.reason, hint.originalException.error);
+            const e = new SentryAPIError(error.reason, axiosError);
             captureException(e, {
               extra: {
-                status_code: hint.originalException.error.status,
+                status_code: axiosError?.status,
+                url: axiosError?.config?.url,
                 field: error.field,
               },
             });
