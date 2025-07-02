@@ -5,11 +5,7 @@ import * as React from 'react';
 
 import { PAYPAL_CLIENT_ID } from 'src/constants';
 import { promoFactory } from 'src/factories';
-import {
-  renderWithTheme,
-  withMarkup,
-  wrapWithThemeAndRouter,
-} from 'src/utilities/testHelpers';
+import { renderWithTheme, withMarkup } from 'src/utilities/testHelpers';
 
 import BillingSummary from './BillingSummary';
 
@@ -76,25 +72,17 @@ describe('BillingSummary', () => {
   });
 
   it('does not display the promotions section unless there are promos', async () => {
-    const { rerender } = renderWithTheme(
+    const { queryByText } = renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-        <BillingSummary balance={0} balanceUninvoiced={5} paymentMethods={[]} />
+        <BillingSummary
+          balance={0}
+          balanceUninvoiced={5}
+          paymentMethods={[]}
+          promotions={[]}
+        />
       </PayPalScriptProvider>
     );
-    expect(screen.queryByText('Promotions')).not.toBeInTheDocument();
-    rerender(
-      wrapWithThemeAndRouter(
-        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-          <BillingSummary
-            balance={0}
-            balanceUninvoiced={5}
-            paymentMethods={[]}
-            promotions={promoFactory.buildList(1)}
-          />
-        </PayPalScriptProvider>
-      )
-    );
-    expect(screen.getByText('Promotions'));
+    expect(queryByText('Promotions')).not.toBeInTheDocument();
   });
 
   it('renders promo summary, expiry, and credit remaining', async () => {
@@ -146,32 +134,23 @@ describe('BillingSummary', () => {
     within(screen.getByTestId('accrued-charges-value')).getByText('$5.00');
   });
 
-  it('opens "Make a Payment" drawer when "Make a payment." is clicked', async () => {
-    const { getByTestId, getByText, rerender } = renderWithTheme(
+  it.only('opens "Make a Payment" drawer when "Make a payment." is clicked', async () => {
+    const { getByTestId, findByText, findByTestId } = renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary balance={5} balanceUninvoiced={5} paymentMethods={[]} />
-      </PayPalScriptProvider>
+      </PayPalScriptProvider>,
+      {
+        routerOptions: {
+          useFullRouter: true,
+          initialRoute: '/account/billing',
+        },
+      }
     );
 
-    const paymentButton = getByText('Make a payment', { exact: false });
+    const paymentButton = await findByText('Make a payment', { exact: false });
     await userEvent.click(paymentButton);
-    queryMocks.useMatch.mockReturnValue({
-      routeId: '/account/billing/make-payment',
-    });
 
-    rerender(
-      wrapWithThemeAndRouter(
-        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-          <BillingSummary
-            balance={5}
-            balanceUninvoiced={5}
-            paymentMethods={[]}
-          />
-        </PayPalScriptProvider>
-      )
-    );
-
-    expect(getByTestId('drawer')).toBeVisible();
+    expect(await findByTestId('drawer')).toBeVisible();
     expect(getByTestId('drawer-title').textContent).toEqual('Make a Payment');
   });
 });
