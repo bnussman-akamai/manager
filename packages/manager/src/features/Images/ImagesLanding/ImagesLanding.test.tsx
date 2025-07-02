@@ -9,7 +9,6 @@ import { http, HttpResponse, server } from 'src/mocks/testServer';
 import { mockMatchMedia, renderWithTheme } from 'src/utilities/testHelpers';
 
 import ImagesLanding from './ImagesLanding';
-import { migrationRouteTree } from 'src/routes';
 
 beforeAll(() => mockMatchMedia());
 
@@ -115,7 +114,7 @@ describe('Images Landing Table', () => {
     ).toBeInTheDocument();
   });
 
-  it.only('should allow opening the Edit Image drawer', async () => {
+  it('should allow opening the Edit Image drawer', async () => {
     const images = imageFactory.buildList(3, {
       regions: [
         { region: 'us-east', status: 'available' },
@@ -161,36 +160,28 @@ describe('Images Landing Table', () => {
         { region: 'us-southeast', status: 'pending' },
       ],
     });
+
     server.use(
-      http.get('*/images', () => {
-        return HttpResponse.json(makeResourcePage(images));
+      http.get('*/images', ({ request }) => {
+        const filter = request.headers.get('x-filter');
+
+        if (filter?.includes('manual')) {
+          return HttpResponse.json(makeResourcePage(images));
+        }
+        return HttpResponse.json(makeResourcePage([]));
       })
     );
 
-    const {
-      getAllByLabelText,
-      getByTestId,
-      getByText,
-      queryByTestId,
-      rerender,
-    } = renderWithTheme(<ImagesLanding />, {
-      routerOptions: { initialRoute: '/images' },
+    const { findByLabelText, getByText } = renderWithTheme(<ImagesLanding />, {
+      routerOptions: { initialRoute: '/images', useFullRouter: true },
     });
 
-    const loadingElement = queryByTestId(loadingTestId);
-    if (loadingElement) {
-      await waitForElementToBeRemoved(loadingElement);
-    }
-
-    const actionMenu = getAllByLabelText(
+    const actionMenu = await findByLabelText(
       `Action menu for Image ${images[0].label}`
-    )[0];
+    );
+
     await userEvent.click(actionMenu);
     await userEvent.click(getByText('Rebuild an Existing Linode'));
-
-    expect(getByTestId(loadingTestId)).toBeInTheDocument();
-
-    await waitForElementToBeRemoved(getByTestId(loadingTestId));
 
     await waitFor(() => {
       getByText('Rebuild an Existing Linode from an Image');
@@ -204,30 +195,35 @@ describe('Images Landing Table', () => {
         { region: 'us-southeast', status: 'pending' },
       ],
     });
+
     server.use(
-      http.get('*/images', () => {
-        return HttpResponse.json(makeResourcePage(images));
+      http.get('*/images', ({ request }) => {
+        const filter = request.headers.get('x-filter');
+
+        if (filter?.includes('manual')) {
+          return HttpResponse.json(makeResourcePage(images));
+        }
+        return HttpResponse.json(makeResourcePage([]));
       })
     );
-
-    const { getAllByLabelText, getByText, queryByTestId } = renderWithTheme(
+    const { findByLabelText, getByText, router } = renderWithTheme(
       <ImagesLanding />,
-      { routerOptions: { initialRoute: '/images' } }
+      {
+        routerOptions: { initialRoute: '/images', useFullRouter: true },
+      }
     );
 
-    const loadingElement = queryByTestId(loadingTestId);
-    await waitForElementToBeRemoved(loadingElement);
-
-    const actionMenu = getAllByLabelText(
+    const actionMenu = await findByLabelText(
       `Action menu for Image ${images[0].label}`
-    )[0];
+    );
     await userEvent.click(actionMenu);
     await userEvent.click(getByText('Deploy to New Linode'));
 
-    // expect(mockHistory.push).toBeCalledWith({
-    //   pathname: '/linodes/create/',
-    //   search: `?type=Images&imageID=${images[0].id}`,
-    // });
+    // We can access the router and asset based on its state
+    expect(router.state.location.pathname).toBe('/linodes/create');
+    expect(router.state.location.searchStr).toBe(
+      `?type=Images&imageID=${encodeURIComponent(images[0].id)}`
+    );
   });
 
   it('should allow deleting an image', async () => {
@@ -237,30 +233,32 @@ describe('Images Landing Table', () => {
         { region: 'us-southeast', status: 'pending' },
       ],
     });
+
     server.use(
-      http.get('*/images', () => {
-        return HttpResponse.json(makeResourcePage(images));
+      http.get('*/images', ({ request }) => {
+        const filter = request.headers.get('x-filter');
+
+        if (filter?.includes('manual')) {
+          return HttpResponse.json(makeResourcePage(images));
+        }
+        return HttpResponse.json(makeResourcePage([]));
       })
     );
 
-    const { getAllByLabelText, getByTestId, getByText, queryByTestId } =
-      renderWithTheme(<ImagesLanding />);
+    const { getByText, findByLabelText } = renderWithTheme(<ImagesLanding />, {
+      routerOptions: { initialRoute: '/images', useFullRouter: true },
+    });
 
-    const loadingElement = queryByTestId(loadingTestId);
-    await waitForElementToBeRemoved(loadingElement);
-
-    const actionMenu = getAllByLabelText(
+    const actionMenu = await findByLabelText(
       `Action menu for Image ${images[0].label}`
-    )[0];
+    );
     await userEvent.click(actionMenu);
     await userEvent.click(getByText('Delete'));
 
-    expect(getByTestId(loadingTestId)).toBeInTheDocument();
-
-    await waitForElementToBeRemoved(getByTestId(loadingTestId));
-
     await waitFor(() => {
-      getByText('Are you sure you want to delete this Image?');
+      expect(
+        getByText('Are you sure you want to delete this Image?')
+      ).toBeVisible();
     });
   });
 
@@ -290,9 +288,7 @@ describe('Images Landing Table', () => {
     });
 
     const loadingElement = queryByTestId(loadingTestId);
-    if (loadingElement) {
-      await waitForElementToBeRemoved(loadingElement);
-    }
+    await waitForElementToBeRemoved(loadingElement);
 
     const createImageButton = getByText('Create Image').closest('button');
 
@@ -344,9 +340,7 @@ describe('Images Landing Table', () => {
       });
 
     const loadingElement = queryByTestId(loadingTestId);
-    if (loadingElement) {
-      await waitForElementToBeRemoved(loadingElement);
-    }
+    await waitForElementToBeRemoved(loadingElement);
 
     const actionMenu = getAllByLabelText(
       `Action menu for Image ${images[0].label}`

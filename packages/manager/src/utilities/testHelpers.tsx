@@ -23,23 +23,18 @@ import thunk from 'redux-thunk';
 
 import { LinodeThemeWrapper } from 'src/LinodeThemeWrapper';
 import { setupInterceptors } from 'src/request';
+import { migrationRouteTree } from 'src/routes';
 import { defaultState, storeFactory } from 'src/store';
 
 import { mergeDeepRight } from './mergeDeepRight';
 
 import type { QueryClient } from '@tanstack/react-query';
 // TODO: Tanstack Router - replace AnyRouter once migration is complete.
-import type {
-  AnyRootRoute,
-  AnyRouter,
-  RootRoute,
-  Route,
-} from '@tanstack/react-router';
-import type { MatcherFunction, RenderResult } from '@testing-library/react';
+import type { AnyRootRoute, AnyRouter, Route } from '@tanstack/react-router';
+import type { MatcherFunction } from '@testing-library/react';
 import type { DeepPartial } from 'redux';
 import type { FlagSet } from 'src/featureFlags';
 import type { ApplicationState } from 'src/store';
-import { migrationRouteTree } from 'src/routes';
 
 export const mockMatchMedia = (matches: boolean = true) => {
   window.matchMedia = vi.fn().mockImplementation((query) => {
@@ -92,13 +87,12 @@ interface Options {
 }
 
 function replaceInRouteTree(routes: Route[], path: string, component: any) {
-  // console.log(typeof route, Array.isArray(route))
   for (const route of routes) {
     if (route.fullPath === path) {
-      console.log('Replaced', path, 'component in unit test.');
+      // console.log('Replaced', path, 'component in unit test.');
       route.update({ component: () => component });
     } else if (route.children) {
-      replaceInRouteTree(route.children, path, component);
+      replaceInRouteTree(route.children as Route[], path, component);
     }
   }
 }
@@ -135,7 +129,10 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
     ? migrationRouteTree
     : (options.routerOptions?.routeTree ?? rootRoute.addChildren([indexRoute]));
 
-  if (options.routerOptions?.useFullRouter) {
+  if (
+    options.routerOptions?.useFullRouter &&
+    options.routerOptions.initialRoute
+  ) {
     replaceInRouteTree(
       tree.children,
       options.routerOptions.initialRoute,
@@ -153,27 +150,30 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
     defaultPendingMs: 0,
   });
 
-  return (
-    <Provider store={storeToPass}>
-      <QueryClientProvider client={passedQueryClient || queryClient}>
-        <LinodeThemeWrapper theme={options.theme}>
-          <LDProvider
-            clientSideID={''}
-            deferInitialization
-            flags={options.flags ?? {}}
-            options={{ bootstrap: options.flags }}
-          >
-            <CssBaseline enableColorScheme />
-            <SnackbarProvider>
-              <MemoryRouter {...options.MemoryRouter}>
-                <RouterProvider router={router} />
-              </MemoryRouter>
-            </SnackbarProvider>
-          </LDProvider>
-        </LinodeThemeWrapper>
-      </QueryClientProvider>
-    </Provider>
-  );
+  return {
+    ui: (
+      <Provider store={storeToPass}>
+        <QueryClientProvider client={passedQueryClient || queryClient}>
+          <LinodeThemeWrapper theme={options.theme}>
+            <LDProvider
+              clientSideID={''}
+              deferInitialization
+              flags={options.flags ?? {}}
+              options={{ bootstrap: options.flags }}
+            >
+              <CssBaseline enableColorScheme />
+              <SnackbarProvider>
+                <MemoryRouter {...options.MemoryRouter}>
+                  <RouterProvider router={router} />
+                </MemoryRouter>
+              </SnackbarProvider>
+            </LDProvider>
+          </LinodeThemeWrapper>
+        </QueryClientProvider>
+      </Provider>
+    ),
+    router,
+  };
 };
 
 // When wrapping a TableRow component to test, we'll get an invalid DOM nesting
@@ -189,13 +189,14 @@ export const wrapWithTableBody = (ui: any, options: Options = {}) =>
   );
 
 export const renderWithTheme = (
-  ui: React.ReactNode,
+  _ui: React.ReactNode,
   options: Options = {}
-): RenderResult => {
-  const utils = render(wrapWithTheme(ui, options));
+) => {
+  const { ui, router } = wrapWithTheme(_ui, options)
+  const utils = render(ui);
   return {
     ...utils,
-    rerender: (ui) => utils.rerender(wrapWithTheme(ui, options)),
+    router,
   };
 };
 
