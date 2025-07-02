@@ -18,36 +18,7 @@ import { Region } from './Region';
 
 import type { LinodeCreateFormValues } from './utilities';
 
-const queryMocks = vi.hoisted(() => ({
-  useLocation: vi.fn(),
-  useNavigate: vi.fn(),
-  useParams: vi.fn(),
-  useSearch: vi.fn(),
-}));
-
-vi.mock('@tanstack/react-router', async () => {
-  const actual = await vi.importActual('@tanstack/react-router');
-  return {
-    ...actual,
-    useLocation: queryMocks.useLocation,
-    useNavigate: queryMocks.useNavigate,
-    useSearch: queryMocks.useSearch,
-    useParams: queryMocks.useParams,
-  };
-});
-
 describe('Region', () => {
-  beforeEach(() => {
-    queryMocks.useLocation.mockReturnValue({
-      pathname: '/linodes/create',
-    });
-    queryMocks.useNavigate.mockReturnValue(vi.fn());
-    queryMocks.useSearch.mockReturnValue({
-      type: 'Clone Linode',
-    });
-    queryMocks.useParams.mockReturnValue({});
-  });
-
   it('should render a heading', () => {
     const { getAllByText } = renderWithThemeAndHookFormContext({
       component: <Region />,
@@ -129,10 +100,6 @@ describe('Region', () => {
 
     const linode = linodeFactory.build({ region: regionA.id, type: type.id });
 
-    queryMocks.useParams.mockReturnValue({
-      linodeId: linode.id,
-    });
-
     server.use(
       http.get('*/v4/linode/types/:id', () => {
         return HttpResponse.json(type);
@@ -145,6 +112,14 @@ describe('Region', () => {
     const { findByText, getByPlaceholderText } =
       renderWithThemeAndHookFormContext<LinodeCreateFormValues>({
         component: <Region />,
+        options: {
+          routerOptions: { initialRoute: '/linodes/create' },
+          MemoryRouter: {
+            initialEntries: [
+              `/linodes/create?type=Clone%20Linode&linodeID=${linode.id}`,
+            ],
+          },
+        },
         useFormOptions: {
           defaultValues: {
             linode,
@@ -178,6 +153,14 @@ describe('Region', () => {
     const { findByText, getByPlaceholderText, getByText } =
       renderWithThemeAndHookFormContext<LinodeCreateFormValues>({
         component: <Region />,
+        options: {
+          routerOptions: { initialRoute: '/linodes/create' },
+          MemoryRouter: {
+            initialEntries: [
+              `/linodes/create?type=Clone%20Linode&linodeID=${linode.id}`,
+            ],
+          },
+        },
         useFormOptions: {
           defaultValues: {
             linode,

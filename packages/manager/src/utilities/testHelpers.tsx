@@ -180,13 +180,11 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
 // error complaining that a <tr /> cannot appear as a child of a <div />. This
 // is a wrapper around `wrapWithTheme()` that renders the `ui` argument in a
 // <table /> and <tbody />.
-export const wrapWithTableBody = (ui: any, options: Options = {}) =>
-  wrapWithTheme(
-    <table>
-      <tbody>{ui}</tbody>
-    </table>,
-    options
-  );
+export const wrapWithTableBody = (ui: any, options: Options = {}) => (
+  <table>
+    <tbody>{ui}</tbody>
+  </table>
+);
 
 export const renderWithTheme = (
   _ui: React.ReactNode,
