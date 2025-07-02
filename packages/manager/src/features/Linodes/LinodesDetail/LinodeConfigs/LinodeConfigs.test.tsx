@@ -2,7 +2,7 @@ import { linodeFactory } from '@linode/utilities';
 import React from 'react';
 
 import 'src/mocks/testServer';
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import LinodeConfigs from './LinodeConfigs';
 
@@ -48,7 +48,7 @@ describe('LinodeConfigs', () => {
       data: linodeFactory.build,
     });
 
-    const { queryByText } = await renderWithThemeAndRouter(<LinodeConfigs />);
+    const { queryByText } = renderWithTheme(<LinodeConfigs />);
 
     expect(queryByText('Network Interfaces')).toBeVisible();
   });
@@ -64,7 +64,7 @@ describe('LinodeConfigs', () => {
       linodeInterfaces: { enabled: true },
     });
 
-    const { queryByText } = await renderWithThemeAndRouter(<LinodeConfigs />);
+    const { queryByText } = renderWithTheme(<LinodeConfigs />);
 
     expect(queryByText('Network Interfaces')).not.toBeInTheDocument();
   });

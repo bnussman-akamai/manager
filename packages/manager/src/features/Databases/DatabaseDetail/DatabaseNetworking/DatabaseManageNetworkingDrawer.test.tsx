@@ -8,7 +8,7 @@ import { subnetFactory, vpcFactory } from 'src/factories';
 import { databaseFactory } from 'src/factories/databases';
 import {
   renderWithTheme,
-  renderWithThemeAndRouter,
+  renderWithTheme,
 } from 'src/utilities/testHelpers';
 
 import DatabaseManageNetworkingDrawer from './DatabaseManageNetworkingDrawer';
@@ -87,7 +87,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useRegionQuery.mockReturnValue({
       data: mockRegion,
     });
-    renderWithThemeAndRouter(<DatabaseManageNetworkingDrawer {...mockProps} />);
+    renderWithTheme(<DatabaseManageNetworkingDrawer {...mockProps} />);
 
     const vpcSelectorLabel = screen.getByText('Assign a VPC');
     expect(vpcSelectorLabel).toBeInTheDocument();
@@ -97,7 +97,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useRegionQuery.mockReturnValue({
       data: mockRegion,
     });
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <DatabaseManageNetworkingDrawer {...mockProps} />
     );
 
@@ -114,7 +114,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
       ...mockProps,
       database: { ...mockDatabase, private_network: null },
     };
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <DatabaseManageNetworkingDrawer {...altProps} />
     );
 
@@ -125,7 +125,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useRegionQuery.mockReturnValue({
       data: mockRegion,
     });
-    await renderWithTheme(<DatabaseManageNetworkingDrawer {...mockProps} />);
+    renderWithTheme(<DatabaseManageNetworkingDrawer {...mockProps} />);
     const saveButton = screen.getByTestId(saveButtonTestId);
     expect(saveButton).toBeDisabled();
   });
@@ -134,7 +134,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useRegionQuery.mockReturnValue({
       data: mockRegion,
     });
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <DatabaseManageNetworkingDrawer {...mockProps} />,
       {
         initialRoute: `/databases/${mockProps.database.engine}/${mockProps.database.id}/networking`,
@@ -157,7 +157,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     const mockNavigate = vi.fn();
     queryMocks.useNavigate.mockReturnValue(mockNavigate);
 
-    renderWithThemeAndRouter(
+    renderWithTheme(
       <DatabaseManageNetworkingDrawer {...mockProps} />,
       {
         initialRoute: `/databases/${mockProps.database.engine}/${mockProps.database.id}/networking`,

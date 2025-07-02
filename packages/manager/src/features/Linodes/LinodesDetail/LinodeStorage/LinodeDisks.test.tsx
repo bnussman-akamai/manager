@@ -4,7 +4,7 @@ import React from 'react';
 import { linodeDiskFactory } from 'src/factories';
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { LinodeDisks } from './LinodeDisks';
 
@@ -43,7 +43,7 @@ describe('LinodeDisks', () => {
       })
     );
 
-    const { findByText, getByText } = await renderWithThemeAndRouter(
+    const { findByText, getByText } = renderWithTheme(
       <LinodeDisks />
     );
 

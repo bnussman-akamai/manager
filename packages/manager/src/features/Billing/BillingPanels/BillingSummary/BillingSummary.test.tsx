@@ -6,7 +6,7 @@ import * as React from 'react';
 import { PAYPAL_CLIENT_ID } from 'src/constants';
 import { promoFactory } from 'src/factories';
 import {
-  renderWithThemeAndRouter,
+  renderWithTheme,
   withMarkup,
   wrapWithThemeAndRouter,
 } from 'src/utilities/testHelpers';
@@ -38,7 +38,7 @@ vi.mock('@tanstack/react-router', async () => {
 
 describe('BillingSummary', () => {
   it('displays appropriate helper text and value when there is no balance', async () => {
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary balance={0} balanceUninvoiced={5} paymentMethods={[]} />
       </PayPalScriptProvider>
@@ -48,7 +48,7 @@ describe('BillingSummary', () => {
   });
 
   it('displays a credit when there is a negative balance', async () => {
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary
           balance={-10}
@@ -62,7 +62,7 @@ describe('BillingSummary', () => {
   });
 
   it('displays the balance when there is a positive balance that is not yet past due', async () => {
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary
           balance={10}
@@ -76,7 +76,7 @@ describe('BillingSummary', () => {
   });
 
   it('does not display the promotions section unless there are promos', async () => {
-    const { rerender } = await renderWithThemeAndRouter(
+    const { rerender } = renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary balance={0} balanceUninvoiced={5} paymentMethods={[]} />
       </PayPalScriptProvider>
@@ -98,7 +98,7 @@ describe('BillingSummary', () => {
   });
 
   it('renders promo summary, expiry, and credit remaining', async () => {
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary
           balance={0}
@@ -125,7 +125,7 @@ describe('BillingSummary', () => {
       promoFactory.build(),
       promoFactory.build({ service_type: 'linode', summary: 'MY_PROMO_CODE' }),
     ];
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <BillingSummary
         balance={0}
         balanceUninvoiced={5}
@@ -138,7 +138,7 @@ describe('BillingSummary', () => {
   });
 
   it('displays accrued charges', async () => {
-    await renderWithThemeAndRouter(
+    renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary balance={0} balanceUninvoiced={5} paymentMethods={[]} />
       </PayPalScriptProvider>
@@ -147,7 +147,7 @@ describe('BillingSummary', () => {
   });
 
   it('opens "Make a Payment" drawer when "Make a payment." is clicked', async () => {
-    const { getByTestId, getByText, rerender } = await renderWithThemeAndRouter(
+    const { getByTestId, getByText, rerender } = renderWithTheme(
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
         <BillingSummary balance={5} balanceUninvoiced={5} paymentMethods={[]} />
       </PayPalScriptProvider>

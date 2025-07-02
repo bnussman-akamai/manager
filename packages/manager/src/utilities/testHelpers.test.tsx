@@ -11,7 +11,7 @@ import {
   renderWithTheme,
   renderWithThemeAndFormik,
   renderWithThemeAndHookFormContext,
-  renderWithThemeAndRouter,
+  renderWithTheme,
   resizeScreenSize,
   withMarkup,
   wrapWithStore,
@@ -62,10 +62,10 @@ describe('testHelpers', () => {
     });
   });
 
-  describe('renderWithThemeAndRouter', () => {
+  describe('renderWithTheme', () => {
     it('should render the component with theme and router', async () => {
       const TestComponent = () => <div>Test</div>;
-      const { getByText, router } = await renderWithThemeAndRouter(
+      const { getByText, router } = renderWithTheme(
         <TestComponent />
       );
 
