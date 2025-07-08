@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
 import {
@@ -6,7 +6,7 @@ import {
   objectStorageTypeFactory,
 } from 'src/factories';
 import { UNKNOWN_PRICE } from 'src/utilities/pricing/constants';
-import { wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import {
   EnableObjectStorageModal,
@@ -52,17 +52,15 @@ describe('EnableObjectStorageModal', () => {
   });
 
   it('includes a header', () => {
-    const { getAllByText } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getAllByText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     getAllByText('Enable Object Storage');
   });
 
   it('displays flat rate pricing, storage, and network transfer amounts in a region without price increases', () => {
-    const { getByText } = render(
-      wrapWithTheme(
-        <EnableObjectStorageModal {...props} regionId={BASE_PRICING_REGION} />
-      )
+    const { getByText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} regionId={BASE_PRICING_REGION} />
     );
     getByText(`$5/month`, { exact: false });
     getByText(OBJ_STORAGE_STORAGE_AMT, { exact: false });
@@ -70,13 +68,11 @@ describe('EnableObjectStorageModal', () => {
   });
 
   it('displays flat rate pricing, storage, and network transfer amounts in a price increase region', () => {
-    const { getByText } = render(
-      wrapWithTheme(
-        <EnableObjectStorageModal
-          {...props}
-          regionId={DC_SPECIFIC_PRICING_REGION}
-        />
-      )
+    const { getByText } = renderWithTheme(
+      <EnableObjectStorageModal
+        {...props}
+        regionId={DC_SPECIFIC_PRICING_REGION}
+      />
     );
     getByText(`$5/month`, { exact: false });
     getByText(OBJ_STORAGE_STORAGE_AMT, { exact: false });
@@ -84,8 +80,8 @@ describe('EnableObjectStorageModal', () => {
   });
 
   it('displays flat rate pricing, storage, and network transfer amounts when a regionId is not defined', () => {
-    const { getByText } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getByText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     getByText(`$5/month`, { exact: false });
     getByText(OBJ_STORAGE_STORAGE_AMT, { exact: false });
@@ -98,8 +94,8 @@ describe('EnableObjectStorageModal', () => {
       isError: true,
     });
 
-    const { getByTestId, getByText } = render(
-      wrapWithTheme(<EnableObjectStorageModal regionId="us-east" {...props} />)
+    const { getByTestId, getByText } = renderWithTheme(
+      <EnableObjectStorageModal regionId="us-east" {...props} />
     );
 
     const primaryActionButton = getByTestId('enable-obj');
@@ -109,8 +105,8 @@ describe('EnableObjectStorageModal', () => {
   });
 
   it('includes a link to linode.com/pricing', () => {
-    const { getByText } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getByText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     const link = getByText('Learn more');
     expect(link.closest('a')).toHaveAttribute(
@@ -120,32 +116,32 @@ describe('EnableObjectStorageModal', () => {
   });
 
   it('includes a link to Account Settings', () => {
-    const { getByText } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getByText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     const link = getByText('Account Settings');
     expect(link.closest('a')).toHaveAttribute('href', '/account/settings');
   });
 
   it('calls the onClose prop/handler when the Cancel button is clicked', () => {
-    const { getByText } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getByText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     fireEvent.click(getByText('Cancel'));
     expect(props.onClose).toHaveBeenCalled();
   });
 
   it('calls the onClose prop/handler when the Close (X) button is clicked', () => {
-    const { getByLabelText } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getByLabelText } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     fireEvent.click(getByLabelText('Close'));
     expect(props.onClose).toHaveBeenCalled();
   });
 
   it('calls the handleSubmit prop/handler when the Enable Object Storage button is clicked', () => {
-    const { getByTestId } = render(
-      wrapWithTheme(<EnableObjectStorageModal {...props} />)
+    const { getByTestId } = renderWithTheme(
+      <EnableObjectStorageModal {...props} />
     );
     fireEvent.click(getByTestId('enable-obj'));
     expect(props.handleSubmit).toHaveBeenCalled();

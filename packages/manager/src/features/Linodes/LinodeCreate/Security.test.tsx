@@ -11,8 +11,7 @@ import { accountFactory } from 'src/factories';
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
 import {
-  renderWithThemeAndHookFormContext,
-  renderWithThemeAndRouter,
+  renderWithTheme,
   wrapWithFormContext,
 } from 'src/utilities/testHelpers';
 
@@ -23,9 +22,9 @@ import type { LinodeCreateFormValues } from './utilities';
 describe('Security', () => {
   // TODO: Unskip once M3-8559 is addressed.
   it.skip('should render a root password input', async () => {
-    const { findByLabelText } = renderWithThemeAndHookFormContext({
-      component: <Security />,
-    });
+    const { findByLabelText } = renderWithTheme(
+      wrapWithFormContext({ component: <Security /> })
+    );
 
     const rootPasswordInput = await findByLabelText('Root Password');
 
@@ -37,7 +36,7 @@ describe('Security', () => {
     const component = wrapWithFormContext({
       component: <Security />,
     });
-    const { getAllByText } = await renderWithThemeAndRouter(component);
+    const { getAllByText } = renderWithTheme(component);
 
     const heading = getAllByText('SSH Keys')[0];
 
@@ -49,7 +48,7 @@ describe('Security', () => {
     const component = wrapWithFormContext({
       component: <Security />,
     });
-    const { getByText } = await renderWithThemeAndRouter(component);
+    const { getByText } = renderWithTheme(component);
 
     const addSSHKeyButton = getByText('Add an SSH Key');
 
@@ -73,9 +72,9 @@ describe('Security', () => {
       })
     );
 
-    const { findByLabelText } = renderWithThemeAndHookFormContext({
-      component: <Security />,
-    });
+    const { findByLabelText } = renderWithTheme(
+      wrapWithFormContext({ component: <Security /> })
+    );
 
     const rootPasswordInput = await findByLabelText('Root Password');
 
@@ -101,9 +100,11 @@ describe('Security', () => {
       })
     );
 
-    const { findByText, getByRole } = renderWithThemeAndHookFormContext({
-      component: <Security />,
-    });
+    const { findByText, getByRole } = renderWithTheme(
+      wrapWithFormContext({
+        component: <Security />,
+      })
+    );
 
     // Make sure the restricted user's SSH keys are loaded
     for (const sshKey of sshKeys) {
@@ -124,12 +125,12 @@ describe('Security', () => {
       })
     );
 
-    const component = wrapWithFormContext({
-      component: <Security />,
-    });
-    const { findByText } = await renderWithThemeAndRouter(component, {
-      flags: { linodeDiskEncryption: true },
-    });
+    const { findByText } = renderWithTheme(
+      wrapWithFormContext({ component: <Security /> }),
+      {
+        flags: { linodeDiskEncryption: true },
+      }
+    );
 
     const heading = await findByText('Disk Encryption');
 
@@ -158,7 +159,7 @@ describe('Security', () => {
       component: <Security />,
       useFormOptions: { defaultValues: { region: region.id } },
     });
-    const { findByLabelText } = await renderWithThemeAndRouter(component, {
+    const { findByLabelText } = renderWithTheme(component, {
       flags: { linodeDiskEncryption: true },
     });
 
@@ -188,10 +189,9 @@ describe('Security', () => {
       component: <Security />,
       useFormOptions: { defaultValues: { region: region.id } },
     });
-    const { findByLabelText, getByLabelText } = await renderWithThemeAndRouter(
-      component,
-      { flags: { linodeDiskEncryption: true } }
-    );
+    const { findByLabelText, getByLabelText } = renderWithTheme(component, {
+      flags: { linodeDiskEncryption: true },
+    });
 
     await findByLabelText(
       'Distributed Compute Instances are encrypted. This setting can not be changed.'

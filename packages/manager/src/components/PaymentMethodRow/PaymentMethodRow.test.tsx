@@ -212,7 +212,7 @@ describe('Payment Method Row', () => {
           <PaymentMethodRow onDelete={vi.fn()} paymentMethod={paymentMethod} />
         </PayPalScriptProvider>,
         {
-          initialRoute: '/account/billing',
+          routerOptions: { initialRoute: '/account/billing' },
         }
       );
 

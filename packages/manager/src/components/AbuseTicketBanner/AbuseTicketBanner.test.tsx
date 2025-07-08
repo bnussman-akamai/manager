@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import * as React from 'react';
 
 import {
@@ -8,7 +8,7 @@ import {
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
 import { getAbuseTickets } from 'src/store/selectors/getAbuseTicket';
-import { renderWithTheme, wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { AbuseTicketBanner } from './AbuseTicketBanner';
 
@@ -38,7 +38,7 @@ describe('Abuse ticket banner', () => {
         );
       })
     );
-    const { queryAllByText } = render(wrapWithTheme(<AbuseTicketBanner />));
+    const { queryAllByText } = renderWithTheme(<AbuseTicketBanner />);
 
     await waitFor(() => {
       expect(queryAllByText(/2 open abuse tickets/)).toHaveLength(1);

@@ -1,7 +1,11 @@
 import { fireEvent, render } from '@testing-library/react';
 import * as React from 'react';
 
-import { assertOrder, wrapWithTheme } from 'src/utilities/testHelpers';
+import {
+  assertOrder,
+  renderWithTheme,
+  wrapWithTheme,
+} from 'src/utilities/testHelpers';
 
 import {
   getInitialValuesFromUserPreferences,
@@ -131,28 +135,26 @@ describe('OrderBy', () => {
         { age: 50, name: 'may' },
       ];
 
-      const { container, getByTestId } = render(
-        wrapWithTheme(
-          <OrderBy data={data} order="desc" orderBy="name" {...componentProps}>
-            {({ data, handleOrderChange }) => {
-              return (
-                <>
-                  {data.map((d) => (
-                    <div data-qa-name key={d.name}>
-                      {d.name}
-                    </div>
-                  ))}
-                  <button
-                    data-testid="change-order"
-                    onClick={() => handleOrderChange('age', 'asc')}
-                  >
-                    Change Order
-                  </button>
-                </>
-              );
-            }}
-          </OrderBy>
-        )
+      const { container, getByTestId } = renderWithTheme(
+        <OrderBy data={data} order="desc" orderBy="name" {...componentProps}>
+          {({ data, handleOrderChange }) => {
+            return (
+              <>
+                {data.map((d) => (
+                  <div data-qa-name key={d.name}>
+                    {d.name}
+                  </div>
+                ))}
+                <button
+                  data-testid="change-order"
+                  onClick={() => handleOrderChange('age', 'asc')}
+                >
+                  Change Order
+                </button>
+              </>
+            );
+          }}
+        </OrderBy>
       );
       // First, the data should be sorted according to props.
       assertOrder(container, '[data-qa-name]', ['may', 'april']);

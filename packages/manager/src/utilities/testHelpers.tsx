@@ -194,6 +194,7 @@ export const renderWithTheme = (
   const utils = render(ui);
   return {
     ...utils,
+    rerender: (ui: any) => utils.rerender(wrapWithTheme(ui, options).ui),
     router,
   };
 };
