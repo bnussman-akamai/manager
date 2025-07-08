@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import * as React from 'react';
 
-import { wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme, wrapWithTheme } from 'src/utilities/testHelpers';
 
 import { ObjectActionMenu } from './ObjectActionMenu';
 
@@ -20,32 +20,24 @@ const props: Props = {
 
 describe('ObjectActionMenu', () => {
   it('Includes a "Delete" option', () => {
-    const { queryByText } = render(
-      wrapWithTheme(<ObjectActionMenu {...props} />)
-    );
+    const { queryByText } = renderWithTheme(<ObjectActionMenu {...props} />);
     expect(queryByText('Delete')).toBeInTheDocument();
   });
 
   it('executes the onRemove function when the "Delete" option is clicked', () => {
-    const { getAllByText } = render(
-      wrapWithTheme(<ObjectActionMenu {...props} />)
-    );
+    const { getAllByText } = renderWithTheme(<ObjectActionMenu {...props} />);
 
     fireEvent.click(getAllByText('Delete')[0]);
     expect(mockHandleClickDelete).toHaveBeenCalled();
   });
 
   it('Includes a "Download" option', () => {
-    const { queryByText } = render(
-      wrapWithTheme(<ObjectActionMenu {...props} />)
-    );
+    const { queryByText } = renderWithTheme(<ObjectActionMenu {...props} />);
     expect(queryByText('Download')).toBeInTheDocument();
   });
 
   it('executes the onOpen function when the "Download" option is clicked', () => {
-    const { getAllByText } = render(
-      wrapWithTheme(<ObjectActionMenu {...props} />)
-    );
+    const { getAllByText } = renderWithTheme(<ObjectActionMenu {...props} />);
 
     fireEvent.click(getAllByText('Download')[0]);
     expect(mockHandleClickDownload).toHaveBeenCalled();

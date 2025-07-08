@@ -1,7 +1,6 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
-import { wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { TabLinkList } from './TabLinkList'; // Import your component and Tab type
 import { Tabs } from './Tabs';
@@ -16,17 +15,15 @@ describe('TabLinkList', () => {
   ];
 
   it('renders TabLinkList with links when noLink is not provided', () => {
-    const { getAllByRole } = render(
-      wrapWithTheme(
-        <Tabs>
-          <TabLinkList tabs={tabs} />
-        </Tabs>,
-        {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
-        }
-      )
+    const { getAllByRole } = renderWithTheme(
+      <Tabs>
+        <TabLinkList tabs={tabs} />
+      </Tabs>,
+      {
+        MemoryRouter: {
+          initialEntries: [{ pathname: '/tab-1' }],
+        },
+      }
     );
 
     const tabLinks = getAllByRole('tab');
@@ -34,17 +31,15 @@ describe('TabLinkList', () => {
   });
 
   it('renders TabLinkList without links when noLink is provided', () => {
-    const { getAllByRole } = render(
-      wrapWithTheme(
-        <Tabs>
-          <TabLinkList noLink tabs={tabs} />
-        </Tabs>,
-        {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
-        }
-      )
+    const { getAllByRole } = renderWithTheme(
+      <Tabs>
+        <TabLinkList noLink tabs={tabs} />
+      </Tabs>,
+      {
+        MemoryRouter: {
+          initialEntries: [{ pathname: '/tab-1' }],
+        },
+      }
     );
 
     const tabLinks = getAllByRole('tab');
@@ -54,17 +49,15 @@ describe('TabLinkList', () => {
   });
 
   it('renders TabLinkList with the correct tab titles', () => {
-    const { getByText } = render(
-      wrapWithTheme(
-        <Tabs>
-          <TabLinkList tabs={tabs} />
-        </Tabs>,
-        {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
-        }
-      )
+    const { getByText } = renderWithTheme(
+      <Tabs>
+        <TabLinkList tabs={tabs} />
+      </Tabs>,
+      {
+        MemoryRouter: {
+          initialEntries: [{ pathname: '/tab-1' }],
+        },
+      }
     );
 
     tabs.forEach((tab) => {

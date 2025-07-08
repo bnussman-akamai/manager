@@ -1,5 +1,5 @@
 import { breakpoints } from '@linode/ui';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import * as React from 'react';
 
 import {
@@ -8,11 +8,7 @@ import {
 } from 'src/factories/support';
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
-import {
-  renderWithTheme,
-  resizeScreenSize,
-  wrapWithTheme,
-} from 'src/utilities/testHelpers';
+import { renderWithTheme, resizeScreenSize } from 'src/utilities/testHelpers';
 
 import { SupportTicketDetail } from './SupportTicketDetail';
 
@@ -57,7 +53,7 @@ describe('Support Ticket Detail', () => {
         return HttpResponse.json(ticket);
       })
     );
-    const { findByText } = render(wrapWithTheme(<SupportTicketDetail />));
+    const { findByText } = renderWithTheme(<SupportTicketDetail />);
     expect(
       await screen.findByText(/#0: TEST Support Ticket/i)
     ).toBeInTheDocument();

@@ -4,11 +4,7 @@ import * as React from 'react';
 import { kubernetesClusterFactory } from 'src/factories';
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
-import {
-  renderWithTheme,
-  wrapWithTableBody,
-  wrapWithTheme,
-} from 'src/utilities/testHelpers';
+import { renderWithTheme, wrapWithTableBody } from 'src/utilities/testHelpers';
 
 import { KubernetesClusterRow } from './KubernetesClusterRow';
 
@@ -25,7 +21,7 @@ const props: Props = {
 describe('ClusterRow component', () => {
   it('should render', async () => {
     const { getByTestId } = renderWithTheme(
-      wrapWithTheme(wrapWithTableBody(<KubernetesClusterRow {...props} />))
+      wrapWithTableBody(<KubernetesClusterRow {...props} />)
     );
 
     getByTestId('cluster-row');

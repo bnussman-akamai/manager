@@ -1,11 +1,7 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
-import {
-  assertOrder,
-  renderWithTheme,
-  wrapWithTheme,
-} from 'src/utilities/testHelpers';
+import { assertOrder, renderWithTheme } from 'src/utilities/testHelpers';
 
 import {
   getInitialValuesFromUserPreferences,

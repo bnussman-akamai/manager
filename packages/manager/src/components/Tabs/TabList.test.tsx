@@ -1,7 +1,7 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import { wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { Tab } from './Tab'; // Adjust the import path based on your project structure
 import { TabList } from './TabList';
@@ -9,34 +9,30 @@ import { Tabs } from './Tabs'; // Adjust the import path based on your project s
 
 describe('TabList component', () => {
   it('renders TabList correctly', () => {
-    const { container } = render(
-      wrapWithTheme(
-        <Tabs>
-          <TabList />
-        </Tabs>,
-        {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
-        }
-      )
+    const { container } = renderWithTheme(
+      <Tabs>
+        <TabList />
+      </Tabs>,
+      {
+        MemoryRouter: {
+          initialEntries: [{ pathname: '/tab-1' }],
+        },
+      }
     );
 
     expect(container).toMatchSnapshot();
   });
 
   it('handles className prop', () => {
-    const { container } = render(
-      wrapWithTheme(
-        <Tabs>
-          <TabList className="custom-class" />
-        </Tabs>,
-        {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
-        }
-      )
+    const { container } = renderWithTheme(
+      <Tabs>
+        <TabList className="custom-class" />
+      </Tabs>,
+      {
+        MemoryRouter: {
+          initialEntries: [{ pathname: '/tab-1' }],
+        },
+      }
     );
 
     const tabListElement = container.querySelector('.custom-class');
@@ -44,20 +40,18 @@ describe('TabList component', () => {
   });
 
   it('handles click events on tabs', () => {
-    const { getByText } = render(
-      wrapWithTheme(
-        <Tabs>
-          <TabList>
-            <Tab>Tab 1</Tab>
-            <Tab>Tab 2</Tab>
-          </TabList>
-        </Tabs>,
-        {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
-        }
-      )
+    const { getByText } = renderWithTheme(
+      <Tabs>
+        <TabList>
+          <Tab>Tab 1</Tab>
+          <Tab>Tab 2</Tab>
+        </TabList>
+      </Tabs>,
+      {
+        MemoryRouter: {
+          initialEntries: [{ pathname: '/tab-1' }],
+        },
+      }
     );
 
     const tab1 = getByText('Tab 1');

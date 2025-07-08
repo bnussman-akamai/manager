@@ -6,10 +6,7 @@ import { describe, it } from 'vitest';
 
 import { subnetFactory, vpcFactory } from 'src/factories';
 import { databaseFactory } from 'src/factories/databases';
-import {
-  renderWithTheme,
-  renderWithTheme,
-} from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import DatabaseManageNetworkingDrawer from './DatabaseManageNetworkingDrawer';
 
@@ -97,9 +94,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useRegionQuery.mockReturnValue({
       data: mockRegion,
     });
-    renderWithTheme(
-      <DatabaseManageNetworkingDrawer {...mockProps} />
-    );
+    renderWithTheme(<DatabaseManageNetworkingDrawer {...mockProps} />);
 
     const unassignButton = screen.getByText('Unassign VPC');
     expect(unassignButton).toBeInTheDocument();
@@ -114,9 +109,7 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
       ...mockProps,
       database: { ...mockDatabase, private_network: null },
     };
-    renderWithTheme(
-      <DatabaseManageNetworkingDrawer {...altProps} />
-    );
+    renderWithTheme(<DatabaseManageNetworkingDrawer {...altProps} />);
 
     expect(screen.queryByText('Unassign VPC')).not.toBeInTheDocument();
   });
@@ -134,12 +127,11 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useRegionQuery.mockReturnValue({
       data: mockRegion,
     });
-    renderWithTheme(
-      <DatabaseManageNetworkingDrawer {...mockProps} />,
-      {
+    renderWithTheme(<DatabaseManageNetworkingDrawer {...mockProps} />, {
+      routerOptions: {
         initialRoute: `/databases/${mockProps.database.engine}/${mockProps.database.id}/networking`,
       }
-    );
+    });
 
     const accessCheckbox = screen.getByTestId(
       'database-public-access-checkbox'
@@ -157,12 +149,11 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     const mockNavigate = vi.fn();
     queryMocks.useNavigate.mockReturnValue(mockNavigate);
 
-    renderWithTheme(
-      <DatabaseManageNetworkingDrawer {...mockProps} />,
-      {
+    renderWithTheme(<DatabaseManageNetworkingDrawer {...mockProps} />, {
+      routerOptions: {
         initialRoute: `/databases/${mockProps.database.engine}/${mockProps.database.id}/networking`,
-      }
-    );
+      },
+    });
 
     const accessCheckbox = screen.getByTestId(
       'database-public-access-checkbox'

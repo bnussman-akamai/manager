@@ -1,11 +1,11 @@
 import * as kube from '@linode/api-v4/lib/kubernetes/kubernetes';
 import { breakpoints } from '@linode/ui';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 
 import { reactRouterProps } from 'src/__data__/reactRouterProps';
-import { resizeScreenSize, wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme, resizeScreenSize } from 'src/utilities/testHelpers';
 
 import { ClusterActionMenu } from './ClusterActionMenu';
 
@@ -36,9 +36,8 @@ const props = {
 describe('Kubernetes cluster action menu', () => {
   it('should include the correct Kube actions', async () => {
     resizeScreenSize(breakpoints.values.sm);
-    const { getByText, queryByLabelText } = render(
-      wrapWithTheme(<ClusterActionMenu {...props} />)
-    );
+    const { getByText, queryByLabelText } = renderWithTheme(
+      <ClusterActionMenu {...props} />);
 
     const actionMenuButton = queryByLabelText(/^Action menu for/)!;
 
@@ -50,8 +49,8 @@ describe('Kubernetes cluster action menu', () => {
 
   it('should query the API for a config file when Download kubeconfig is clicked', async () => {
     resizeScreenSize(breakpoints.values.lg);
-    const { getByText } = render(
-      wrapWithTheme(<ClusterActionMenu {...props} />)
+    const { getByText } = renderWithTheme(
+      (<ClusterActionMenu {...props} />)
     );
 
     await fireEvent.click(getByText(/download/i));

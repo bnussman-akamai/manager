@@ -30,7 +30,7 @@ import { mergeDeepRight } from './mergeDeepRight';
 
 import type { QueryClient } from '@tanstack/react-query';
 // TODO: Tanstack Router - replace AnyRouter once migration is complete.
-import type { AnyRootRoute, AnyRouter, Route } from '@tanstack/react-router';
+import type { AnyRootRoute, AnyRouter, LinkProps, Route } from '@tanstack/react-router';
 import type { MatcherFunction } from '@testing-library/react';
 import type { DeepPartial } from 'redux';
 import type { FlagSet } from 'src/featureFlags';
@@ -70,7 +70,7 @@ export const resizeScreenSize = (width: number) => {
 };
 
 interface TanStackRouterOptions {
-  initialRoute?: string;
+  initialRoute?: LinkProps['to'];
   router?: AnyRouter;
   routeTree?: AnyRootRoute;
   useFullRouter?: boolean;

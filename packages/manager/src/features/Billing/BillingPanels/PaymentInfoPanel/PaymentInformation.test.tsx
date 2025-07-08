@@ -5,11 +5,7 @@ import * as React from 'react';
 
 import { PAYPAL_CLIENT_ID } from 'src/constants';
 import { paymentMethodFactory } from 'src/factories';
-import {
-  renderWithTheme,
-  wrapWithTheme,
-  wrapWithThemeAndRouter,
-} from 'src/utilities/testHelpers';
+import { renderWithTheme, wrapWithTheme } from 'src/utilities/testHelpers';
 
 import PaymentInformation from './PaymentInformation';
 
@@ -81,12 +77,11 @@ describe('Payment Info Panel', () => {
   });
 
   it('Shows Add Payment button for Linode customers and hides it for Akamai customers', async () => {
-    const { getByTestId, queryByText, rerender } =
-      renderWithTheme(
-        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-          <PaymentInformation {...props} loading={false} />
-        </PayPalScriptProvider>
-      );
+    const { getByTestId, queryByText, rerender } = renderWithTheme(
+      <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
+        <PaymentInformation {...props} loading={false} />
+      </PayPalScriptProvider>
+    );
 
     expect(getByTestId(ADD_PAYMENT_METHOD_BUTTON_ID)).toBeInTheDocument();
 
@@ -107,7 +102,9 @@ describe('Payment Info Panel', () => {
         <PaymentInformation {...props} />
       </PayPalScriptProvider>,
       {
-        initialRoute: '/account/billing',
+        routerOptions: {
+          initialRoute: '/account/billing',
+        }
       }
     );
 
@@ -118,11 +115,9 @@ describe('Payment Info Panel', () => {
       routeId: '/account/billing/add-payment-method',
     });
     rerender(
-      wrapWithThemeAndRouter(
-        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-          <PaymentInformation {...props} />
-        </PayPalScriptProvider>
-      )
+      <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
+        <PaymentInformation {...props} />
+      </PayPalScriptProvider>
     );
     expect(getByTestId('drawer')).toBeVisible();
   });

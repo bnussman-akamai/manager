@@ -33,12 +33,11 @@ describe('PlacementGroupsLanding', () => {
       isLoading: true,
     });
 
-    const { getByRole } = renderWithTheme(
-      <PlacementGroupsLanding />,
-      {
+    const { getByRole } = renderWithTheme(<PlacementGroupsLanding />, {
+      routerOptions: {
         initialRoute: '/placement-groups',
-      }
-    );
+      },
+    });
 
     expect(getByRole('progressbar')).toBeInTheDocument();
   });
@@ -48,12 +47,11 @@ describe('PlacementGroupsLanding', () => {
       error: [{ reason: 'Not found' }],
     });
 
-    const { getByText } = renderWithTheme(
-      <PlacementGroupsLanding />,
-      {
+    const { getByText } = renderWithTheme(<PlacementGroupsLanding />, {
+      routerOptions: {
         initialRoute: '/placement-groups',
-      }
-    );
+      },
+    });
 
     expect(getByText(/not found/i)).toBeInTheDocument();
   });
@@ -70,12 +68,11 @@ describe('PlacementGroupsLanding', () => {
       },
     });
 
-    const { getByText } = renderWithTheme(
-      <PlacementGroupsLanding />,
-      {
+    const { getByText } = renderWithTheme(<PlacementGroupsLanding />, {
+      routerOptions: {
         initialRoute: '/placement-groups',
-      }
-    );
+      },
+    });
 
     expect(getByText(/create placement group/i)).toBeInTheDocument();
     expect(getByText(/docs/i)).toBeInTheDocument();
@@ -96,12 +93,11 @@ describe('PlacementGroupsLanding', () => {
       },
     });
 
-    const { getByText } = renderWithTheme(
-      <PlacementGroupsLanding />,
-      {
+    const { getByText } = renderWithTheme(<PlacementGroupsLanding />, {
+      routerOptions: {
         initialRoute: '/placement-groups',
-      }
-    );
+      },
+    });
 
     expect(getByText(/group 1/i)).toBeInTheDocument();
     expect(getByText(/group 2/i)).toBeInTheDocument();
@@ -115,12 +111,11 @@ describe('PlacementGroupsLanding', () => {
       },
     });
 
-    const { getByText } = renderWithTheme(
-      <PlacementGroupsLanding />,
-      {
+    const { getByText } = renderWithTheme(<PlacementGroupsLanding />, {
+      routerOptions: {
         initialRoute: '/placement-groups',
-      }
-    );
+      },
+    });
 
     expect(getByText(headers.description)).toBeInTheDocument();
   });
@@ -133,12 +128,11 @@ describe('PlacementGroupsLanding', () => {
       },
     });
 
-    const { getByText } = renderWithTheme(
-      <PlacementGroupsLanding />,
-      {
+    const { getByText } = renderWithTheme(<PlacementGroupsLanding />, {
+      routerOptions: {
         initialRoute: '/placement-groups',
-      }
-    );
+      },
+    });
 
     expect(getByText('Getting Started Guides')).toBeInTheDocument();
   });

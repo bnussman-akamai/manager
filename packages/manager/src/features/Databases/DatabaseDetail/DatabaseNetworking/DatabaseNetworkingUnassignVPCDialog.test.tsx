@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 import { describe, it } from 'vitest';
@@ -9,80 +9,52 @@ import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { DatabaseNetworkingUnassignVPCDialog } from './DatabaseNetworkingUnassignVPCDialog';
 
-const defaultPlatform = 'rdbms-default';
-const mockSubnets = [
-  subnetFactory.build({ id: 1 }),
-  subnetFactory.build({ id: 2 }),
-];
-const mockVPC = vpcFactory.build({ id: 12345 });
-const mockPrivateNetwork = {
-  vpc_id: mockVPC.id,
-  subnet_id: mockSubnets[0].id,
-  public_access: false,
-};
-const mockDatabase = databaseFactory.build({
-  platform: defaultPlatform,
-  private_network: mockPrivateNetwork,
-  engine: 'mysql',
-  id: 1,
-});
-
-const mockProps = {
-  databaseEngine: mockDatabase.engine,
-  databaseId: mockDatabase.id,
-  databaseLabel: mockDatabase.label,
-  onClose: vi.fn(),
-  open: true,
-};
-
-const unassignButtonTestId = 'unassign-button';
-
-// Hoist query mocks
-const queryMocks = vi.hoisted(() => {
-  return {
-    useDatabaseMutation: vi.fn(),
-    useNavigate: vi.fn(() => vi.fn()),
-  };
-});
-
-vi.mock('@linode/queries', async () => {
-  const actual = await vi.importActual('@linode/queries');
-  return {
-    ...actual,
-    useDatabaseMutation: queryMocks.useDatabaseMutation,
-  };
-});
-
-vi.mock('@tanstack/react-router', async () => {
-  const actual = await vi.importActual('@tanstack/react-router');
-  return {
-    ...actual,
-    useNavigate: queryMocks.useNavigate,
-  };
-});
-
 describe('DatabaseNetworkingUnassignVPCDialog Component', () => {
   it(`should navigate to summary after unassigning`, async () => {
-    const mockNavigate = vi.fn();
-    queryMocks.useNavigate.mockReturnValue(mockNavigate);
-    renderWithTheme(
-      <DatabaseNetworkingUnassignVPCDialog {...mockProps} />,
+    const subnet = subnetFactory.build({ id: 1 });
+    const vpc = vpcFactory.build({ id: 12345 });
+    const database = databaseFactory.build({
+      platform: 'rdbms-default',
+      private_network: {
+        vpc_id: vpc.id,
+        subnet_id: subnet.id,
+        public_access: false,
+      },
+      engine: 'mysql',
+      id: 1,
+    });
+
+    const props = {
+      databaseEngine: database.engine,
+      databaseId: database.id,
+      databaseLabel: database.label,
+      onClose: vi.fn(),
+      open: true,
+    };
+
+    const { findByTestId, router } = renderWithTheme(
+      <DatabaseNetworkingUnassignVPCDialog {...props} />,
       {
-        initialRoute: `/databases/${mockProps.databaseEngine}/${mockProps.databaseId}/networking`,
+        routerOptions: {
+          initialRoute: '/databases/$engine/$databaseId/networking',
+          useFullRouter: true,
+        },
+        MemoryRouter: {
+          initialEntries: [
+            `/databases/${database.engine}/${database.id}/networking`,
+          ],
+        },
       }
     );
 
-    const unassignButton = screen.getByTestId(unassignButtonTestId);
+    const unassignButton = await findByTestId('unassign-button');
     await userEvent.click(unassignButton);
+
     // Check that navigation occurs after unassign button is clicked
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith({
-        params: {
-          engine: mockProps.databaseEngine,
-          databaseId: mockProps.databaseId,
-        },
-        to: '/databases/$engine/$databaseId',
-      });
+      expect(router.state.location.searchStr).toBe(
+        `/databases/${database.engine}/${database.id}`
+      );
     });
   });
 });

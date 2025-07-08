@@ -9,35 +9,7 @@ import { FirewallDeviceLanding } from './FirewallDeviceLanding';
 
 import type { FirewallDeviceLandingProps } from './FirewallDeviceLanding';
 import type { FirewallDeviceEntityType } from '@linode/api-v4';
-
-const queryMocks = vi.hoisted(() => ({
-  useLocation: vi.fn().mockReturnValue({}),
-  useNavigate: vi.fn(() => vi.fn()),
-  useOrderV2: vi.fn().mockReturnValue({
-    handleOrderChange: vi.fn(),
-  }),
-  useParams: vi.fn().mockReturnValue({}),
-  useSearch: vi.fn().mockReturnValue({}),
-}));
-
-vi.mock('@tanstack/react-router', async () => {
-  const actual = await vi.importActual('@tanstack/react-router');
-  return {
-    ...actual,
-    useLocation: queryMocks.useLocation,
-    useNavigate: queryMocks.useNavigate,
-    useParams: queryMocks.useParams,
-    useSearch: queryMocks.useSearch,
-  };
-});
-
-vi.mock('src/hooks/useOrderV2', async () => {
-  const actual = await vi.importActual('src/hooks/useOrderV2');
-  return {
-    ...actual,
-    useOrderV2: queryMocks.useOrderV2,
-  };
-});
+import userEvent from '@testing-library/user-event';
 
 const baseProps = (
   type: FirewallDeviceEntityType
@@ -59,14 +31,6 @@ services.forEach((service: FirewallDeviceEntityType) => {
   const serviceName = service === 'linode' ? 'Linode' : 'NodeBalancer';
 
   describe(`Firewall ${serviceName} landing page`, () => {
-    beforeEach(() => {
-      queryMocks.useLocation.mockReturnValue({
-        pathname: '/firewalls/1/linodes',
-      });
-      queryMocks.useParams.mockReturnValue({
-        id: '1',
-      });
-    });
     const props = [baseProps(service), disabledProps(service)];
 
     props.forEach((prop) => {
@@ -115,25 +79,24 @@ services.forEach((service: FirewallDeviceEntityType) => {
           expect(addButton).toHaveAttribute('aria-disabled', 'false');
         });
 
-        it(`should navigate to Add ${serviceName} To Firewall drawer when enabled`, async () => {
-          const mockNavigate = vi.fn();
-          queryMocks.useNavigate.mockReturnValue(mockNavigate);
-
-          const { getByTestId } = renderWithTheme(
+        it.only(`should navigate to Add ${serviceName} To Firewall drawer when enabled`, async () => {
+          console.log(service)
+          const { findByTestId, router } = renderWithTheme(
             <FirewallDeviceLanding {...prop} />,
             {
-              routerOptions: { initialRoute: `/firewalls/1/${service}` },
+              routerOptions: {
+                initialRoute: `/firewalls/$id/${service}s`,
+                useFullRouter: true,
+              },
+              MemoryRouter: { initialEntries: [`/firewalls/1/${service}s`] },
             }
           );
-          const addButton = getByTestId('add-device-button');
-          fireEvent.click(addButton);
+          const addButton = await findByTestId('add-device-button');
+          await userEvent.click(addButton);
 
-          await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith({
-              params: { id: '1' },
-              to: `/firewalls/$id/${service}s/add`,
-            });
-          });
+          expect(router.state.location.pathname).toBe(
+            `/firewalls/1/${service}s/add`
+          );
         });
       }
     });

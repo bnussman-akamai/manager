@@ -104,7 +104,9 @@ describe('AlertDetail component tests', () => {
     const { getByTestId, getByText } = renderWithTheme(
       <AlertDetail />,
       {
-        initialRoute: '/alerts/definitions/detail/linode/1',
+        routerOptions: {
+          initialRoute: '/alerts/definitions/detail/linode/1',
+        }
       }
     );
 
@@ -128,7 +130,9 @@ describe('AlertDetail component tests', () => {
     });
 
     const { getByTestId } = renderWithTheme(<AlertDetail />, {
-      initialRoute: '/alerts/definitions/detail/linode/1',
+      routerOptions: {
+        initialRoute: '/alerts/definitions/detail/linode/1',
+      }
     });
 
     expect(getByTestId('circle-progress')).toBeInTheDocument();
@@ -139,7 +143,9 @@ describe('AlertDetail component tests', () => {
 
   it('should render the component successfully with alert details overview', async () => {
     const { getByText } = renderWithTheme(<AlertDetail />, {
-      initialRoute: '/alerts/definitions/detail/linode/1',
+      routerOptions: {
+        initialRoute: '/alerts/definitions/detail/linode/1',
+      }
     });
     // validate overview is present with its couple of properties (values will be validated in its own components test)
     expect(getByText('Overview')).toBeInTheDocument();
@@ -161,7 +167,9 @@ describe('AlertDetail component tests', () => {
     });
 
     renderWithTheme(<AlertDetail />, {
-      initialRoute: '/alerts/definitions/detail/linode/1',
+      routerOptions: {
+        initialRoute: '/alerts/definitions/detail/linode/1',
+      }
     });
 
     const element = screen.getByTestId('notice-error').textContent;

@@ -1,7 +1,7 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
-import { wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { CancelLanding } from './CancelLanding';
 
@@ -13,20 +13,18 @@ afterAll(() => {
 
 describe('CancelLanding', () => {
   it('does not render the body when there is no survey_link in the state', () => {
-    const { queryByTestId } = render(wrapWithTheme(<CancelLanding />));
+    const { queryByTestId } = renderWithTheme(<CancelLanding />);
     expect(queryByTestId('body')).toBe(null);
   });
 
   it('renders the body when there is a survey_link in the state', () => {
-    const { queryByTestId } = render(
-      wrapWithTheme(<CancelLanding />, {
-        MemoryRouter: {
-          initialEntries: [
-            { pathname: '/cancel', state: { survey_link: 'linode.com' } },
-          ],
-        },
-      })
-    );
+    const { queryByTestId } = renderWithTheme(<CancelLanding />, {
+      MemoryRouter: {
+        initialEntries: [
+          { pathname: '/cancel', state: { survey_link: 'linode.com' } },
+        ],
+      },
+    });
     expect(queryByTestId('body')).toBeInTheDocument();
   });
 
@@ -39,13 +37,11 @@ describe('CancelLanding', () => {
     window.location = { ...realLocation, assign: mockAssign };
 
     const survey_link = 'https://linode.com';
-    const { getByTestId } = render(
-      wrapWithTheme(<CancelLanding />, {
-        MemoryRouter: {
-          initialEntries: [{ pathname: '/cancel', state: { survey_link } }],
-        },
-      })
-    );
+    const { getByTestId } = renderWithTheme(<CancelLanding />, {
+      MemoryRouter: {
+        initialEntries: [{ pathname: '/cancel', state: { survey_link } }],
+      },
+    });
     const button = getByTestId('survey-button');
     fireEvent.click(button);
     expect(mockAssign).toHaveBeenCalledWith(survey_link);

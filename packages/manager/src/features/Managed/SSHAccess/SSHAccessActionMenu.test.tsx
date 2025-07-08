@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
-import { renderWithTheme, wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { SSHAccessActionMenu } from './SSHAccessActionMenu';
 
@@ -44,16 +44,14 @@ describe('SSH Access Action Menu', () => {
 
   it('should include Disable if access to the Linode is enabled', () => {
     const { queryByText } = renderWithTheme(
-      wrapWithTheme(<SSHAccessActionMenu {...props} isEnabled={true} />)
+      <SSHAccessActionMenu {...props} isEnabled={true} />
     );
     expect(queryByText('Disable')).toBeInTheDocument();
     expect(queryByText('Enable')).not.toBeInTheDocument();
   });
 
   it('should open the drawer when "Edit" option is clicked', () => {
-    const { getByText } = renderWithTheme(
-      wrapWithTheme(<SSHAccessActionMenu {...props} />)
-    );
+    const { getByText } = renderWithTheme(<SSHAccessActionMenu {...props} />);
     fireEvent.click(getByText('Edit'));
     expect(navigate).toHaveBeenCalledWith({
       params: {

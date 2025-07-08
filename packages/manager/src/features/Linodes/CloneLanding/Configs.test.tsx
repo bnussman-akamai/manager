@@ -1,8 +1,8 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
 
 import { linodeConfigs } from 'src/__data__/linodeConfigs';
-import { wrapWithTheme } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { Configs } from './Configs';
 
@@ -18,14 +18,14 @@ const props: ConfigsProps = {
 
 describe('Configs', () => {
   it('renders a row for each config', () => {
-    const { getByText } = render(wrapWithTheme(<Configs {...props} />));
+    const { getByText } = renderWithTheme(<Configs {...props} />);
     linodeConfigs.forEach((eachConfig) => {
       expect(getByText(eachConfig.label)).toBeDefined();
     });
   });
 
   it('fires the handle event when clicked', () => {
-    const { getByTestId } = render(wrapWithTheme(<Configs {...props} />));
+    const { getByTestId } = renderWithTheme(<Configs {...props} />);
     linodeConfigs.forEach((eachConfig) => {
       const checkbox = getByTestId(`checkbox-${eachConfig.id}`).parentNode;
       fireEvent.click(checkbox as any);
@@ -34,8 +34,8 @@ describe('Configs', () => {
   });
 
   it('renders an empty state when no configs', () => {
-    const { getByTestId, getByText } = render(
-      wrapWithTheme(<Configs {...props} configs={[]} />)
+    const { getByTestId, getByText } = renderWithTheme(
+      <Configs {...props} configs={[]} />
     );
 
     expect(getByTestId('table-row-empty')).toBeDefined();
