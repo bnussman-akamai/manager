@@ -5,12 +5,11 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.23.0",
-    "concurrently": "9.1.0",
-    "husky": "^9.1.6",
-    "typescript": "^5.7.3",
-    "vitest": "^3.1.2",
+    "@linode/eslint-plugin-cloud-manager": "^0.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
     "@vitest/ui": "^3.1.2",
-    "lint-staged": "^15.4.3",
+    "concurrently": "9.1.0",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-cypress": "^4.2.1",
@@ -23,22 +22,24 @@
     "eslint-plugin-sonarjs": "^3.0.2",
     "eslint-plugin-testing-library": "^7.1.1",
     "eslint-plugin-xss": "^0.1.12",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.4.3",
     "prettier": "~3.5.3",
+    "turbo": "^2.5.4",
+    "typescript": "^5.7.3",
     "typescript-eslint": "^8.29.0",
-    "@typescript-eslint/eslint-plugin": "^8.29.0",
-    "@typescript-eslint/parser": "^8.29.0",
-    "@linode/eslint-plugin-cloud-manager": "^0.0.11"
+    "vitest": "^3.1.2"
   },
   "scripts": {
-    "lint:all": "pnpm -r --parallel lint",
+    "lint:all": "turbo lint",
     "install:all": "pnpm install --frozen-lockfile",
     "build:sdk": "pnpm run --filter @linode/api-v4 build",
     "build:validation": "pnpm run --filter @linode/validation build",
-    "build": "pnpm build:validation && pnpm build:sdk && pnpm --filter linode-manager build",
+    "build": "turbo build",
     "build:analyze": "pnpm run --filter linode-manager build:analyze",
     "bootstrap": "pnpm install:all && pnpm build:validation && pnpm build:sdk",
     "up:expose": "npm_config_package_import_method=clone-or-copy pnpm install:all && pnpm build:validation && pnpm build:sdk && pnpm start:all:expose",
-    "dev": "concurrently -n api-v4,validation,ui,utilities,queries,shared,manager -c blue,yellow,magenta,cyan,gray,blue,green \"pnpm run --filter @linode/api-v4 start\" \"pnpm run --filter @linode/validation start\" \"pnpm run --filter @linode/ui start\" \"pnpm run --filter @linode/utilities start\" \"pnpm run --filter @linode/queries start\" \"pnpm run --filter @linode/shared start\" \"pnpm run --filter linode-manager start\"",
+    "dev": "turbo start",
     "start:all:expose": "concurrently -n api-v4,validation,ui,utilities,queries,shared,manager -c blue,yellow,magenta,cyan,gray,blue,green \"pnpm run --filter @linode/api-v4 start\" \"pnpm run --filter @linode/validation start\" \"pnpm run --filter @linode/ui start\" \"pnpm run --filter @linode/utilities start\" \"pnpm run --filter @linode/queries start\" \"pnpm run --filter @linode/shared start\" \"pnpm run --filter linode-manager start:expose\"",
     "start:manager": "pnpm --filter linode-manager start",
     "start:manager:ci": "pnpm run --filter linode-manager start:ci",
@@ -77,6 +78,7 @@
   "volta": {
     "node": "20.17.0"
   },
+  "packageManager": "pnpm@10.12.1",
   "workspaces": {
     "packages": [
       "packages/*",
