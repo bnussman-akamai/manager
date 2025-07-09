@@ -18,6 +18,9 @@ lib
 # misc
 .DS_Store
 
+# turborepo
+.turbo
+
 # swc data
 .swc
 
