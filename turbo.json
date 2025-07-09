@@ -1,5 +1,10 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  "remoteCache": {
+    "enabled": true,
+    "apiUrl": "https://cache.nussman.us",
+    "teamSlug": "cloud-manager"
+  },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
