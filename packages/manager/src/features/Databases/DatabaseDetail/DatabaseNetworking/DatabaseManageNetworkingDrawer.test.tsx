@@ -78,6 +78,11 @@ describe('DatabaseManageNetworkingDrawer Component', () => {
     queryMocks.useAllVPCsQuery.mockReturnValue({
       data: [mockVPC],
     });
+    queryMocks.useDatabaseMutation.mockReturnValue({
+      mutateAsync: vi.fn().mockResolvedValue({}),
+      isLoading: false,
+      reset: vi.fn(),
+    });
   });
 
   it('Should render the VPC Selector', () => {
