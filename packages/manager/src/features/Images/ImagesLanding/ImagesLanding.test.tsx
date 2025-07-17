@@ -6,13 +6,16 @@ import * as React from 'react';
 import { imageFactory } from 'src/factories';
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
-import {
-  mockMatchMedia,
-  renderWithTheme,
-} from 'src/utilities/testHelpers';
+import { mockMatchMedia, renderWithTheme } from 'src/utilities/testHelpers';
 
 import ImagesLanding from './ImagesLanding';
 import { migrationRouteTree } from 'src/routes';
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from '@tanstack/react-router';
 
 beforeAll(() => mockMatchMedia());
 
@@ -208,9 +211,28 @@ describe('Images Landing Table', () => {
       })
     );
 
+    const rootRoute = createRootRoute({});
+    const imagesLandingRoute = createRoute({
+      component: ImagesLanding,
+      getParentRoute: () => rootRoute,
+      path: '/images',
+    });
+    const imagesEditRoute = createRoute({
+      component: ImagesLanding,
+      getParentRoute: () => imagesLandingRoute,
+      path: '$imageId/$action',
+    });
+
+    const router = createRouter({
+      history: createMemoryHistory({
+        initialEntries: ['/images'],
+      }),
+      routeTree: rootRoute.addChildren([imagesLandingRoute.addChildren([imagesEditRoute])]),
+    });
+
     const { getByText, findByLabelText, findByText } = renderWithTheme(
       <ImagesLanding />,
-      { initialRoute: '/images' }
+      { router }
     );
 
     const actionMenu = await findByLabelText(

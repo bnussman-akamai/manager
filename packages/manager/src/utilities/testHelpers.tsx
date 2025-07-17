@@ -128,7 +128,7 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
             <CssBaseline enableColorScheme />
             <SnackbarProvider>
               <MemoryRouter {...options.MemoryRouter}>
-                <RouterProvider router={router} />
+                <RouterProvider router={options.router ?? router} />
               </MemoryRouter>
             </SnackbarProvider>
           </LDProvider>
