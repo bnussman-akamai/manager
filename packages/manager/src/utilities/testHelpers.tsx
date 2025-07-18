@@ -31,6 +31,7 @@ import { mergeDeepRight } from './mergeDeepRight';
 import type { QueryClient } from '@tanstack/react-query';
 // TODO: Tanstack Router - replace AnyRouter once migration is complete.
 import type { AnyRootRoute, AnyRouter, Route } from '@tanstack/react-router';
+import type { LinkProps as TanStackLinkProps } from '@tanstack/react-router';
 import type { MatcherFunction, RenderResult } from '@testing-library/react';
 import type { DeepPartial } from 'redux';
 import type { FlagSet } from 'src/featureFlags';
@@ -83,10 +84,29 @@ function replaceInRouteTree(routes: Route[], path: string, component: any) {
 interface Options {
   customStore?: DeepPartial<ApplicationState>;
   flags?: FlagSet;
+  /**
+   * The inital TanStack router route.
+   *
+   * This is useful for rendering a component that uses TanStack router hooks
+   * that expect to be rendered only on a specific route.
+   */
   initialRoute?: string;
+  /**
+   * Use this to pass mock browser history.
+   *
+   * If `initialRoute` is provided, mock history will be created for you with that route.
+   */
   MemoryRouter?: MemoryRouterProps;
   queryClient?: QueryClient;
-  renderInFullRouterAsRoutes?: string[];
+  /**
+   * Renders the passed component in the context of our entire router
+   * by replacing the component of the given routes.
+   *
+   * Note: You may have to await your assertions if you are dealing with a lazy route
+   *
+   * @default false
+   */
+  renderInFullRouterAsRoutes?: TanStackLinkProps['to'][];
   router?: AnyRouter;
   routeTree?: AnyRootRoute;
   theme?: 'dark' | 'light';
@@ -125,7 +145,7 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
 
   if (options.renderInFullRouterAsRoutes) {
     for (const route of options.renderInFullRouterAsRoutes) {
-      replaceInRouteTree(routeTree.children, route, uiToRender);
+      replaceInRouteTree(routeTree.children, route as string, uiToRender);
     }
   }
 
