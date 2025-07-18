@@ -1,4 +1,10 @@
 import { grantsFactory, profileFactory } from '@linode/utilities';
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from '@tanstack/react-router';
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
@@ -9,13 +15,6 @@ import { http, HttpResponse, server } from 'src/mocks/testServer';
 import { mockMatchMedia, renderWithTheme } from 'src/utilities/testHelpers';
 
 import ImagesLanding from './ImagesLanding';
-import { migrationRouteTree } from 'src/routes';
-import {
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from '@tanstack/react-router';
 
 beforeAll(() => mockMatchMedia());
 
@@ -131,6 +130,7 @@ describe('Images Landing Table', () => {
       <ImagesLanding />,
       {
         initialRoute: '/images',
+        renderInFullRouterAsRoutes: ['/images', '/images/$imageId/$action'],
       }
     );
 
@@ -158,7 +158,10 @@ describe('Images Landing Table', () => {
 
     const { findByText, getByText, findByLabelText } = renderWithTheme(
       <ImagesLanding />,
-      { initialRoute: '/images' }
+      {
+        initialRoute: '/images',
+        renderInFullRouterAsRoutes: ['/images', '/images/$imageId/$action'],
+      }
     );
 
     const actionMenu = await findByLabelText(
@@ -198,7 +201,7 @@ describe('Images Landing Table', () => {
     // @todo: assert URL from router's state
   });
 
-  it.only('should allow deleting an image', async () => {
+  it('should allow deleting an image', async () => {
     const image = imageFactory.build();
 
     server.use(
@@ -212,6 +215,7 @@ describe('Images Landing Table', () => {
     );
 
     const rootRoute = createRootRoute({});
+
     const imagesLandingRoute = createRoute({
       component: ImagesLanding,
       getParentRoute: () => rootRoute,
@@ -227,7 +231,9 @@ describe('Images Landing Table', () => {
       history: createMemoryHistory({
         initialEntries: ['/images'],
       }),
-      routeTree: rootRoute.addChildren([imagesLandingRoute.addChildren([imagesEditRoute])]),
+      routeTree: rootRoute.addChildren([
+        imagesLandingRoute.addChildren([imagesEditRoute]),
+      ]),
     });
 
     const { getByText, findByLabelText, findByText } = renderWithTheme(
@@ -244,6 +250,10 @@ describe('Images Landing Table', () => {
     expect(
       await findByText('Are you sure you want to delete this Image?')
     ).toBeVisible();
+
+    expect(router.state.location.href).toBe(
+      `/images/${encodeURIComponent(image.id)}/delete`
+    );
   });
 
   it('disables the create button if the user does not have permission to create images', async () => {

@@ -23,13 +23,14 @@ import thunk from 'redux-thunk';
 
 import { LinodeThemeWrapper } from 'src/LinodeThemeWrapper';
 import { setupInterceptors } from 'src/request';
+import { migrationRouteTree } from 'src/routes';
 import { defaultState, storeFactory } from 'src/store';
 
 import { mergeDeepRight } from './mergeDeepRight';
 
 import type { QueryClient } from '@tanstack/react-query';
 // TODO: Tanstack Router - replace AnyRouter once migration is complete.
-import type { AnyRootRoute, AnyRouter } from '@tanstack/react-router';
+import type { AnyRootRoute, AnyRouter, Route } from '@tanstack/react-router';
 import type { MatcherFunction, RenderResult } from '@testing-library/react';
 import type { DeepPartial } from 'redux';
 import type { FlagSet } from 'src/featureFlags';
@@ -68,12 +69,24 @@ export const resizeScreenSize = (width: number) => {
   window.matchMedia = createMatchMedia(width);
 };
 
+function replaceInRouteTree(routes: Route[], path: string, component: any) {
+  for (const route of routes) {
+    if (route.fullPath === path) {
+      // console.log('Replaced', path, 'component in unit test.');
+      route.update({ component: () => component });
+    } else if (route.children) {
+      replaceInRouteTree(route.children as Route[], path, component);
+    }
+  }
+}
+
 interface Options {
   customStore?: DeepPartial<ApplicationState>;
   flags?: FlagSet;
   initialRoute?: string;
   MemoryRouter?: MemoryRouterProps;
   queryClient?: QueryClient;
+  renderInFullRouterAsRoutes?: string[];
   router?: AnyRouter;
   routeTree?: AnyRootRoute;
   theme?: 'dark' | 'light';
@@ -106,13 +119,23 @@ export const wrapWithTheme = (ui: any, options: Options = {}) => {
     path: options.initialRoute ?? '/',
   });
 
+  const routeTree = options.renderInFullRouterAsRoutes
+    ? migrationRouteTree
+    : (options.routeTree ?? rootRoute.addChildren([indexRoute]));
+
+  if (options.renderInFullRouterAsRoutes) {
+    for (const route of options.renderInFullRouterAsRoutes) {
+      replaceInRouteTree(routeTree.children, route, uiToRender);
+    }
+  }
+
   const router: AnyRouter = createRouter({
     history: createMemoryHistory({
       initialEntries: (options.MemoryRouter?.initialEntries as string[]) ?? [
         options.initialRoute ?? '/',
       ],
     }),
-    routeTree: rootRoute.addChildren([indexRoute]),
+    routeTree,
   });
 
   return (
