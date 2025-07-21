@@ -1,5 +1,5 @@
 import { useAccountSettings } from '@linode/queries';
-import { QueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import * as React from 'react';
 
@@ -16,23 +16,22 @@ export const Router = () => {
   const { isDatabasesEnabled } = useIsDatabasesEnabled();
   const { isPlacementGroupsEnabled } = useIsPlacementGroupsEnabled();
   const { isACLPEnabled } = useIsACLPEnabled();
+  const queryClient = useQueryClient();
   const globalErrors = useGlobalErrors();
-
-  // Update the router's context
-  router.update({
-    context: {
-      accountSettings,
-      globalErrors,
-      isACLPEnabled,
-      isDatabasesEnabled,
-      isPlacementGroupsEnabled,
-      queryClient: new QueryClient(),
-    },
-  });
 
   return (
     <ErrorBoundaryFallback useTanStackRouterBoundary={true}>
-      <RouterProvider router={router} />
+      <RouterProvider
+        context={{
+          accountSettings,
+          globalErrors,
+          isACLPEnabled,
+          isDatabasesEnabled,
+          isPlacementGroupsEnabled,
+          queryClient,
+        }}
+        router={router}
+      />
     </ErrorBoundaryFallback>
   );
 };

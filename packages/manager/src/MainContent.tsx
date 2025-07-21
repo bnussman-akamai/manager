@@ -1,5 +1,4 @@
 import {
-  useAccountSettings,
   useMutatePreferences,
   usePreferences,
   useProfile,
@@ -7,10 +6,8 @@ import {
 import { Box } from '@linode/ui';
 import { useMediaQuery } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { useQueryClient } from '@tanstack/react-query';
-import { RouterProvider } from '@tanstack/react-router';
+import { Outlet } from '@tanstack/react-router';
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
 
 import { MainContentBanner } from 'src/components/MainContentBanner';
@@ -31,6 +28,7 @@ import {
 } from 'src/features/NotificationCenter/NotificationCenterContext';
 import { TopMenu } from 'src/features/TopMenu/TopMenu';
 
+import { AccountActivationLanding } from './components/AccountActivation/AccountActivationLanding';
 import { useIsPageScrollable } from './components/PrimaryNav/utils';
 import { ENABLE_MAINTENANCE_MODE } from './constants';
 import { complianceUpdateContext } from './context/complianceUpdateContext';
@@ -38,10 +36,8 @@ import { sessionExpirationContext } from './context/sessionExpirationContext';
 import { switchAccountSessionContext } from './context/switchAccountSessionContext';
 import { TOPMENU_HEIGHT } from './features/TopMenu/constants';
 import { useGlobalErrors } from './hooks/useGlobalErrors';
-import { migrationRouter } from './routes';
 
 import type { Theme } from '@mui/material/styles';
-import type { AnyRouter } from '@tanstack/react-router';
 
 const useStyles = makeStyles()((theme: Theme) => ({
   activationWrapper: {
@@ -112,7 +108,6 @@ export const MainContent = () => {
     (preferences) => preferences?.desktop_sidebar_open
   );
   const { mutateAsync: updatePreferences } = useMutatePreferences();
-  const queryClient = useQueryClient();
 
   const globalErrors = useGlobalErrors();
 
@@ -137,21 +132,11 @@ export const MainContent = () => {
   const { data: profile } = useProfile();
   const username = profile?.username || '';
 
-  const { data: accountSettings } = useAccountSettings();
-  const defaultRoot = accountSettings?.managed ? '/managed' : '/linodes';
-
   const isNarrowViewport = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down(960)
   );
 
   const { isPageScrollable } = useIsPageScrollable(contentRef);
-
-  migrationRouter.update({
-    context: {
-      globalErrors,
-      queryClient,
-    },
-  });
 
   /**
    * this is the case where the user has successfully completed signup
@@ -161,15 +146,7 @@ export const MainContent = () => {
    * So in this case, we'll show something more user-friendly
    */
   if (globalErrors.account_unactivated) {
-    return (
-      <>
-        <Redirect to="/account-activation" />
-        <RouterProvider
-          context={{ queryClient }}
-          router={migrationRouter as AnyRouter}
-        />
-      </>
-    );
+    return <AccountActivationLanding />;
   }
 
   // If the API is in maintenance mode, return a Maintenance screen
@@ -264,27 +241,11 @@ export const MainContent = () => {
                       <Grid className={cx(classes.switchWrapper, 'p0')}>
                         <div className="content-wrapper">
                           <GlobalNotifications />
-                          <React.Suspense fallback={<SuspenseLoader />}>
-                            <ErrorBoundaryFallback>
-                              <Switch>
-                                <Redirect exact from="/" to={defaultRoot} />
-                                {/** We don't want to break any bookmarks. This can probably be removed eventually. */}
-                                <Redirect from="/dashboard" to={defaultRoot} />
-                                {/**
-                                 * This is the catch all routes that allows TanStack Router to take over.
-                                 * When a route is not found here, it will be handled by the migration router, which in turns handles the NotFound component.
-                                 * It is currently set to the migration router in order to incrementally migrate the app to the new routing.
-                                 * This is a temporary solution until we are ready to fully migrate to TanStack Router.
-                                 */}
-                                <Route path="*">
-                                  <RouterProvider
-                                    context={{ queryClient }}
-                                    router={migrationRouter as AnyRouter}
-                                  />
-                                </Route>
-                              </Switch>
-                            </ErrorBoundaryFallback>
-                          </React.Suspense>
+                          <ErrorBoundaryFallback>
+                            <React.Suspense fallback={<SuspenseLoader />}>
+                              <Outlet />
+                            </React.Suspense>
+                          </ErrorBoundaryFallback>
                         </div>
                       </Grid>
                     </Grid>

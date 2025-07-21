@@ -1,3 +1,4 @@
+import { useAccountSettings } from '@linode/queries';
 import { Box, Stack } from '@linode/ui';
 import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton, useMediaQuery, useTheme } from '@mui/material';
@@ -37,6 +38,9 @@ export const TopMenu = React.memo((props: TopMenuProps) => {
   const { openSideMenu, username } = props;
 
   const isLoggedInAsCustomer = getIsLoggedInAsCustomer();
+  
+  const { data: accountSettings } = useAccountSettings();
+  const defaultRoot = accountSettings?.managed ? '/managed' : '/linodes';
 
   const isNarrowViewport = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down(960)
@@ -86,7 +90,7 @@ export const TopMenu = React.memo((props: TopMenuProps) => {
                 accessibleAriaLabel="Akamai - Dashboard"
                 style={{ lineHeight: 0 }}
                 title="Akamai - Dashboard"
-                to={`/dashboard`}
+                to={defaultRoot}
               >
                 <StyledAkamaiLogo
                   sx={{

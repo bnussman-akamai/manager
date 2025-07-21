@@ -5,9 +5,8 @@ import {
   flattenChildrenIntoAriaLabel,
   opensInNewTab,
 } from '@linode/utilities'; // `link.ts` utils from @linode/utilities
+import { Link as RouterLink } from '@tanstack/react-router';
 import * as React from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { Link as RouterLink } from 'react-router-dom';
 import type { LinkProps as _LinkProps } from 'react-router-dom';
 
 import ExternalLinkIcon from 'src/assets/icons/external-link.svg';

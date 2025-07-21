@@ -1,10 +1,9 @@
 import {
   createRootRouteWithContext,
   ErrorComponent,
-  Outlet,
 } from '@tanstack/react-router';
 
-import { Root } from '../Root';
+import { MainContent } from 'src/MainContent';
 
 import type { RouterContext } from './types';
 
@@ -13,11 +12,6 @@ import type { RouterContext } from './types';
  * we are using the Outlet component since the Provider is still sitting in <MainContent />.
  */
 export const rootRoute = createRootRouteWithContext<RouterContext>()({
-  component: Root,
-  errorComponent: ErrorComponent,
-});
-
-export const migrationRootRoute = createRootRouteWithContext<RouterContext>()({
-  component: Outlet,
+  component: MainContent,
   errorComponent: ErrorComponent,
 });
