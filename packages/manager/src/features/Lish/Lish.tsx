@@ -183,7 +183,7 @@ const Lish = () => {
       }
       onChange={navToURL}
     >
-      <TabLinkList tabs={tabs} />
+      <TabLinkList noLink tabs={tabs} />
       <TabPanels>
         <SafeTabPanel data-qa-tab="Weblish" index={0}>
           <Weblish linode={linode} refreshToken={refreshToken} {...data} />
