@@ -1,7 +1,7 @@
 import { useTypeQuery } from '@linode/queries';
 import { Tooltip, TooltipIcon, Typography } from '@linode/ui';
 import { Hidden } from '@linode/ui';
-import { formatStorageUnits, getFormattedStatus } from '@linode/utilities';
+import { formatStorageUnits } from '@linode/utilities';
 import * as React from 'react';
 
 import Flag from 'src/assets/icons/flag.svg';
@@ -12,20 +12,13 @@ import { TableCell } from 'src/components/TableCell';
 import { TableRow } from 'src/components/TableRow';
 import { statusTooltipIcons } from 'src/features/Linodes/LinodeEntityDetailHeaderMaintenancePolicy.utils';
 import { LinodeActionMenu } from 'src/features/Linodes/LinodesLanding/LinodeActionMenu/LinodeActionMenu';
-import {
-  getProgressOrDefault,
-  linodeInTransition,
-  transitionText,
-} from 'src/features/Linodes/transitions';
-import { notificationCenterContext as _notificationContext } from 'src/features/NotificationCenter/NotificationCenterContext';
-import { useInProgressEvents } from 'src/queries/events/events';
 
 import { LinodeMaintenanceText } from '../../LinodeMaintenanceText';
+import { useLinodeStatus } from '../../LinodesDetail/utilities';
 import { IPAddress } from '../IPAddress';
 import { RegionIndicator } from '../RegionIndicator';
-import { getLinodeIconStatus, parseMaintenanceStartTime } from '../utils';
+import { parseMaintenanceStartTime } from '../utils';
 import {
-  StyledButton,
   StyledIpTableCell,
   StyledMaintenanceTableCell,
 } from './LinodeRow.styles';
@@ -51,25 +44,18 @@ export const LinodeRow = (props: Props) => {
     type,
   } = props;
 
-  const notificationContext = React.useContext(_notificationContext);
-
   const { data: linodeType } = useTypeQuery(type ?? '', type !== null);
-
-  const { data: events } = useInProgressEvents();
-
-  const recentEvent = events?.find(
-    (e) => e.entity?.type === 'linode' && e.entity.id === id
-  );
-
   const isBareMetalInstance = linodeType?.class === 'metal';
-
-  const isTransitioning = linodeInTransition(status, recentEvent);
 
   const parsedMaintenanceStartTime = parseMaintenanceStartTime(
     maintenance?.start_time || maintenance?.when
   );
 
-  const iconStatus = getLinodeIconStatus(status);
+  const { statusIcon, event, secondaryStatus, formattedStatus } =
+    useLinodeStatus({
+      id,
+      status,
+    });
 
   const [isHovered, setIsHovered] = React.useState(false);
 
@@ -106,17 +92,10 @@ export const LinodeRow = (props: Props) => {
         noWrap
         statusCell
       >
-        <StatusIcon status={iconStatus} />
-        {!isTransitioning && getFormattedStatus(status)}
-        {isTransitioning && (
-          <StyledButton onClick={notificationContext.openMenu}>
-            <ProgressDisplay
-              progress={getProgressOrDefault(recentEvent)}
-              sx={{ display: 'inline-block' }}
-              text={transitionText(status, id, recentEvent)}
-            />
-          </StyledButton>
-        )}
+        <StatusIcon status={statusIcon} />
+        {formattedStatus}
+        {secondaryStatus && `(${secondaryStatus})`}
+        {event?.percent_complete && `(${event.percent_complete}%)`}
         {isInProgress && (
           <TooltipIcon
             className="ui-TooltipIcon ui-TooltipIcon-isActive"

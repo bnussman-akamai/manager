@@ -8,7 +8,6 @@ import React from 'react';
 
 import { useFlags } from 'src/hooks/useFlags';
 import { useOrderV2 } from 'src/hooks/useOrderV2';
-import { useInProgressEvents } from 'src/queries/events/events';
 import { addMaintenanceToLinodes } from 'src/utilities/linodes';
 import { storage } from 'src/utilities/storage';
 
@@ -16,7 +15,6 @@ import { PENDING_AND_IN_PROGRESS_MAINTENANCE_FILTER } from '../Account/Maintenan
 import { usePermissions } from '../IAM/hooks/usePermissions';
 import { regionFilterOptions } from './LinodesLanding/RegionTypeFilter';
 import { statusToPriority } from './LinodesLanding/utils';
-import { linodesInTransition } from './transitions';
 
 import type { ExtendedStatus } from './LinodesLanding/utils';
 import type { RegionFilter } from 'src/utilities/storage';
@@ -67,14 +65,10 @@ export const LinodesLandingWrapper = React.memo(() => {
     (thisAccountMaintenance) => thisAccountMaintenance.entity.type === 'linode'
   );
 
-  const { data: events } = useInProgressEvents();
-
   const filteredLinodesData = addMaintenanceToLinodes(
     accountMaintenanceData ?? [],
     filteredLinodes ?? []
   );
-
-  const _linodesInTransition = linodesInTransition(events ?? []);
 
   const orderBy = useOrderV2({
     data: (filteredLinodesData ?? []).map((linode) => {
@@ -84,8 +78,6 @@ export const LinodesLandingWrapper = React.memo(() => {
       let _status: ExtendedStatus = linode.status;
       if (linode.maintenance) {
         _status = 'maintenance';
-      } else if (_linodesInTransition.has(linode.id)) {
-        _status = 'busy';
       }
 
       return {
@@ -116,7 +108,7 @@ export const LinodesLandingWrapper = React.memo(() => {
       filteredLinodesLoading={filteredLinodesLoading}
       handleRegionFilter={handleRegionFilter}
       linodesData={filteredLinodesData}
-      linodesInTransition={linodesInTransition(events ?? [])}
+      linodesInTransition={new Set()}
       linodesRequestError={error ?? undefined}
       linodesRequestLoading={allLinodesLoading}
       navigate={navigate}

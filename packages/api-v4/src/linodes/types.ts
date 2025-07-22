@@ -165,6 +165,7 @@ export interface LinodeIPsResponseIPV6 {
 }
 
 export type LinodeStatus =
+  | 'billing_suspension'
   | 'booting'
   | 'cloning'
   | 'deleting'
@@ -173,6 +174,7 @@ export type LinodeStatus =
   | 'provisioning'
   | 'rebooting'
   | 'rebuilding'
+  | 'resizing'
   | 'restoring'
   | 'running'
   | 'shutting_down'
