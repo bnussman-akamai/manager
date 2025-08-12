@@ -2,7 +2,7 @@ import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { SessionExpirationDialog } from 'src/features/Account/SwitchAccounts/SessionExpirationDialog';
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 const mockParentChildAuthentication = {
   createToken: vi.fn(),
@@ -19,10 +19,19 @@ vi.mock(
   })
 );
 
-const mockHistory = {
-  push: vi.fn(),
-  replace: vi.fn(),
-};
+const mockNavigate = vi.fn();
+
+const queryMocks = vi.hoisted(() => ({
+  useNavigate: vi.fn(() => mockNavigate),
+}));
+
+vi.mock('@tanstack/react-router', async () => {
+  const actual = await vi.importActual('@tanstack/react-router');
+  return {
+    ...actual,
+    useNavigate: queryMocks.useNavigate,
+  };
+});
 
 const realLocation = window.location;
 
@@ -30,19 +39,10 @@ afterAll(() => {
   window.location = realLocation;
 });
 
-// Mock useHistory
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<any>('react-router-dom');
-  return {
-    ...actual,
-    useHistory: vi.fn(() => mockHistory),
-  };
-});
-
 describe('SessionExpirationDialog', () => {
   it('renders correctly when isOpen is true', async () => {
     const onCloseMock = vi.fn();
-    const { getByText } = await renderWithThemeAndRouter(
+    const { getByText } = renderWithTheme(
       <SessionExpirationDialog isOpen={true} onClose={onCloseMock} />
     );
 
@@ -51,7 +51,7 @@ describe('SessionExpirationDialog', () => {
 
   it('tests the Continue Working button when is clicked', async () => {
     const onCloseMock = vi.fn();
-    const { getByText } = await renderWithThemeAndRouter(
+    const { getByText } = renderWithTheme(
       <SessionExpirationDialog isOpen={true} onClose={onCloseMock} />
     );
 
@@ -70,7 +70,7 @@ describe('SessionExpirationDialog', () => {
 
     window.location = { ...realLocation, reload: mockReload };
 
-    const { getByText } = await renderWithThemeAndRouter(
+    const { getByText } = renderWithTheme(
       <SessionExpirationDialog isOpen={true} onClose={vi.fn()} />
     );
 
@@ -79,7 +79,9 @@ describe('SessionExpirationDialog', () => {
       await Promise.resolve();
     });
 
-    expect(mockHistory.push).toHaveBeenCalledWith('/logout');
+    expect(mockNavigate).toHaveBeenCalledWith({
+      to: '/logout',
+    });
     expect(mockReload).toHaveBeenCalled();
   });
 });

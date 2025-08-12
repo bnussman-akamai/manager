@@ -9,10 +9,7 @@ import { CloudPulseDashboardFilterBuilder } from '../shared/CloudPulseDashboardF
 import { CloudPulseDashboardSelect } from '../shared/CloudPulseDashboardSelect';
 import { CloudPulseDateTimeRangePicker } from '../shared/CloudPulseDateTimeRangePicker';
 import { CloudPulseErrorPlaceholder } from '../shared/CloudPulseErrorPlaceholder';
-import {
-  convertToGmt,
-  defaultTimeDuration,
-} from '../Utils/CloudPulseDateTimePickerUtils';
+import { convertToGmt } from '../Utils/CloudPulseDateTimePickerUtils';
 import { FILTER_CONFIG } from '../Utils/FilterConfig';
 import {
   checkIfFilterBuilderNeeded,
@@ -40,15 +37,13 @@ export const CloudPulseDashboardWithFilters = React.memo(
     const { dashboardId, resource } = props;
     const { data: dashboard, isError } =
       useCloudPulseDashboardByIdQuery(dashboardId);
-
     const [filterData, setFilterData] = React.useState<FilterData>({
       id: {},
       label: {},
     });
 
-    const [timeDuration, setTimeDuration] = React.useState<DateTimeWithPreset>(
-      defaultTimeDuration()
-    );
+    const [timeDuration, setTimeDuration] =
+      React.useState<DateTimeWithPreset>();
 
     const [showAppliedFilters, setShowAppliedFilters] =
       React.useState<boolean>(false);
@@ -79,8 +74,8 @@ export const CloudPulseDashboardWithFilters = React.memo(
       (timeDuration: DateTimeWithPreset) => {
         setTimeDuration({
           ...timeDuration,
-          end: convertToGmt(timeDuration.end),
-          start: convertToGmt(timeDuration.start),
+          end: convertToGmt(timeDuration.end, timeDuration.timeZone),
+          start: convertToGmt(timeDuration.start, timeDuration.timeZone),
         });
       },
       []
@@ -106,7 +101,7 @@ export const CloudPulseDashboardWithFilters = React.memo(
       return <CircleProgress />;
     }
 
-    if (!FILTER_CONFIG.get(dashboard.service_type)) {
+    if (!FILTER_CONFIG.get(dashboardId)) {
       return (
         <ErrorState
           errorText={`No Filters Configured for Service Type - ${dashboard.service_type}`}
@@ -179,8 +174,8 @@ export const CloudPulseDashboardWithFilters = React.memo(
             >
               {showAppliedFilters && (
                 <CloudPulseAppliedFilterRenderer
+                  dashboardId={dashboard.id}
                   filters={filterData.label}
-                  serviceType={dashboard.service_type}
                 />
               )}
             </GridLegacy>

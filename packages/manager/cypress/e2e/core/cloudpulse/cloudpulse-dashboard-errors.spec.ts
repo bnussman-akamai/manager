@@ -55,26 +55,17 @@ const flags: Partial<Flags> = {
       dimensionKey: 'LINODE_ID',
       maxResourceSelections: 10,
       serviceType: 'linode',
-      supportedRegionIds: 'us-ord',
     },
     {
       dimensionKey: 'cluster_id',
       maxResourceSelections: 10,
       serviceType: 'dbaas',
-      supportedRegionIds: 'us-ord, us-east',
     },
   ],
 };
-const {
-  clusterName,
-  dashboardName,
-  engine,
-  id,
-  metrics,
-  nodeType,
-  serviceType,
-} = widgetDetails.dbaas;
-
+const { clusterName, dashboardName, engine, id, metrics, nodeType } =
+  widgetDetails.dbaas;
+const serviceType = 'dbaas';
 const dashboard = dashboardFactory.build({
   label: dashboardName,
   service_type: serviceType,
@@ -101,11 +92,19 @@ const mockRegions = [
     id: 'us-ord',
     label: 'Chicago, IL',
     capabilities: ['Managed Databases'],
+    monitors: {
+      metrics: ['Linodes', 'Managed Databases'],
+      alerts: [],
+    },
   }),
   regionFactory.build({
     id: 'us-east',
     label: 'Newark, NJ',
     capabilities: ['Managed Databases'],
+    monitors: {
+      metrics: ['Managed Databases'],
+      alerts: [],
+    },
   }),
 ];
 

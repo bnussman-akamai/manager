@@ -6,11 +6,10 @@
   "devDependencies": {
     "@eslint/js": "^9.23.0",
     "@linode/eslint-plugin-cloud-manager": "^0.0.11",
-    "@typescript-eslint/eslint-plugin": "^8.29.0",
-    "@typescript-eslint/parser": "^8.29.0",
     "@vitest/ui": "^3.1.2",
     "concurrently": "9.1.0",
-    "eslint": "^9.23.0",
+    "lint-staged": "^15.4.3",
+    "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-cypress": "^4.2.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -23,12 +22,13 @@
     "eslint-plugin-testing-library": "^7.1.1",
     "eslint-plugin-xss": "^0.1.12",
     "husky": "^9.1.6",
-    "lint-staged": "^15.4.3",
     "prettier": "~3.5.3",
     "turbo": "^2.5.4",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.29.0",
-    "vitest": "^3.1.2"
+    "vitest": "^3.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0"
   },
   "scripts": {
     "lint": "turbo lint",
@@ -73,7 +73,8 @@
   },
   "resolutions": {
     "semver": "^7.5.2",
-    "yaml": "^2.3.0"
+    "yaml": "^2.3.0",
+    "form-data": "^4.0.4"
   },
   "version": "0.0.0",
   "volta": {

@@ -1,12 +1,10 @@
 import { linodeFactory, regionFactory } from '@linode/utilities';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
 
 import { alertFactory } from 'src/factories';
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { EditAlertResources } from './EditAlertResources';
 
@@ -92,10 +90,9 @@ beforeEach(() => {
 
 describe('EditAlertResources component tests', () => {
   it('Edit alert resources happy path', async () => {
-    const { getByPlaceholderText, getByTestId } =
-      await renderWithThemeAndRouter(
-        <EditAlertResources alertDetails={alertDetails} serviceType="linode" />
-      );
+    const { getByPlaceholderText, getByTestId } = renderWithTheme(
+      <EditAlertResources alertDetails={alertDetails} serviceType="linode" />
+    );
 
     expect(
       getByPlaceholderText('Search for a Region or Entity')
@@ -107,7 +104,7 @@ describe('EditAlertResources component tests', () => {
   it('Edit alert resources successful edit', async () => {
     const mutateAsyncSpy = queryMocks.useEditAlertDefinition().mutateAsync;
 
-    const { getByTestId, getByText } = await renderWithThemeAndRouter(
+    const { getByTestId, getByText } = renderWithTheme(
       <EditAlertResources alertDetails={alertDetails} serviceType="linode" />
     );
 
@@ -161,15 +158,12 @@ describe('EditAlertResources component tests', () => {
       reset: vi.fn(),
     });
 
-    const push = vi.fn();
-    const history = createMemoryHistory(); // Create a memory history for testing
-    history.push = push;
-    history.push('/alerts/definitions/edit/linode/1');
-
-    const { getByTestId, getByText } = await renderWithThemeAndRouter(
-      <Router history={history}>
-        <EditAlertResources alertDetails={alertDetails} serviceType="linode" />
-      </Router>
+    const { getByTestId, getByText } = renderWithTheme(
+      <EditAlertResources alertDetails={alertDetails} serviceType="linode" />,
+      {
+        initialEntries: ['/alerts/definitions/edit/linode/1'],
+        initialRoute: '/alerts/definitions/edit/linode/1',
+      }
     );
 
     expect(getByTestId(saveResources)).toBeInTheDocument();

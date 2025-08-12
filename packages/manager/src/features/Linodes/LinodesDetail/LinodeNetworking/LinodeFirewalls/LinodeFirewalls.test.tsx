@@ -8,11 +8,7 @@ import * as React from 'react';
 import { firewallFactory } from 'src/factories';
 import { makeResourcePage } from 'src/mocks/serverHandlers';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
-import {
-  mockMatchMedia,
-  renderWithTheme,
-  renderWithThemeAndRouter,
-} from 'src/utilities/testHelpers';
+import { mockMatchMedia, renderWithTheme } from 'src/utilities/testHelpers';
 
 import { LinodeFirewalls } from './LinodeFirewalls';
 
@@ -28,7 +24,7 @@ vi.mock('@tanstack/react-router', async () => {
 
 const queryMocks = vi.hoisted(() => ({
   userPermissions: vi.fn(() => ({
-    permissions: {
+    data: {
       apply_linode_firewalls: false,
       delete_firewall_device: false,
     },
@@ -74,15 +70,13 @@ describe('LinodeFirewalls', () => {
 
   it("should enable 'Add Firewall' button if the user has apply_linode_firewalls permission", async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
-        ...queryMocks.userPermissions().permissions,
+      data: {
+        ...queryMocks.userPermissions().data,
         apply_linode_firewalls: true,
       },
     });
 
-    const { getByText } = await renderWithThemeAndRouter(
-      <LinodeFirewalls linodeID={1} />
-    );
+    const { getByText } = renderWithTheme(<LinodeFirewalls linodeID={1} />);
     const addFirewallBtn = getByText('Add Firewall');
     expect(addFirewallBtn).toBeInTheDocument();
     expect(addFirewallBtn).toBeEnabled();
@@ -90,15 +84,13 @@ describe('LinodeFirewalls', () => {
 
   it("should disable 'Add Firewall' button if the user doesn't have apply_linode_firewalls permission", async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
-        ...queryMocks.userPermissions().permissions,
+      data: {
+        ...queryMocks.userPermissions().data,
         apply_linode_firewalls: false,
       },
     });
 
-    const { getByText } = await renderWithThemeAndRouter(
-      <LinodeFirewalls linodeID={1} />
-    );
+    const { getByText } = renderWithTheme(<LinodeFirewalls linodeID={1} />);
     const addFirewallBtn = getByText('Add Firewall');
     expect(addFirewallBtn).toBeInTheDocument();
     expect(addFirewallBtn).toBeDisabled();
@@ -106,8 +98,8 @@ describe('LinodeFirewalls', () => {
 
   it("should enable 'Unassign' button if the user has delete_firewall_device permission", async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
-        ...queryMocks.userPermissions().permissions,
+      data: {
+        ...queryMocks.userPermissions().data,
         delete_firewall_device: true,
       },
     });
@@ -118,9 +110,7 @@ describe('LinodeFirewalls', () => {
       })
     );
 
-    const { getByText } = await renderWithThemeAndRouter(
-      <LinodeFirewalls linodeID={1} />
-    );
+    const { getByText } = renderWithTheme(<LinodeFirewalls linodeID={1} />);
 
     const loadingTestId = 'table-row-loading';
     await waitForElementToBeRemoved(() => screen.queryByTestId(loadingTestId));
@@ -132,8 +122,8 @@ describe('LinodeFirewalls', () => {
 
   it("should disable 'Unassign' button if the user doesn't have delete_firewall_device permission", async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
-        ...queryMocks.userPermissions().permissions,
+      data: {
+        ...queryMocks.userPermissions().data,
         delete_firewall_device: false,
       },
     });
@@ -144,9 +134,7 @@ describe('LinodeFirewalls', () => {
       })
     );
 
-    const { getByText } = await renderWithThemeAndRouter(
-      <LinodeFirewalls linodeID={1} />
-    );
+    const { getByText } = renderWithTheme(<LinodeFirewalls linodeID={1} />);
 
     const loadingTestId = 'table-row-loading';
     await waitForElementToBeRemoved(screen.queryByTestId(loadingTestId));

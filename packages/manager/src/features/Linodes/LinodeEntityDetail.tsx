@@ -13,9 +13,9 @@ import { getIsDistributedRegion } from 'src/components/RegionSelect/RegionSelect
 import { getRestrictedResourceText } from 'src/features/Account/utils';
 import { notificationCenterContext as _notificationContext } from 'src/features/NotificationCenter/NotificationCenterContext';
 import { useDetermineUnreachableIPs } from 'src/hooks/useDetermineUnreachableIPs';
-import { useIsResourceRestricted } from 'src/hooks/useIsResourceRestricted';
 import { useInProgressEvents } from 'src/queries/events/events';
 
+import { usePermissions } from '../IAM/hooks/usePermissions';
 import { LinodeEntityDetailBody } from './LinodeEntityDetailBody';
 import { LinodeEntityDetailFooter } from './LinodeEntityDetailFooter';
 import { LinodeEntityDetailHeader } from './LinodeEntityDetailHeader';
@@ -74,11 +74,11 @@ export const LinodeEntityDetail = (props: Props) => {
     linodeId: linode.id,
   });
 
-  const isLinodesGrantReadOnly = useIsResourceRestricted({
-    grantLevel: 'read_only',
-    grantType: 'linode',
-    id: linode.id,
-  });
+  const { data: permissions } = usePermissions(
+    'linode',
+    ['update_linode'],
+    linode.id
+  );
 
   const imageVendor =
     images?.find((i) => i.id === linode.image)?.vendor ?? null;
@@ -93,15 +93,6 @@ export const LinodeEntityDetail = (props: Props) => {
     linode.region
   );
 
-  const regionSupportsDiskEncryption =
-    (regions
-      ?.find((r) => r.id === linode.region)
-      ?.capabilities.includes('Disk Encryption') ||
-      regions
-        ?.find((r) => r.id === linode.region)
-        ?.capabilities.includes('LA Disk Encryption')) ??
-    false;
-
   let progress;
   let transitionText;
 
@@ -114,7 +105,7 @@ export const LinodeEntityDetail = (props: Props) => {
 
   return (
     <>
-      {isLinodesGrantReadOnly && (
+      {!permissions.update_linode && (
         <Notice
           text={getRestrictedResourceText({
             resourceType: 'Linodes',
@@ -132,7 +123,6 @@ export const LinodeEntityDetail = (props: Props) => {
             interfaceWithVPC={interfaceWithVPC}
             ipv4={linode.ipv4}
             ipv6={trimmedIPv6}
-            isLKELinode={Boolean(linode.lke_cluster_id)}
             isUnreachablePublicIPv4={isUnreachablePublicIPv4}
             isUnreachablePublicIPv6={isUnreachablePublicIPv6}
             linodeCapabilities={linode.capabilities}
@@ -143,13 +133,11 @@ export const LinodeEntityDetail = (props: Props) => {
             numCPUs={linode.specs.vcpus}
             numVolumes={numberOfVolumes}
             region={linode.region}
-            regionSupportsDiskEncryption={regionSupportsDiskEncryption}
             vpcLinodeIsAssignedTo={vpcLinodeIsAssignedTo}
           />
         }
         footer={
           <LinodeEntityDetailFooter
-            isLinodesGrantReadOnly={isLinodesGrantReadOnly}
             linodeCreated={linode.created}
             linodeId={linode.id}
             linodeLabel={linode.label}

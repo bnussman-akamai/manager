@@ -2,17 +2,23 @@ import { linodeFactory } from '@linode/utilities';
 import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 
-import {
-  renderWithThemeAndRouter,
-  wrapWithTableBody,
-} from 'src/utilities/testHelpers';
+import { renderWithTheme, wrapWithTableBody } from 'src/utilities/testHelpers';
 
 import { LinodeRow, RenderFlag } from './LinodeRow';
 
+const queryMocks = vi.hoisted(() => ({
+  userPermissions: vi.fn(() => ({
+    data: {},
+  })),
+}));
+
+vi.mock('src/features/IAM/hooks/usePermissions', () => ({
+  usePermissions: queryMocks.userPermissions,
+}));
 describe('LinodeRow', () => {
   describe('when Linode has mutation', () => {
     it('should render a Flag', async () => {
-      const { getByLabelText } = await renderWithThemeAndRouter(
+      const { getByLabelText } = renderWithTheme(
         <RenderFlag mutationAvailable={true} />
       );
 
@@ -38,7 +44,7 @@ describe('LinodeRow', () => {
       />
     );
 
-    const { getByLabelText, getByText } = await renderWithThemeAndRouter(
+    const { getByLabelText, getByText } = renderWithTheme(
       wrapWithTableBody(renderedLinode)
     );
 

@@ -1,12 +1,11 @@
 import { fireEvent, waitFor } from '@testing-library/react';
 import * as React from 'react';
 
-import { reactRouterProps } from 'src/__data__/reactRouterProps';
 import {
   longviewClientFactory,
   longviewSubscriptionFactory,
 } from 'src/factories';
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import {
   filterLongviewClientsByQuery,
@@ -49,7 +48,6 @@ const props: LongviewClientsCombinedProps = {
   lvClientData: {},
   newClientLoading: false,
   updateLongviewClient: vi.fn(),
-  ...reactRouterProps,
 };
 
 describe('Utility Functions', () => {
@@ -100,22 +98,18 @@ describe('Utility Functions', () => {
 
 describe('Longview clients list view', () => {
   it('should request clients on load', async () => {
-    await renderWithThemeAndRouter(<LongviewClients {...props} />);
+    renderWithTheme(<LongviewClients {...props} />);
     expect(props.getLongviewClients).toHaveBeenCalledTimes(1);
   });
 
   it('should have an Add Client button', async () => {
-    const { findByText } = await renderWithThemeAndRouter(
-      <LongviewLanding {...props} />
-    );
+    const { findByText } = renderWithTheme(<LongviewLanding {...props} />);
     const addButton = await findByText('Add Client');
     expect(addButton).toBeInTheDocument();
   });
 
   it('should attempt to add a new client when the Add Client button is clicked', async () => {
-    const { getByText } = await renderWithThemeAndRouter(
-      <LongviewLanding {...props} />
-    );
+    const { getByText } = renderWithTheme(<LongviewLanding {...props} />);
     const button = getByText('Add Client');
     fireEvent.click(button);
     await waitFor(() =>
@@ -124,7 +118,7 @@ describe('Longview clients list view', () => {
   });
 
   it('should render a row for each client', async () => {
-    const { queryAllByTestId } = await renderWithThemeAndRouter(
+    const { queryAllByTestId } = renderWithTheme(
       <LongviewClients {...props} />
     );
 
@@ -134,7 +128,7 @@ describe('Longview clients list view', () => {
   });
 
   it('should render a CTA for non-Pro subscribers', async () => {
-    const { getByText } = await renderWithThemeAndRouter(
+    const { getByText } = renderWithTheme(
       <LongviewClients {...props} activeSubscription={{}} />
     );
 
@@ -142,7 +136,7 @@ describe('Longview clients list view', () => {
   });
 
   it('should not render a CTA for LV Pro subscribers', async () => {
-    const { queryAllByText } = await renderWithThemeAndRouter(
+    const { queryAllByText } = renderWithTheme(
       <LongviewClients
         {...props}
         activeSubscription={longviewSubscriptionFactory.build({

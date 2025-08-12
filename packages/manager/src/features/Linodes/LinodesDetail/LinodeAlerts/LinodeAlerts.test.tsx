@@ -4,13 +4,13 @@ import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import LinodeAlerts from './LinodeAlerts';
 
 const queryMocks = vi.hoisted(() => ({
   userPermissions: vi.fn(() => ({
-    permissions: {
+    data: {
       update_linode: false,
     },
   })),
@@ -38,13 +38,7 @@ vi.mock('@tanstack/react-router', async () => {
 
 describe('LinodeAlerts', () => {
   it('should render component', async () => {
-    const { getByText } = await renderWithThemeAndRouter(
-      <LinodeAlerts
-        isAclpAlertsSupportedRegionLinode={true}
-        isAlertsBetaMode={false}
-        onAlertsModeChange={() => {}}
-      />
-    );
+    const { getByText } = renderWithTheme(<LinodeAlerts />);
 
     expect(getByText('Alerts')).toBeVisible();
     expect(getByText('CPU Usage')).toBeVisible();
@@ -53,13 +47,7 @@ describe('LinodeAlerts', () => {
   });
 
   it('should disable "Save" button if the user does not have update_linode permission', async () => {
-    const { getByTestId } = await renderWithThemeAndRouter(
-      <LinodeAlerts
-        isAclpAlertsSupportedRegionLinode={true}
-        isAlertsBetaMode={false}
-        onAlertsModeChange={() => {}}
-      />
-    );
+    const { getByTestId } = renderWithTheme(<LinodeAlerts />);
 
     const saveBtn = getByTestId('alerts-save');
     expect(saveBtn).toBeInTheDocument();
@@ -68,17 +56,11 @@ describe('LinodeAlerts', () => {
 
   it('should enable "Save" button if the user has update_linode permission', async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
+      data: {
         update_linode: true,
       },
     });
-    const { getByTestId, getAllByTestId } = await renderWithThemeAndRouter(
-      <LinodeAlerts
-        isAclpAlertsSupportedRegionLinode={true}
-        isAlertsBetaMode={false}
-        onAlertsModeChange={() => {}}
-      />
-    );
+    const { getByTestId, getAllByTestId } = renderWithTheme(<LinodeAlerts />);
 
     const inputCPU = getAllByTestId('textfield-input')[0];
     expect(inputCPU).toBeInTheDocument();

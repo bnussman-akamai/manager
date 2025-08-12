@@ -8,23 +8,21 @@ import {
   Stack,
   Typography,
 } from '@linode/ui';
+import { useNavigate } from '@tanstack/react-router';
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { useHistory } from 'react-router-dom';
 
 import { DebouncedSearchTextField } from 'src/components/DebouncedSearchTextField';
+import { useFlags } from 'src/hooks/useFlags';
 import { useAlertDefinitionByServiceTypeQuery } from 'src/queries/cloudpulse/alerts';
 
 import { AlertContextualViewTableHeaderMap } from '../AlertsListing/constants';
-import {
-  convertAlertsToTypeSet,
-  filterAlertsByStatusAndType,
-} from '../Utils/utils';
+import { convertAlertsToTypeSet, filterAlerts } from '../Utils/utils';
 import { AlertInformationActionTable } from './AlertInformationActionTable';
 
 import type {
   AlertDefinitionType,
   CloudPulseAlertsPayload,
+  CloudPulseServiceType,
 } from '@linode/api-v4';
 
 interface AlertReusableComponentProps {
@@ -39,20 +37,36 @@ interface AlertReusableComponentProps {
   entityName?: string;
 
   /**
+   * Whether the legacy alert is available for the entity
+   */
+  isLegacyAlertAvailable?: boolean;
+
+  /**
    * Called when an alert is toggled on or off.
-   * Only use in create flow.
    * @param payload enabled alerts ids
    */
   onToggleAlert?: (payload: CloudPulseAlertsPayload) => void;
 
   /**
+   * Region ID for the selected entity
+   */
+  regionId?: string;
+
+  /**
    * Service type of selected entity
    */
-  serviceType: string;
+  serviceType: CloudPulseServiceType;
 }
 
 export const AlertReusableComponent = (props: AlertReusableComponentProps) => {
-  const { entityId, entityName, onToggleAlert, serviceType } = props;
+  const {
+    entityId,
+    entityName,
+    onToggleAlert,
+    serviceType,
+    regionId,
+    isLegacyAlertAvailable,
+  } = props;
   const {
     data: alerts,
     error,
@@ -64,13 +78,15 @@ export const AlertReusableComponent = (props: AlertReusableComponentProps) => {
     AlertDefinitionType | undefined
   >();
 
-  // Filter alerts based on status, search text & selected type
+  // Filter alerts based on status, search text, selected type, and region
   const filteredAlerts = React.useMemo(
-    () => filterAlertsByStatusAndType(alerts, searchText, selectedType),
-    [alerts, searchText, selectedType]
+    () => filterAlerts({ alerts, searchText, selectedType, regionId }),
+    [alerts, regionId, searchText, selectedType]
   );
 
-  const history = useHistory();
+  const { aclpBetaServices } = useFlags();
+
+  const navigate = useNavigate();
 
   // Filter unique alert types from alerts list
   const types = convertAlertsToTypeSet(alerts);
@@ -80,21 +96,24 @@ export const AlertReusableComponent = (props: AlertReusableComponentProps) => {
   }
 
   return (
-    <Paper>
+    <Paper sx={{ p: entityId ? undefined : 0 }}>
       <Stack gap={3}>
-        <Box display="flex" justifyContent="space-between">
-          <Box alignItems="center" display="flex" gap={0.5}>
-            <Typography variant="h2">Alerts</Typography>
-            <BetaChip />
+        {entityId && (
+          <Box display="flex" justifyContent="space-between">
+            <Box alignItems="center" display="flex" gap={0.5}>
+              <Typography variant="h2">Alerts</Typography>
+              {aclpBetaServices?.[serviceType]?.alerts && <BetaChip />}
+            </Box>
+            <Button
+              buttonType="outlined"
+              data-qa-buttons="true"
+              data-testid="manage-alerts"
+              onClick={() => navigate({ to: '/alerts/definitions' })}
+            >
+              Manage Alerts
+            </Button>
           </Box>
-          <Button
-            buttonType="outlined"
-            data-testid="manage-alerts"
-            onClick={() => history.push('/alerts/definitions')}
-          >
-            Manage Alerts
-          </Button>
-        </Box>
+        )}
         <Stack gap={2}>
           <Box display="flex" gap={2}>
             <DebouncedSearchTextField
@@ -133,6 +152,7 @@ export const AlertReusableComponent = (props: AlertReusableComponentProps) => {
             onToggleAlert={onToggleAlert}
             orderByColumn="Alert Name"
             serviceType={serviceType}
+            showConfirmationDialog={isLegacyAlertAvailable}
           />
         </Stack>
       </Stack>

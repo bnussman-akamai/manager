@@ -36,20 +36,14 @@ import { EditRangeRDNSDrawer } from './EditRangeRDNSDrawer';
 import IPSharing from './IPSharing';
 import { IPTransfer } from './IPTransfer';
 import { LinodeIPAddressRow } from './LinodeIPAddressRow';
+import { ipResponseToDisplayRows, ipTableId } from './utils';
 import { ViewIPDrawer } from './ViewIPDrawer';
 import { ViewRangeDrawer } from './ViewRangeDrawer';
 import { ViewRDNSDrawer } from './ViewRDNSDrawer';
 
 import type { IPAddressRowHandlers } from './LinodeIPAddressRow';
 import type { IPTypes } from './types';
-import type {
-  IPAddress,
-  IPRange,
-  LinodeIPsResponse,
-  VPCIP,
-} from '@linode/api-v4';
-
-export const ipTableId = 'ips';
+import type { IPAddress, IPRange } from '@linode/api-v4';
 
 interface LinodeIPAddressesProps {
   linodeID: number;
@@ -79,7 +73,7 @@ export const LinodeIPAddresses = (props: LinodeIPAddressesProps) => {
 
   const isLinodeInterface = linode?.interface_generation === 'linode';
 
-  const { isUnreachablePublicIPv4, isUnreachablePublicIPv6 } =
+  const { isUnreachablePublicIPv4, isUnreachablePublicIPv6, interfaceWithVPC } =
     useDetermineUnreachableIPs({
       isLinodeInterface,
       linodeId: linodeID,
@@ -101,6 +95,15 @@ export const LinodeIPAddresses = (props: LinodeIPAddressesProps) => {
 
   const [isViewRDNSDialogOpen, setIsViewRDNSDialogOpen] = React.useState(false);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = React.useState(false);
+
+  const ipAddressesTableRef = React.useRef<HTMLTableElement>(null);
+
+  React.useEffect(() => {
+    if (ipAddressesTableRef.current && location.hash === `#${ipTableId}`) {
+      ipAddressesTableRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.hash]);
 
   const openRemoveIPDialog = (ip: IPAddress) => {
     setSelectedIP(ip);
@@ -135,7 +138,11 @@ export const LinodeIPAddresses = (props: LinodeIPAddressesProps) => {
     openRemoveIPRangeDialog,
   };
 
-  const ipDisplay = ipResponseToDisplayRows(ips);
+  const ipDisplay = ipResponseToDisplayRows({
+    isLinodeInterface,
+    interfaceWithVPC,
+    ipResponse: ips,
+  });
 
   const { sortedData, order, orderBy, handleOrderChange } = useOrderV2({
     data: ipDisplay,
@@ -232,7 +239,11 @@ export const LinodeIPAddresses = (props: LinodeIPAddressesProps) => {
         )}
       </Paper>
       {/* @todo: It'd be nice if we could always sort by public -> private. */}
-      <Table aria-label="Linode IP Addresses" id={ipTableId}>
+      <Table
+        aria-label="Linode IP Addresses"
+        id={ipTableId}
+        ref={ipAddressesTableRef}
+      >
         <TableHead>
           <TableRow>
             <TableCell sx={{ width: '15%' }}>Address</TableCell>
@@ -342,135 +353,3 @@ export interface IPDisplay {
   subnetMask: string;
   type: IPTypes;
 }
-
-// Takes an IP Response object and returns high-level IP display rows.
-export const ipResponseToDisplayRows = (
-  ipResponse?: LinodeIPsResponse
-): IPDisplay[] => {
-  if (!ipResponse) {
-    return [];
-  }
-
-  const { ipv4, ipv6 } = ipResponse;
-
-  const ipDisplay = [
-    ...mapIPv4Display(ipv4.public, 'Public'),
-    ...mapIPv4Display(ipv4.private, 'Private'),
-    ...mapIPv4Display(ipv4.reserved, 'Reserved'),
-    ...mapIPv4Display(ipv4.shared, 'Shared'),
-  ];
-
-  if (ipv6?.slaac) {
-    ipDisplay.push(ipToDisplay(ipv6.slaac, 'SLAAC'));
-  }
-
-  if (ipv6?.link_local) {
-    ipDisplay.push(ipToDisplay(ipv6?.link_local, 'Link Local'));
-  }
-
-  // If there is a VPC interface with 1:1 NAT, hide the Public IPv4 IP address row
-  if (ipv4.vpc.find((vpcIp) => vpcIp.nat_1_1)) {
-    ipDisplay.shift();
-  }
-  ipDisplay.push(...createVPCIPv4Display(ipv4.vpc));
-
-  // IPv6 ranges and pools to display in the networking table
-  ipDisplay.push(
-    ...[...(ipv6 ? ipv6.global : [])].map((thisIP) => {
-      /* If you want to surface rdns info in the future you have two options:
-        1. Use the info we already have:
-          We get info on our routed ranges from /networking/ipv6/ranges and /networking/ipv6/ranges/<id>, because the API
-          only surfaces is_bgp in /networking/ipv6/ranges/<id> we need to use both, this should change in the API
-          Similarly, the API only surfaces rdns info in /networking/ips/<ip>. To correlate a range and
-          it's rdns info, you'll need to make an extra request to /netowrking/ips/<ip> or loop through the
-          result of the request to /networking/ips and find the range info you want
-
-        - OR -
-
-        2. API change
-          API could include RDNS info in /networking/ipv6/ranges and /networking/ipv6/ranges/<id> and
-          while you're at it please ask them to add in is_bgp to /networking/ipv6/ranges as it would save a bunch of
-          extra requests on Linodes with many ranges
-      */
-      return {
-        _range: thisIP,
-        address: `${thisIP.range}/${thisIP.prefix}`,
-        gateway: '',
-        rdns: '',
-        subnetMask: '',
-        type: 'Range – IPv6' as IPDisplay['type'],
-      };
-    })
-  );
-
-  return ipDisplay;
-};
-
-type ipKey =
-  | 'Link Local'
-  | 'Private'
-  | 'Public'
-  | 'Reserved'
-  | 'Shared'
-  | 'SLAAC';
-
-const mapIPv4Display = (ips: IPAddress[], key: ipKey): IPDisplay[] => {
-  return ips.map((ip) => ipToDisplay(ip, key));
-};
-
-export const createVPCIPv4Display = (ips: VPCIP[]): IPDisplay[] => {
-  const emptyProps = {
-    gateway: '',
-    rdns: '',
-    subnetMask: '',
-  };
-
-  const vpcIPDisplay: IPDisplay[] = [];
-  for (const ip of ips) {
-    if (ip.address_range) {
-      vpcIPDisplay.push({
-        address: ip.address_range,
-        type: 'VPC – Range – IPv4',
-        ...emptyProps,
-      });
-    }
-    if (ip.address) {
-      vpcIPDisplay.push({
-        address: ip.address,
-        type: 'VPC – IPv4',
-        ...emptyProps,
-      });
-    }
-    if (ip.nat_1_1) {
-      vpcIPDisplay.push({
-        address: ip.nat_1_1,
-        type: 'VPC NAT – IPv4',
-        ...emptyProps,
-      });
-    }
-  }
-  return vpcIPDisplay;
-};
-
-const ipToDisplay = (ip: IPAddress, key: ipKey): IPDisplay => {
-  return {
-    _ip: ip,
-    address: ip.address,
-    gateway: ip.gateway ?? '',
-    rdns: ip.rdns ?? '',
-    subnetMask: ip.subnet_mask ?? '',
-    type: createType(ip, key) as IPTypes,
-  };
-};
-
-export const createType = (ip: IPAddress, key: ipKey) => {
-  if (key === 'Reserved' && ip.type === 'ipv4') {
-    return ip.public ? 'Reserved IPv4 (public)' : 'Reserved IPv4 (private)';
-  }
-
-  if (key === 'SLAAC') {
-    return 'Public – IPv6 – SLAAC';
-  }
-
-  return `${key} – ${ip.type === 'ipv4' ? 'IPv4' : 'IPv6'}`;
-};

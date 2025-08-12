@@ -5,9 +5,15 @@ import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { FieldPathByValue } from 'react-hook-form';
 
-import { dimensionOperatorOptions, textFieldOperators } from '../../constants';
+import {
+  dimensionOperatorOptions,
+  HELPER_TEXT_MAP,
+  PLACEHOLDER_TEXT_MAP,
+  textFieldOperators,
+} from '../../constants';
 import { ClearIconButton } from './ClearIconButton';
 
+import type { Item } from '../../constants';
 import type { CreateAlertDefinitionForm, DimensionFilterForm } from '../types';
 import type { Dimension, DimensionFilterOperatorType } from '@linode/api-v4';
 
@@ -72,6 +78,7 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
     name: `${name}.operator`,
   });
 
+  const dimensionValueWatcher = useWatch({ control, name: `${name}.value` });
   const selectedDimension =
     dimensionOptions && dimensionFieldWatcher
       ? (dimensionOptions.find(
@@ -88,16 +95,71 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
     }
     return [];
   };
-  const isTextField = dimensionOperatorWatcher
-    ? textFieldOperators.includes(dimensionOperatorWatcher)
-    : false;
+  const isValueMultiple =
+    valueOptions().length > 0 && dimensionOperatorWatcher === 'in';
+
+  const isTextField =
+    !valueOptions().length ||
+    (dimensionOperatorWatcher
+      ? textFieldOperators.includes(dimensionOperatorWatcher)
+      : false);
+
+  const valuePlaceholder = `${isTextField ? 'Enter' : 'Select'} a Value`;
+
+  const customPlaceholderDimension =
+    PLACEHOLDER_TEXT_MAP[dimensionFieldWatcher ?? ''];
+  const customPlaceholderText =
+    customPlaceholderDimension?.[
+      dimensionOperatorWatcher === 'in' ? 'in' : 'default'
+    ] ?? valuePlaceholder;
+
+  const customHelperDimension = HELPER_TEXT_MAP[dimensionFieldWatcher ?? ''];
+  const customHelperText =
+    customHelperDimension?.[
+      dimensionOperatorWatcher === 'in' ? 'in' : 'default'
+    ] ?? undefined;
+
+  const resolveSelectedValues = (
+    options: Item<string, string>[],
+    value: null | string
+  ): Item<string, string> | Item<string, string>[] | null => {
+    if (!value) return isValueMultiple ? [] : null;
+
+    if (isValueMultiple) {
+      const splitValues = value.split(',');
+      return options.filter((option) => splitValues.includes(option.value));
+    }
+
+    return options.find((option) => option.value === value) ?? null;
+  };
+
+  const handleValueChange = (
+    selected: Item<string, string> | Item<string, string>[] | null,
+    operation: string
+  ): string => {
+    if (!['removeOption', 'selectOption'].includes(operation)) {
+      return '';
+    }
+
+    if (isValueMultiple && Array.isArray(selected)) {
+      return selected.map((item) => item.value).join(',');
+    }
+
+    if (!isValueMultiple && selected && !Array.isArray(selected)) {
+      return selected.value;
+    }
+
+    return '';
+  };
+
+  const isCustomValueDimension =
+    dimensionFieldWatcher === 'port' || dimensionFieldWatcher === 'config_id';
   return (
     <GridLegacy
       container
       data-testid={`${name}-id`}
-      sx={{
-        gap: 2,
-      }}
+      flexWrap="wrap"
+      spacing={2}
     >
       <GridLegacy item md={3} xs={12}>
         <Controller
@@ -129,7 +191,7 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
           )}
         />
       </GridLegacy>
-      <GridLegacy item md={2} xs={12}>
+      <GridLegacy item lg={2} md={3} xs={12}>
         <Controller
           control={control}
           name={`${name}.operator`}
@@ -149,6 +211,7 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
                 field.onChange(
                   operation === 'selectOption' ? newValue.value : null
                 );
+                setValue(`${name}.value`, null);
               }}
               options={dimensionOperatorOptions}
               placeholder="Select an Operator"
@@ -161,7 +224,7 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
           )}
         />
       </GridLegacy>
-      <GridLegacy item md={3} xs={12}>
+      <GridLegacy item lg={3} md={4} xs={12}>
         <Box display="flex" gap={2}>
           <Controller
             control={control}
@@ -173,11 +236,23 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
                   data-testid="value"
                   disabled={!dimensionFieldWatcher}
                   errorText={fieldState.error?.message}
+                  helperText={!fieldState.error ? customHelperText : undefined}
                   label="Value"
+                  max={
+                    dimensionFieldWatcher === 'port'
+                      ? 65535
+                      : Number.MAX_SAFE_INTEGER
+                  }
+                  min={dimensionFieldWatcher === 'port' ? 1 : 0}
                   onBlur={field.onBlur}
                   onChange={(event) => field.onChange(event.target.value)}
-                  placeholder={`${isTextField ? 'Enter' : 'Select'} a Value`}
+                  placeholder={customPlaceholderText}
                   sx={{ flex: 1, width: '256px' }}
+                  type={
+                    isCustomValueDimension && dimensionOperatorWatcher !== 'in'
+                      ? 'number'
+                      : 'text'
+                  }
                   value={field.value ?? ''}
                 />
               ) : (
@@ -190,24 +265,22 @@ export const DimensionFilterField = (props: DimensionFilterFieldProps) => {
                     value.value === option.value
                   }
                   label="Value"
+                  limitTags={1}
+                  multiple={isValueMultiple}
                   onBlur={field.onBlur}
-                  onChange={(
-                    _,
-                    selected: { label: string; value: string },
-                    operation
-                  ) => {
-                    field.onChange(
-                      operation === 'selectOption' ? selected.value : null
-                    );
+                  onChange={(_, selected, operation) => {
+                    field.onChange(handleValueChange(selected, operation));
                   }}
                   options={valueOptions()}
-                  placeholder={`${isTextField ? 'Enter' : 'Select'} a Value`}
-                  sx={{ flex: 1 }}
-                  value={
-                    valueOptions().find(
-                      (option) => option.value === field.value
-                    ) ?? null
+                  placeholder={
+                    dimensionValueWatcher &&
+                    (!Array.isArray(dimensionValueWatcher) ||
+                      dimensionValueWatcher.length)
+                      ? ''
+                      : valuePlaceholder
                   }
+                  sx={{ flex: 1 }}
+                  value={resolveSelectedValues(valueOptions(), field.value)}
                 />
               )
             }

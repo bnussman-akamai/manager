@@ -5,10 +5,10 @@ import { useSnackbar } from 'notistack';
 import * as React from 'react';
 
 import { TagCell } from 'src/components/TagCell/TagCell';
-import { useRestrictedGlobalGrantCheck } from 'src/hooks/useRestrictedGlobalGrantCheck';
 import { getAPIErrorOrDefault } from 'src/utilities/errorUtils';
 import { formatDate } from 'src/utilities/formatDate';
 
+import { usePermissions } from '../IAM/hooks/usePermissions';
 import {
   StyledBox,
   StyledLabelBox,
@@ -18,7 +18,6 @@ import {
 } from './LinodeEntityDetail.styles';
 
 interface FooterProps {
-  isLinodesGrantReadOnly: boolean;
   linodeCreated: string;
   linodeId: number;
   linodeLabel: string;
@@ -33,7 +32,6 @@ export const LinodeEntityDetailFooter = React.memo((props: FooterProps) => {
   const { data: profile } = useProfile();
 
   const {
-    isLinodesGrantReadOnly,
     linodeCreated,
     linodeId,
     linodeLabel,
@@ -42,10 +40,7 @@ export const LinodeEntityDetailFooter = React.memo((props: FooterProps) => {
     linodeTags,
   } = props;
 
-  const isReadOnlyAccountAccess = useRestrictedGlobalGrantCheck({
-    globalGrantType: 'account_access',
-    permittedGrantLevel: 'read_write',
-  });
+  const { data: permissions } = usePermissions('account', ['is_account_admin']);
 
   const { mutateAsync: updateLinode } = useLinodeUpdateMutation(linodeId);
 
@@ -148,7 +143,10 @@ export const LinodeEntityDetailFooter = React.memo((props: FooterProps) => {
         }}
       >
         <TagCell
-          disabled={isLinodesGrantReadOnly || isReadOnlyAccountAccess}
+          // A restricted user can technically add tags to a Linode if they have read-write permission on the Linode,
+          // but for the sake of the user experience, we choose to disable the "Add a tag" button in the UI because
+          // restricted users can't see account tags using GET /v4/tags
+          disabled={!permissions.is_account_admin}
           entityLabel={linodeLabel}
           sx={{
             width: '100%',

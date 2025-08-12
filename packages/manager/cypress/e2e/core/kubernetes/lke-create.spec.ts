@@ -182,6 +182,13 @@ const validEnterprisePlanTabs = [
 const validStandardPlanTabs = [...validEnterprisePlanTabs, 'GPU'];
 
 describe('LKE Cluster Creation', () => {
+  beforeEach(() => {
+    // Mock feature flag -- @TODO LKE-E: Remove feature flag once LKE-E is fully rolled out
+    mockAppendFeatureFlags({
+      lkeEnterprise: { enabled: true, la: true, postLa: false },
+    }).as('getFeatureFlags');
+  });
+
   /*
    * - Confirms that users can create a cluster by completing the LKE create form.
    * - Confirms that LKE cluster is created.
@@ -366,7 +373,7 @@ describe('LKE Cluster Creation', () => {
       cy.contains('Kubernetes API Endpoint').should('be.visible');
       cy.contains('linodelke.net:443').should('be.visible');
 
-      cy.findAllByText(nodePoolLabel, { selector: 'h2' })
+      cy.findAllByText(nodePoolLabel, { selector: 'h3' })
         .should('have.length', similarNodePoolCount)
         .first()
         .should('be.visible');
@@ -434,6 +441,7 @@ describe('LKE Cluster Creation with APL enabled', () => {
     mockAppendFeatureFlags({
       apl: true,
       aplGeneralAvailability: true,
+      lkeEnterprise: { enabled: true, la: true, postLa: false },
     }).as('getFeatureFlags');
     mockCreateCluster(mockedLKECluster).as('createCluster');
     mockGetCluster(mockedLKECluster).as('getCluster');
@@ -530,6 +538,13 @@ describe('LKE Cluster Creation with APL enabled', () => {
 });
 
 describe('LKE Cluster Creation with DC-specific pricing', () => {
+  beforeEach(() => {
+    // Mock feature flag -- @TODO LKE-E: Remove feature flag once LKE-E is fully rolled out
+    mockAppendFeatureFlags({
+      lkeEnterprise: { enabled: true, la: true, postLa: false },
+    }).as('getFeatureFlags');
+  });
+
   /*
    * - Confirms that DC-specific prices are present in the LKE create form.
    * - Confirms that pricing docs link is shown in "Region" section.
@@ -648,6 +663,13 @@ describe('LKE Cluster Creation with DC-specific pricing', () => {
 });
 
 describe('LKE Cluster Creation with ACL', () => {
+  beforeEach(() => {
+    // Mock feature flag -- @TODO LKE-E: Remove feature flag once LKE-E is fully rolled out
+    mockAppendFeatureFlags({
+      lkeEnterprise: { enabled: true, la: true, postLa: false },
+    }).as('getFeatureFlags');
+  });
+
   // setting up mocks
   const clusterLabel = randomLabel();
   const mockRegion = regionFactory.build({
@@ -675,6 +697,7 @@ describe('LKE Cluster Creation with ACL', () => {
 
   describe('with LKE IPACL account capability', () => {
     beforeEach(() => {
+      mockGetKubernetesVersions([clusterVersion]).as('getLKEVersions');
       mockGetRegions([mockRegion]).as('getRegions');
       mockGetLinodeTypes(mockLinodeTypes).as('getLinodeTypes');
       mockGetRegionAvailability(mockRegion.id, []).as('getRegionAvailability');
@@ -709,7 +732,7 @@ describe('LKE Cluster Creation with ACL', () => {
         .click();
 
       cy.url().should('endWith', '/kubernetes/create');
-      cy.wait(['@getRegions', '@getLinodeTypes']);
+      cy.wait(['@getRegions', '@getLinodeTypes', '@getLKEVersions']);
 
       // Fill out LKE creation form label, region, and Kubernetes version fields.
       cy.findByLabelText('Cluster Label').should('be.visible').click();
@@ -1260,7 +1283,7 @@ describe('LKE Cluster Creation with LKE-E', () => {
    */
   it('does not show the LKE-E flow with the feature flag off', () => {
     mockAppendFeatureFlags({
-      lkeEnterprise: { enabled: false, la: false },
+      lkeEnterprise: { enabled: false, la: false, postLa: false },
     }).as('getFeatureFlags');
     cy.visitWithLogin('/kubernetes/clusters');
 
@@ -1279,7 +1302,7 @@ describe('LKE Cluster Creation with LKE-E', () => {
     beforeEach(() => {
       // Mock feature flag -- @TODO LKE-E: Remove feature flag once LKE-E is fully rolled out
       mockAppendFeatureFlags({
-        lkeEnterprise: { enabled: true, la: true },
+        lkeEnterprise: { enabled: true, la: true, postLa: false },
       }).as('getFeatureFlags');
     });
 

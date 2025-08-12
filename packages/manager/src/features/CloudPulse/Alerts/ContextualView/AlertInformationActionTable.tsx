@@ -4,7 +4,6 @@ import { Grid, TableBody, TableHead } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import React from 'react';
 
-// eslint-disable-next-line no-restricted-imports
 import OrderBy from 'src/components/OrderBy';
 import Paginate from 'src/components/Paginate';
 import { PaginationFooter } from 'src/components/PaginationFooter/PaginationFooter';
@@ -22,7 +21,10 @@ import { ALERT_SCOPE_TOOLTIP_CONTEXTUAL } from '../constants';
 import { scrollToElement } from '../Utils/AlertResourceUtils';
 import { AlertInformationActionRow } from './AlertInformationActionRow';
 
-import type { CloudPulseAlertsPayload } from '@linode/api-v4';
+import type {
+  CloudPulseAlertsPayload,
+  CloudPulseServiceType,
+} from '@linode/api-v4';
 
 export interface AlertInformationActionTableProps {
   /**
@@ -67,7 +69,12 @@ export interface AlertInformationActionTableProps {
   /**
    * Service type of the selected entity
    */
-  serviceType: string;
+  serviceType: CloudPulseServiceType;
+
+  /**
+   * Flag to determine if confirmation dialog should be displayed
+   */
+  showConfirmationDialog?: boolean;
 }
 
 export interface TableColumnHeader {
@@ -108,11 +115,11 @@ export const AlertInformationActionTable = (
     alerts,
     columns,
     entityId,
-    entityName,
     error,
     orderByColumn,
     serviceType,
     onToggleAlert,
+    showConfirmationDialog,
   } = props;
 
   const alertsTableRef = React.useRef<HTMLTableElement>(null);
@@ -125,7 +132,7 @@ export const AlertInformationActionTable = (
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const isEditMode = !!entityId;
-  const isCreateMode = !!onToggleAlert;
+  const isCreateMode = !isEditMode;
 
   const { enabledAlerts, setEnabledAlerts, hasUnsavedChanges } =
     useContextualAlertsState(alerts, entityId);
@@ -134,6 +141,13 @@ export const AlertInformationActionTable = (
     serviceType,
     entityId ?? ''
   );
+
+  // To send initial state of alerts through toggle handler function
+  React.useEffect(() => {
+    if (onToggleAlert) {
+      onToggleAlert(enabledAlerts);
+    }
+  }, []);
 
   const handleCancel = () => {
     setIsDialogOpen(false);
@@ -274,11 +288,6 @@ export const AlertInformationActionTable = (
                             return null;
                           }
 
-                          // TODO: Remove this once we have a way to toggle ACCOUNT and REGION level alerts
-                          if (!isEditMode && alert.scope !== 'entity') {
-                            return null;
-                          }
-
                           const status = enabledAlerts[alert.type]?.includes(
                             alert.id
                           );
@@ -312,13 +321,14 @@ export const AlertInformationActionTable = (
                       buttonType="primary"
                       data-qa-buttons="true"
                       data-testid="save-alerts"
-                      disabled={!hasUnsavedChanges}
+                      disabled={!hasUnsavedChanges || isLoading}
+                      loading={isLoading}
                       onClick={() => {
-                        window.scrollTo({
-                          behavior: 'instant',
-                          top: 0,
-                        });
-                        setIsDialogOpen(true);
+                        if (showConfirmationDialog) {
+                          setIsDialogOpen(true);
+                        } else {
+                          handleConfirm(enabledAlerts);
+                        }
                       }}
                     >
                       Save
@@ -337,13 +347,12 @@ export const AlertInformationActionTable = (
         isOpen={isDialogOpen}
         message={
           <>
-            Are you sure you want to save these settings for {entityName}? All
-            legacy alert settings will be disabled and replaced by the new{' '}
-            <b>Alerts(Beta)</b> settings.
+            Are you sure you want to save (Beta) Alerts? <b>Legacy</b> settings
+            will be disabled and replaced by (Beta) Alerts settings.
           </>
         }
-        primaryButtonLabel="Save"
-        title="Save Alerts?"
+        primaryButtonLabel="Confirm"
+        title="Are you sure you want to save (Beta) Alerts? "
       />
     </>
   );

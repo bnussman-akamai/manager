@@ -1,3 +1,44 @@
+## [2025-08-12] - v0.18.0
+
+
+### Changed:
+
+- Use gap for TableSortLabel spacing of text and icons ([#12512](https://github.com/linode/manager/pull/12512))
+
+### Fixed:
+
+- Check icon color in dark mode and Color Token for all checkbox states ([#12603](https://github.com/linode/manager/pull/12603))
+- Restore the previous date value when Cancel is clicked ([#12611](https://github.com/linode/manager/pull/12611))
+- DatePicker: Error not shown if end date time is before start date time ([#12614](https://github.com/linode/manager/pull/12614))
+
+## [2025-07-29] - v0.17.0
+
+
+### Changed:
+
+- Textfield styles and color to match ADS ([#12496](https://github.com/linode/manager/pull/12496))
+- Add qa-ids to `DateTimeRangePicker.tsx` and `TimeZoneSelect.tsx` files, update `Presets.tsx` to calculate date according to selected timezone  ([#12497](https://github.com/linode/manager/pull/12497))
+- Use gap for TableSortLabel spacing of text and icons ([#12512](https://github.com/linode/manager/pull/12512))
+
+### Fixed:
+
+- `TextField` not respecting `inputProps.id` and `InputProps.id` ([#12502](https://github.com/linode/manager/pull/12502))
+
+
+## [2025-07-15] - v0.16.0
+
+
+### Added:
+
+- Add `null` as type option for `headingChip` ([#12460](https://github.com/linode/manager/pull/12460))
+
+### Changed:
+
+- TooltipIcon CDS standardization ([#12348](https://github.com/linode/manager/pull/12348))
+- Add `timeZoneProps` to control `timeZone dropdown` in DateTimeRangePicker.tsx ([#12423](https://github.com/linode/manager/pull/12423))
+- Notification banner stroke, width, error icon ([#12471](https://github.com/linode/manager/pull/12471))
+- Require `selected` prop in `ListItemOptionProps` type ([#12481](https://github.com/linode/manager/pull/12481))
+
 ## [2025-07-01] - v0.15.0
 
 

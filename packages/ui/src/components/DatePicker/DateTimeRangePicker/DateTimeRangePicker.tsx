@@ -15,7 +15,6 @@ import { TimePicker } from '../TimePicker';
 import { TimeZoneSelect } from '../TimeZoneSelect';
 
 import type { SxProps } from '@mui/material/styles';
-
 export interface DateTimeRangePickerProps {
   /** Properties for the end date field */
   endDateProps?: {
@@ -87,6 +86,18 @@ export interface DateTimeRangePickerProps {
   };
 }
 
+type TimeZoneStrategy = {
+  keepEndTime: boolean;
+  keepStartTime: boolean;
+};
+
+const strategies: Record<string, TimeZoneStrategy> = {
+  'last month': { keepStartTime: true, keepEndTime: true },
+  reset: { keepStartTime: true, keepEndTime: true },
+  'this month': { keepStartTime: true, keepEndTime: false },
+  default: { keepStartTime: false, keepEndTime: false },
+};
+
 export const DateTimeRangePicker = ({
   endDateProps,
   format,
@@ -100,7 +111,7 @@ export const DateTimeRangePicker = ({
     startDateProps?.value ?? null,
   );
   const [selectedPreset, setSelectedPreset] = useState<null | string>(
-    presetsProps?.defaultValue ?? null,
+    presetsProps?.defaultValue ?? 'reset',
   );
   const [endDate, setEndDate] = useState<DateTime | null>(
     endDateProps?.value ?? null,
@@ -120,6 +131,19 @@ export const DateTimeRangePicker = ({
   const startDateInputRef = useRef<HTMLInputElement | null>(null);
   const endDateInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Persist previous state values
+  const previousValues = useRef<{
+    endDate: DateTime | null;
+    selectedPreset: null | string;
+    startDate: DateTime | null;
+    timeZone: string;
+  }>({
+    endDate: endDateProps?.value ?? null,
+    startDate: startDateProps?.value ?? null,
+    selectedPreset: presetsProps?.defaultValue ?? null,
+    timeZone: timeZoneProps?.defaultValue ?? 'UTC', // fallback to a string
+  });
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -133,18 +157,44 @@ export const DateTimeRangePicker = ({
   };
 
   const handleClose = () => {
+    // Revert values
+    setStartDate(previousValues.current.startDate);
+    setEndDate(previousValues.current.endDate);
+    setTimeZone(previousValues.current.timeZone);
+    setSelectedPreset(previousValues.current.selectedPreset);
+
+    // Clear errors
+    setStartDateError('');
+    setEndDateError('');
     setOpen(false);
     setAnchorEl(null);
   };
 
   const handleApply = () => {
+    if (startDateError || endDateError) {
+      return;
+    }
+
     onApply?.({
       endDate: endDate ? endDate.toISO() : null,
       selectedPreset,
       startDate: startDate ? startDate.toISO() : null,
       timeZone,
     });
+
+    // Save current values
+    previousValues.current = {
+      startDate,
+      endDate,
+      timeZone,
+      selectedPreset,
+    };
+
     handleClose();
+  };
+
+  const getTimeZoneStrategy = (preset: null | string): TimeZoneStrategy => {
+    return strategies[preset ?? 'default'] || strategies.default;
   };
 
   const handleTimeZoneChange = (newTimeZone: string) => {
@@ -153,11 +203,14 @@ export const DateTimeRangePicker = ({
     }
     setTimeZone(newTimeZone);
 
+    const { keepEndTime, keepStartTime } = getTimeZoneStrategy(selectedPreset);
+
     setStartDate((prev) =>
-      prev ? prev.setZone(newTimeZone, { keepLocalTime: true }) : null,
+      prev ? prev.setZone(newTimeZone, { keepLocalTime: keepStartTime }) : null,
     );
+
     setEndDate((prev) =>
-      prev ? prev.setZone(newTimeZone, { keepLocalTime: true }) : null,
+      prev ? prev.setZone(newTimeZone, { keepLocalTime: keepEndTime }) : null,
     );
   };
 
@@ -167,9 +220,13 @@ export const DateTimeRangePicker = ({
   ) => {
     if (newStartDate && newEndDate && newStartDate > newEndDate) {
       setStartDateError(
-        'Start date must be earlier than or equal to end date.',
+        startDateProps?.errorMessage ??
+          'Start date must be earlier than or equal to end date.',
       );
-      setEndDateError('End date must be later than or equal to start date.');
+      setEndDateError(
+        endDateProps?.errorMessage ??
+          'End date must be later than or equal to start date.',
+      );
     } else {
       setStartDateError('');
       setEndDateError('');
@@ -256,7 +313,11 @@ export const DateTimeRangePicker = ({
           onClose={handleClose}
           open={open}
           role="dialog"
-          sx={{ boxShadow: 3, zIndex: 1300 }}
+          sx={(theme) => ({
+            boxShadow: 3,
+            zIndex: 1300,
+            mt: startDateError || endDateError ? theme.spacingFunction(24) : 0,
+          })}
           transformOrigin={{ horizontal: 'left', vertical: 'top' }}
         >
           <Box
@@ -271,6 +332,7 @@ export const DateTimeRangePicker = ({
               <Presets
                 onPresetSelect={handlePresetSelect}
                 selectedPreset={selectedPreset}
+                timeZone={timeZone}
               />
             )}
             <Box>
@@ -304,30 +366,34 @@ export const DateTimeRangePicker = ({
               >
                 <TimePicker
                   label="Start Time"
-                  onChange={(newTime) => {
+                  onChange={(newTime: DateTime | null) => {
                     if (newTime) {
-                      setStartDate(
-                        (prev) =>
+                      setStartDate((prev) => {
+                        const updatedValue =
                           prev?.set({
                             hour: newTime.hour,
                             minute: newTime.minute,
-                          }) ?? newTime,
-                      );
+                          }) ?? newTime;
+                        validateDates(updatedValue, endDate);
+                        return updatedValue;
+                      });
                     }
                   }}
                   value={startDate}
                 />
                 <TimePicker
                   label="End Time"
-                  onChange={(newTime) => {
+                  onChange={(newTime: DateTime | null) => {
                     if (newTime) {
-                      setEndDate(
-                        (prev) =>
+                      setEndDate((prev) => {
+                        const updatedValue =
                           prev?.set({
                             hour: newTime.hour,
                             minute: newTime.minute,
-                          }) ?? newTime,
-                      );
+                          }) ?? newTime;
+                        validateDates(startDate, updatedValue);
+                        return updatedValue;
+                      });
                     }
                   }}
                   value={endDate}
@@ -343,10 +409,14 @@ export const DateTimeRangePicker = ({
           </Box>
           <Divider spacingBottom={0} spacingTop={0} />
           <Box display="flex" gap={2} justifyContent="flex-end" padding={2}>
-            <Button buttonType="outlined" onClick={handleClose}>
+            <Button buttonType="outlined" data-qa-buttons onClick={handleClose}>
               Cancel
             </Button>
-            <Button buttonType="primary" onClick={handleApply}>
+            <Button
+              buttonType="primary"
+              data-qa-buttons="apply"
+              onClick={handleApply}
+            >
               Apply
             </Button>
           </Box>

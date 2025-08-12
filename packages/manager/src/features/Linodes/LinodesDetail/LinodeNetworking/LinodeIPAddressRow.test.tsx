@@ -4,18 +4,18 @@ import * as React from 'react';
 
 import { vpcIPFactory } from 'src/factories';
 import { PUBLIC_IP_ADDRESSES_CONFIG_INTERFACE_TOOLTIP_TEXT } from 'src/features/Linodes/constants';
-import {
-  createVPCIPv4Display,
-  ipResponseToDisplayRows,
-} from 'src/features/Linodes/LinodesDetail/LinodeNetworking/LinodeIPAddresses';
 import { renderWithTheme, wrapWithTableBody } from 'src/utilities/testHelpers';
 
 import { LinodeIPAddressRow } from './LinodeIPAddressRow';
+import { createVPCIPv4Display, ipResponseToDisplayRows } from './utils';
 
 import type { IPAddressRowHandlers } from './LinodeIPAddressRow';
 
 const ips = linodeIPFactory.build();
-const ipDisplay = ipResponseToDisplayRows(ips)[0];
+const ipDisplay = ipResponseToDisplayRows({
+  ipResponse: ips,
+  isLinodeInterface: false,
+})[0];
 const ipDisplayVPC = createVPCIPv4Display([vpcIPFactory.build()])[0];
 
 const handlers: IPAddressRowHandlers = {
@@ -130,8 +130,11 @@ describe('LinodeIPAddressRow', () => {
 describe('ipResponseToDisplayRows', () => {
   it('should not return a Public IPv4 row if there is a VPC interface with 1:1 NAT', () => {
     const ipDisplays = ipResponseToDisplayRows({
-      ...ips,
-      ipv4: { ...ips.ipv4, vpc: [vpcIPFactory.build()] },
+      ipResponse: {
+        ...ips,
+        ipv4: { ...ips.ipv4, vpc: [vpcIPFactory.build()] },
+      },
+      isLinodeInterface: false,
     });
 
     expect(

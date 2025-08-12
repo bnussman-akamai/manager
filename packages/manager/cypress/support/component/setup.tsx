@@ -29,7 +29,6 @@ import { LDProvider } from 'launchdarkly-react-client-sdk';
 import { SnackbarProvider } from 'notistack';
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 
 import { LinodeThemeWrapper } from 'src/LinodeThemeWrapper';
 import { storeFactory } from 'src/store';
@@ -48,7 +47,6 @@ export const mountWithTheme = (
   jsx: React.ReactNode,
   theme: ThemeName = 'light',
   flags: Partial<Flags> = {},
-  useTanstackRouter: boolean = false,
   routeTree?: (parentRoute: AnyRoute) => AnyRoute[]
 ) => {
   const queryClient = queryClientFactory();
@@ -80,13 +78,7 @@ export const mountWithTheme = (
             options={{ bootstrap: flags }}
           >
             <SnackbarProvider>
-              {useTanstackRouter ? (
-                <MemoryRouter>
-                  <RouterProvider router={router} />
-                </MemoryRouter>
-              ) : (
-                <MemoryRouter>{jsx}</MemoryRouter>
-              )}
+              <RouterProvider router={router} />
             </SnackbarProvider>
           </LDProvider>
         </LinodeThemeWrapper>

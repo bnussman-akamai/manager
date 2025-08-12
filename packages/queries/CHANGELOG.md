@@ -1,3 +1,30 @@
+## [2025-08-12] - v0.11.0
+
+
+### Upcoming Features:
+
+- Add GET queries for destinations endpoints ([#12559](https://github.com/linode/manager/pull/12559))
+
+## [2025-07-29] - v0.10.0
+
+
+### Changed:
+
+- Fetch all nodebalancers query to accept Params and Filter ([#12510](https://github.com/linode/manager/pull/12510))
+
+### Upcoming Features:
+
+- Add queries for streams endpoints (GET, POST) ([#12524](https://github.com/linode/manager/pull/12524))
+
+## [2025-07-15] - v0.9.0
+
+
+### Added:
+
+- `entitytransfers/` directory and migrated relevant query keys and hooks ([#12406](https://github.com/linode/manager/pull/12406))
+- Added `databases/` directory and migrated relevant query keys and hooks ([#12426](https://github.com/linode/manager/pull/12426))
+- `statusPage/` directory and migrated relevant query keys and hooks ([#12468](https://github.com/linode/manager/pull/12468))
+
 ## [2025-07-01] - v0.8.0
 
 

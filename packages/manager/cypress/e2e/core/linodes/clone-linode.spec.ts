@@ -59,7 +59,7 @@ import type { Event, Linode } from '@linode/api-v4';
 const getLinodeCloneUrl = (linode: Linode): string => {
   const regionQuery = `&regionID=${linode.region}`;
   const typeQuery = linode.type ? `&typeID=${linode.type}` : '';
-  return `/linodes/create?linodeID=${linode.id}${regionQuery}&type=Clone%20Linode${typeQuery}`;
+  return `/linodes/create/clone?linodeID=${linode.id}${regionQuery}${typeQuery}`;
 };
 
 authenticate();
@@ -136,7 +136,7 @@ describe('clone linode', () => {
       cy.wait('@cloneLinode').then((xhr) => {
         const newLinodeId = xhr.response?.body?.id;
         assert.equal(xhr.response?.statusCode, 200);
-        cy.url().should('endWith', `linodes/${newLinodeId}`);
+        cy.url().should('endWith', `linodes/${newLinodeId}/metrics`);
       });
 
       ui.toast.assertMessage(`Your Linode ${newLinodeLabel} is being created.`);
@@ -318,7 +318,7 @@ describe('clone linode', () => {
     cy.wait('@cloneLinode').then((xhr) => {
       const newLinodeId = xhr.response?.body?.id;
       assert.equal(xhr.response?.statusCode, 200);
-      cy.url().should('endWith', `linodes/${newLinodeId}`);
+      cy.url().should('endWith', `linodes/${newLinodeId}/metrics`);
     });
 
     cy.wait(['@getLinodeVolumes', '@getLinodeConfigs']);

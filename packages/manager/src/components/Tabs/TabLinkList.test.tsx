@@ -22,9 +22,8 @@ describe('TabLinkList', () => {
           <TabLinkList tabs={tabs} />
         </Tabs>,
         {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
+          initialRoute: '/tab-1',
+          initialEntries: ['/tab-1'],
         }
       )
     );
@@ -40,9 +39,8 @@ describe('TabLinkList', () => {
           <TabLinkList noLink tabs={tabs} />
         </Tabs>,
         {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
+          initialRoute: '/tab-1',
+          initialEntries: ['/tab-1'],
         }
       )
     );
@@ -60,9 +58,8 @@ describe('TabLinkList', () => {
           <TabLinkList tabs={tabs} />
         </Tabs>,
         {
-          MemoryRouter: {
-            initialEntries: [{ pathname: '/tab-1' }],
-          },
+          initialRoute: '/tab-1',
+          initialEntries: ['/tab-1'],
         }
       )
     );

@@ -20,11 +20,11 @@ vi.mock('@tanstack/react-router', async () => {
 
 const queryMocks = vi.hoisted(() => ({
   userPermissions: vi.fn(() => ({
-    permissions: {
+    data: {
       reboot_linode: false,
-      update_linode_config_profile: false,
+      update_linode: false,
       clone_linode: false,
-      delete_linode_config_profile: false,
+      delete_linode: false,
     },
   })),
   useNavigate: vi.fn(() => navigate),
@@ -90,11 +90,11 @@ describe('ConfigActionMenu', () => {
 
   it('should enable all actions menu if the user has permissions', async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
+      data: {
         reboot_linode: true,
-        update_linode_config_profile: true,
+        update_linode: true,
         clone_linode: true,
-        delete_linode_config_profile: true,
+        delete_linode: true,
       },
     });
 

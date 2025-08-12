@@ -12,13 +12,10 @@ import {
   Typography,
 } from '@linode/ui';
 import { reduceAsync, scrollErrorIntoViewV2 } from '@linode/utilities';
-import { useLocation as useLocationTanstack } from '@tanstack/react-router';
-import { update } from 'ramda';
+import { useLocation } from '@tanstack/react-router';
 import * as React from 'react';
 import type { JSX } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-// eslint-disable-next-line no-restricted-imports
-import { useLocation as useLocationRouterDom } from 'react-router-dom';
 import { debounce } from 'throttle-debounce';
 
 import { sendSupportTicketExitEvent } from 'src/utilities/analytics/customEventAnalytics';
@@ -28,6 +25,7 @@ import { storage, supportTicketStorageDefaults } from 'src/utilities/storage';
 import { AttachFileForm } from '../AttachFileForm';
 import { MarkdownReference } from '../SupportTicketDetail/TabbedReply/MarkdownReference';
 import { TabbedReply } from '../SupportTicketDetail/TabbedReply/TabbedReply';
+import { updateFileAtIndex } from '../ticketUtils';
 import {
   ENTITY_ID_TO_NAME_MAP,
   SCHEMA_MAP,
@@ -51,7 +49,6 @@ import type {
   TicketSeverity,
 } from '@linode/api-v4';
 import type { EntityForTicketDetails } from 'src/components/SupportLink/SupportLink';
-import type { SupportState } from 'src/routes/support';
 
 interface Accumulator {
   errors: AttachmentError[];
@@ -107,12 +104,23 @@ export interface SupportTicketDialogProps {
 
 export interface SupportTicketFormFields {
   description: string;
+  entity?: EntityForTicketDetails;
   entityId: string;
   entityInputValue: string;
   entityType: EntityType;
+  formPayloadValues?: FormPayloadValues;
   selectedSeverity: TicketSeverity | undefined;
   summary: string;
   ticketType: TicketType;
+  title?: string;
+}
+
+export interface SupportTicketLocationState {
+  description?: SupportTicketDialogProps['prefilledDescription'];
+  entity?: SupportTicketDialogProps['prefilledEntity'];
+  formPayloadValues?: SupportTicketFormFields['formPayloadValues'];
+  ticketType?: SupportTicketDialogProps['prefilledTicketType'];
+  title?: SupportTicketDialogProps['prefilledTitle'];
 }
 
 export const entitiesToItems = (type: string, entities: any) => {
@@ -140,23 +148,20 @@ export const SupportTicketDialog = (props: SupportTicketDialogProps) => {
     prefilledTitle,
   } = props;
 
-  const locationRouterDom = useLocationRouterDom<any>();
-  const locationTanstack = useLocationTanstack();
-  const locationTanstackState = locationTanstack.state as SupportState;
-  const stateParams =
-    locationRouterDom.state ?? locationTanstackState.supportTicketFormFields;
+  const location = useLocation();
+  const locationState = location.state as SupportTicketLocationState;
 
   // Collect prefilled data from props or Link parameters.
-  const _prefilledDescription: string =
-    prefilledDescription ?? stateParams?.description ?? undefined;
-  const _prefilledEntity: EntityForTicketDetails =
-    prefilledEntity ?? stateParams?.entity ?? undefined;
-  const _prefilledTitle: string =
-    prefilledTitle ?? stateParams?.title ?? undefined;
-  const prefilledFormPayloadValues: FormPayloadValues =
-    stateParams?.formPayloadValues ?? undefined;
-  const _prefilledTicketType: TicketType =
-    prefilledTicketType ?? stateParams?.ticketType ?? undefined;
+  const _prefilledDescription: string | undefined =
+    prefilledDescription ?? locationState?.description ?? undefined;
+  const _prefilledEntity: EntityForTicketDetails | undefined =
+    prefilledEntity ?? locationState?.entity ?? undefined;
+  const _prefilledTitle: string | undefined =
+    prefilledTitle ?? locationState?.title ?? undefined;
+  const prefilledFormPayloadValues: FormPayloadValues | undefined =
+    locationState?.formPayloadValues ?? undefined;
+  const _prefilledTicketType: TicketType | undefined =
+    prefilledTicketType ?? locationState?.ticketType ?? undefined;
 
   // Use the prefilled title if one is given, otherwise, use any default prefill titles by ticket type, if extant.
   const newPrefilledTitle = _prefilledTitle
@@ -283,12 +288,13 @@ export const SupportTicketDialog = (props: SupportTicketDialogProps) => {
     return uploadAttachment(attachment.ticketId, attachment.file)
       .then(() => {
         /* null out an uploaded file after upload */
-        setFiles((oldFiles: FileAttachment[]) =>
-          update(
-            idx,
-            { file: null, name: '', uploaded: true, uploading: false },
-            oldFiles
-          )
+        setFiles((oldFiles) =>
+          updateFileAtIndex(oldFiles, idx, {
+            file: null,
+            name: '',
+            uploaded: true,
+            uploading: false,
+          })
         );
         return accumulator;
       })
@@ -298,7 +304,9 @@ export const SupportTicketDialog = (props: SupportTicketDialogProps) => {
          * fail! Don't try to aggregate errors!
          */
         setFiles((oldFiles) =>
-          update(idx, { ...oldFiles[idx], uploading: false }, oldFiles)
+          updateFileAtIndex(oldFiles, idx, {
+            uploading: false,
+          })
         );
         const newError = getErrorStringOrDefault(
           attachmentErrors,
@@ -320,7 +328,9 @@ export const SupportTicketDialog = (props: SupportTicketDialogProps) => {
       .filter((file) => !file.uploaded)
       .map((file, idx) => {
         setFiles((oldFiles) =>
-          update(idx, { ...oldFiles[idx], uploading: true }, oldFiles)
+          updateFileAtIndex(oldFiles, idx, {
+            uploading: true,
+          })
         );
         const formData = new FormData();
         formData.append('file', file.file ?? ''); // Safety check for TS only

@@ -1,3 +1,24 @@
+## [2025-08-12] - v0.7.0
+
+
+### Changed:
+
+- Allow Linode Select options to be disabled on a per-option basis ([#12585](https://github.com/linode/manager/pull/12585))
+
+## [2025-07-29] - v0.6.0
+
+
+### Fixed:
+
+- `LinodeSelect` not filtering by the `optionsFilter` when `options` was passed as props ([#12529](https://github.com/linode/manager/pull/12529))
+
+## [2025-07-15] - v0.5.0
+
+
+### Upcoming Features:
+
+- Add `useIsLinodeAclpSubscribed` hook and unit tests ([#12479](https://github.com/linode/manager/pull/12479))
+
 ## [2025-07-01] - v0.4.0
 
 ### Tech Stories

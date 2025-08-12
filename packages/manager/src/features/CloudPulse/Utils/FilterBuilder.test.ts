@@ -4,7 +4,11 @@ import { DateTime } from 'luxon';
 import { dashboardFactory } from 'src/factories';
 
 import { RESOURCE_ID, RESOURCES } from './constants';
-import { deepEqual, getFilters, getPortProperties } from './FilterBuilder';
+import {
+  deepEqual,
+  getFilters,
+  getTextFilterProperties,
+} from './FilterBuilder';
 import {
   buildXFilter,
   checkIfAllMandatoryFiltersAreSelected,
@@ -22,13 +26,15 @@ import { CloudPulseSelectTypes } from './models';
 
 const mockDashboard = dashboardFactory.build();
 
-const linodeConfig = FILTER_CONFIG.get('linode');
+const linodeConfig = FILTER_CONFIG.get(2);
 
-const dbaasConfig = FILTER_CONFIG.get('dbaas');
+const dbaasConfig = FILTER_CONFIG.get(1);
 
-const nodeBalancerConfig = FILTER_CONFIG.get('nodebalancer');
+const nodeBalancerConfig = FILTER_CONFIG.get(3);
 
-const dbaasDashboard = dashboardFactory.build({ service_type: 'dbaas' });
+const firewallConfig = FILTER_CONFIG.get(4);
+
+const dbaasDashboard = dashboardFactory.build({ service_type: 'dbaas', id: 1 });
 
 it('test getRegionProperties method', () => {
   const regionConfig = linodeConfig?.filters.find(
@@ -95,7 +101,7 @@ it('test getResourceSelectionProperties method', () => {
     } = getResourcesProperties(
       {
         config: resourceSelectionConfig,
-        dashboard: mockDashboard,
+        dashboard: { ...mockDashboard, id: 2 },
         dependentFilters: { region: 'us-east' },
         isServiceAnalyticsIntegration: true,
       },
@@ -148,7 +154,7 @@ describe('shouldDisableFilterByFilterKey', () => {
     const result = shouldDisableFilterByFilterKey(
       'resource_id',
       { region: 'us-east' },
-      mockDashboard
+      { ...mockDashboard, id: 2 }
     );
     expect(result).toEqual(false);
   });
@@ -269,7 +275,7 @@ it('test checkIfAllMandatoryFiltersAreSelected method', () => {
   expect(resourceSelectionConfig).toBeDefined();
   const now = DateTime.now();
   let result = checkIfAllMandatoryFiltersAreSelected({
-    dashboard: mockDashboard,
+    dashboard: { ...mockDashboard, id: 2 },
     filterValue: { region: 'us-east', resource_id: ['1', '2'] },
     timeDuration: {
       end: now.toISO(),
@@ -364,7 +370,7 @@ it('test getCustomSelectProperties method', () => {
   }
 });
 
-it('test getPortFilterProperties method', () => {
+it('test getTextFilterProperties method for port', () => {
   const portFilterConfig = nodeBalancerConfig?.filters.find(
     (filterObj) => filterObj.name === 'Ports'
   );
@@ -372,17 +378,42 @@ it('test getPortFilterProperties method', () => {
   expect(portFilterConfig).toBeDefined();
 
   if (portFilterConfig) {
-    const { handlePortChange, label, savePreferences } = getPortProperties(
-      {
-        config: portFilterConfig,
-        dashboard: dashboardFactory.build({ service_type: 'nodebalancer' }),
-        isServiceAnalyticsIntegration: false,
-      },
-      vi.fn()
-    );
+    const { handleTextFilterChange, label, savePreferences } =
+      getTextFilterProperties(
+        {
+          config: portFilterConfig,
+          dashboard: dashboardFactory.build({ service_type: 'nodebalancer' }),
+          isServiceAnalyticsIntegration: false,
+        },
+        vi.fn()
+      );
 
-    expect(handlePortChange).toBeDefined();
+    expect(handleTextFilterChange).toBeDefined();
     expect(label).toEqual(portFilterConfig.configuration.name);
+    expect(savePreferences).toEqual(true);
+  }
+});
+
+it('test getTextFilterProperties method for interface_id', () => {
+  const interfaceIdFilterConfig = firewallConfig?.filters.find(
+    (filterObj) => filterObj.name === 'Interface IDs'
+  );
+
+  expect(interfaceIdFilterConfig).toBeDefined();
+
+  if (interfaceIdFilterConfig) {
+    const { handleTextFilterChange, label, savePreferences } =
+      getTextFilterProperties(
+        {
+          config: interfaceIdFilterConfig,
+          dashboard: dashboardFactory.build({ service_type: 'firewall' }),
+          isServiceAnalyticsIntegration: false,
+        },
+        vi.fn()
+      );
+
+    expect(handleTextFilterChange).toBeDefined();
+    expect(label).toEqual(interfaceIdFilterConfig.configuration.name);
     expect(savePreferences).toEqual(true);
   }
 });
@@ -392,7 +423,7 @@ it('test getFiltersForMetricsCallFromCustomSelect method', () => {
     {
       resource_id: [1, 2, 3],
     },
-    'linode'
+    2
   );
 
   expect(result).toBeDefined();
@@ -405,7 +436,7 @@ it('test constructAdditionalRequestFilters method', () => {
       {
         resource_id: [1, 2, 3],
       },
-      'linode'
+      2
     )
   );
 
@@ -466,10 +497,7 @@ it('returns false for different arrays', () => {
 });
 
 it('should return the filters based on dashboard', () => {
-  const filters = getFilters(
-    dashboardFactory.build({ service_type: 'dbaas' }),
-    true
-  );
+  const filters = getFilters(dashboardFactory.build({ id: 1 }), true);
 
   expect(filters?.length).toBe(1);
 });

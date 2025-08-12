@@ -5,7 +5,7 @@ const fieldErrorMessage = 'This field is required.';
 export const dimensionFilters = object({
   dimension_label: string().required(fieldErrorMessage),
   operator: string()
-    .oneOf(['eq', 'neq', 'startswith', 'endswith'])
+    .oneOf(['eq', 'neq', 'startswith', 'endswith', 'in'])
     .required(fieldErrorMessage),
   value: string().required(fieldErrorMessage),
 });
@@ -78,10 +78,7 @@ export const createAlertDefinitionSchema = object({
   tags: array().of(string().defined()).optional(),
   entity_ids: array().of(string().defined()).optional(),
   regions: array().of(string().defined()).optional(),
-  scope: string()
-    .oneOf(['entity', 'region', 'account'])
-    .defined()
-    .required(fieldErrorMessage),
+  scope: string().oneOf(['entity', 'region', 'account']).nullable().optional(),
 });
 
 export const editAlertDefinitionSchema = object({
@@ -125,6 +122,6 @@ export const editAlertDefinitionSchema = object({
   status: string()
     .oneOf(['enabled', 'disabled', 'in progress', 'failed'])
     .optional(),
-  scope: string().oneOf(['entity', 'region', 'account']).required(),
+  scope: string().oneOf(['entity', 'region', 'account']).nullable().optional(),
   regions: array().of(string().defined()).optional(),
 });

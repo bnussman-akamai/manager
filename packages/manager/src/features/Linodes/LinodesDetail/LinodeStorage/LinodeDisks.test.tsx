@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 
 import { linodeDiskFactory } from 'src/factories';
-import { renderWithThemeAndRouter } from 'src/utilities/testHelpers';
+import { renderWithTheme } from 'src/utilities/testHelpers';
 
 import { LinodeDisks } from './LinodeDisks';
 
@@ -28,7 +28,7 @@ vi.mock('@linode/queries', async () => {
 
 const queryMocks = vi.hoisted(() => ({
   userPermissions: vi.fn(() => ({
-    permissions: {
+    data: {
       create_linode_disk: false,
     },
   })),
@@ -73,9 +73,7 @@ describe('LinodeDisks', () => {
       error: null,
     });
 
-    const { findByText, getByText } = await renderWithThemeAndRouter(
-      <LinodeDisks />
-    );
+    const { findByText, getByText } = renderWithTheme(<LinodeDisks />);
 
     // Verify heading renders
     expect(getByText('Disks')).toBeVisible();
@@ -87,7 +85,7 @@ describe('LinodeDisks', () => {
   });
 
   it('should disable "add a disk" button if the user does not have a create_linode_disk permissions and has free disk space', async () => {
-    renderWithThemeAndRouter(<LinodeDisks />);
+    renderWithTheme(<LinodeDisks />);
 
     const addDiskBtn = screen.getByText('Add a Disk');
     expect(addDiskBtn).toHaveAttribute('aria-disabled', 'true');
@@ -95,12 +93,12 @@ describe('LinodeDisks', () => {
 
   it('should enable "add a disk" button if the user has a create_linode_disk permissions and has free disk space', async () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
+      data: {
         create_linode_disk: true,
       },
     });
 
-    renderWithThemeAndRouter(<LinodeDisks />);
+    renderWithTheme(<LinodeDisks />);
 
     const addDiskBtn = screen.getByText('Add a Disk');
     expect(addDiskBtn).not.toHaveAttribute('aria-disabled', 'true');
@@ -108,7 +106,7 @@ describe('LinodeDisks', () => {
 
   it('should disable the "Add a Disk" button when there is no free disk space', () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
+      data: {
         create_linode_disk: true,
       },
     });
@@ -119,7 +117,7 @@ describe('LinodeDisks', () => {
       error: null,
     });
 
-    renderWithThemeAndRouter(<LinodeDisks />);
+    renderWithTheme(<LinodeDisks />);
 
     const addDiskBtn = screen.getByText('Add a Disk');
     expect(addDiskBtn).toHaveAttribute('aria-disabled', 'true');
@@ -127,7 +125,7 @@ describe('LinodeDisks', () => {
 
   it('should enable the "Add a Disk" button when there is free disk space', () => {
     queryMocks.userPermissions.mockReturnValue({
-      permissions: {
+      data: {
         create_linode_disk: true,
       },
     });
@@ -138,7 +136,7 @@ describe('LinodeDisks', () => {
       error: null,
     });
 
-    renderWithThemeAndRouter(<LinodeDisks />);
+    renderWithTheme(<LinodeDisks />);
 
     const addDiskBtn = screen.getByText('Add a Disk');
     expect(addDiskBtn).not.toHaveAttribute('aria-disabled', 'true');

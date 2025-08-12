@@ -10,6 +10,7 @@ import NullComponent from 'src/components/NullComponent';
 import RenderComponent from '../shared/CloudPulseComponentRenderer';
 import {
   DASHBOARD_ID,
+  INTERFACE_ID,
   NODE_TYPE,
   PORT,
   REGION,
@@ -21,10 +22,10 @@ import {
   getCustomSelectProperties,
   getFilters,
   getNodeTypeProperties,
-  getPortProperties,
   getRegionProperties,
   getResourcesProperties,
   getTagsProperties,
+  getTextFilterProperties,
 } from '../Utils/FilterBuilder';
 import { FILTER_CONFIG } from '../Utils/FilterConfig';
 import { type CloudPulseServiceTypeFilters } from '../Utils/models';
@@ -96,7 +97,7 @@ export const CloudPulseDashboardFilterBuilder = React.memo(
     const checkAndUpdateDependentFilters = React.useCallback(
       (filterKey: string, value: FilterValueType) => {
         if (dashboard && dashboard.service_type) {
-          const serviceTypeConfig = FILTER_CONFIG.get(dashboard.service_type);
+          const serviceTypeConfig = FILTER_CONFIG.get(dashboard.id);
           const filters = serviceTypeConfig?.filters ?? [];
 
           for (const filter of filters) {
@@ -137,19 +138,24 @@ export const CloudPulseDashboardFilterBuilder = React.memo(
       [emitFilterChange, checkAndUpdateDependentFilters]
     );
 
-    const handlePortChange = React.useCallback(
-      (port: string, label: string[], savePref: boolean = false) => {
+    const handleTextFilterChange = React.useCallback(
+      (
+        port: string,
+        label: string[],
+        filterKey: string,
+        savePref: boolean = false
+      ) => {
         const portList = port
           .replace(/,$/, '')
           .split(',')
           .filter((p) => p !== '');
         emitFilterChangeByFilterKey(
-          PORT,
+          filterKey,
           portList,
           label.filter((l) => l !== ''),
           savePref,
           {
-            [PORT]: port,
+            [filterKey]: port,
           }
         );
       },
@@ -298,8 +304,11 @@ export const CloudPulseDashboardFilterBuilder = React.memo(
             },
             handleNodeTypeChange
           );
-        } else if (config.configuration.filterKey === PORT) {
-          return getPortProperties(
+        } else if (
+          config.configuration.filterKey === PORT ||
+          config.configuration.filterKey === INTERFACE_ID
+        ) {
+          return getTextFilterProperties(
             {
               config,
               dashboard,
@@ -309,7 +318,7 @@ export const CloudPulseDashboardFilterBuilder = React.memo(
                 ? { [RESOURCE_ID]: resource_ids }
                 : dependentFilterReference.current,
             },
-            handlePortChange
+            handleTextFilterChange
           );
         } else {
           return getCustomSelectProperties(
@@ -331,7 +340,7 @@ export const CloudPulseDashboardFilterBuilder = React.memo(
         handleNodeTypeChange,
         handleTagsChange,
         handleRegionChange,
-        handlePortChange,
+        handleTextFilterChange,
         handleResourceChange,
         handleCustomSelectChange,
         isServiceAnalyticsIntegration,
@@ -381,7 +390,7 @@ export const CloudPulseDashboardFilterBuilder = React.memo(
     if (
       !dashboard ||
       !dashboard.service_type ||
-      !FILTER_CONFIG.has(dashboard.service_type)
+      !FILTER_CONFIG.has(dashboard.id)
     ) {
       return <NullComponent />; // in this we don't want to show the filters at all
     }

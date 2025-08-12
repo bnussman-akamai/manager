@@ -30,7 +30,7 @@ const statusTextMap: Record<AccountMaintenance['status'], string> = {
   pending: 'Pending',
   started: 'In Progress',
   canceled: 'Canceled',
-  'in-progress': 'In Progress',
+  in_progress: 'In Progress',
   scheduled: 'Scheduled',
 };
 
@@ -39,7 +39,7 @@ const statusIconMap: Record<AccountMaintenance['status'], Status> = {
   pending: 'active',
   started: 'other',
   canceled: 'inactive',
-  'in-progress': 'other',
+  in_progress: 'other',
   scheduled: 'active',
 };
 
@@ -98,7 +98,6 @@ export const MaintenanceTableRow = (props: MaintenanceTableRowProps) => {
           </Stack>
         ) : (
           <Link
-            tabIndex={0}
             to={
               entity.type === 'linode'
                 ? `/${entity.type}s/${entity.id}`
@@ -115,12 +114,12 @@ export const MaintenanceTableRow = (props: MaintenanceTableRowProps) => {
           {(tableType === 'upcoming' || tableType === 'completed') && (
             <Hidden mdDown>
               <TableCell data-testid="relative-date">
-                {parseAPIDate(when).toRelative()}
+                {when ? parseAPIDate(when).toRelative() : '—'}
               </TableCell>
             </Hidden>
           )}
           <TableCell noWrap>
-            {dateValue
+            {dateValue && typeof dateValue === 'string'
               ? formatDate(dateValue, { timezone: profile?.timezone })
               : '—'}
           </TableCell>
@@ -130,13 +129,15 @@ export const MaintenanceTableRow = (props: MaintenanceTableRowProps) => {
       {!flags.vmHostMaintenance?.enabled && (
         <>
           <TableCell noWrap>
-            {formatDate(when, {
-              timezone: profile?.timezone,
-            })}
+            {when
+              ? formatDate(when, {
+                  timezone: profile?.timezone,
+                })
+              : '—'}
           </TableCell>
           <Hidden mdDown>
             <TableCell data-testid="relative-date">
-              {parseAPIDate(when).toRelative()}
+              {when ? parseAPIDate(when).toRelative() : '—'}
             </TableCell>
           </Hidden>
         </>
@@ -155,14 +156,18 @@ export const MaintenanceTableRow = (props: MaintenanceTableRowProps) => {
       )}
       <Hidden lgDown>
         <TableCell>
-          {isTruncated ? (
-            <Tooltip title={<Markdown textOrMarkdown={reason} />}>
-              <div>
-                <Markdown textOrMarkdown={truncatedReason} />
-              </div>
-            </Tooltip>
+          {reason ? (
+            isTruncated ? (
+              <Tooltip title={<Markdown textOrMarkdown={reason} />}>
+                <div>
+                  <Markdown textOrMarkdown={truncatedReason} />
+                </div>
+              </Tooltip>
+            ) : (
+              <Markdown textOrMarkdown={truncatedReason} />
+            )
           ) : (
-            <Markdown textOrMarkdown={truncatedReason} />
+            '—'
           )}
         </TableCell>
       </Hidden>

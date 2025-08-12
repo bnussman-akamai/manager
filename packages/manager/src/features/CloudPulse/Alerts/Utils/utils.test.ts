@@ -1,3 +1,4 @@
+import { regionFactory } from '@linode/utilities';
 import { act, renderHook } from '@testing-library/react';
 
 import { alertFactory, serviceTypesFactory } from 'src/factories';
@@ -9,7 +10,8 @@ import {
   convertAlertsToTypeSet,
   convertSecondsToMinutes,
   convertSecondsToOptions,
-  filterAlertsByStatusAndType,
+  filterAlerts,
+  filterRegionByServiceType,
   getSchemaWithEntityIdValidation,
   getServiceTypeLabel,
   handleMultipleError,
@@ -31,8 +33,6 @@ it('test getServiceTypeLabel method', () => {
       service.label
     );
   });
-  expect(getServiceTypeLabel('test', { data: services })).toBe('test');
-  expect(getServiceTypeLabel('', { data: services })).toBe('');
 });
 it('test convertSecondsToMinutes method', () => {
   expect(convertSecondsToMinutes(0)).toBe('0 minutes');
@@ -50,13 +50,32 @@ it('test convertSecondsToOptions method', () => {
   expect(convertSecondsToOptions(900)).toEqual('15 min');
 });
 
-it('test filterAlertsByStatusAndType method', () => {
-  const alerts = alertFactory.buildList(12, { created_by: 'system' });
-  expect(filterAlertsByStatusAndType(alerts, '', 'system')).toHaveLength(12);
-  expect(filterAlertsByStatusAndType(alerts, '', 'user')).toHaveLength(0);
-  expect(filterAlertsByStatusAndType(alerts, 'Alert-1', 'system')).toHaveLength(
-    4
-  );
+it('test filterAlerts method', () => {
+  const alerts = [
+    ...alertFactory.buildList(12, { created_by: 'system' }),
+    alertFactory.build({
+      label: 'Alert-14',
+      scope: 'region',
+      regions: ['us-east'],
+    }),
+  ];
+  expect(
+    filterAlerts({ alerts, searchText: '', selectedType: 'system' })
+  ).toHaveLength(12);
+  expect(
+    filterAlerts({ alerts, searchText: '', selectedType: 'user' })
+  ).toHaveLength(0);
+  expect(
+    filterAlerts({ alerts, searchText: 'Alert-1', selectedType: 'system' })
+  ).toHaveLength(4);
+  expect(
+    filterAlerts({
+      alerts,
+      searchText: '',
+      selectedType: 'system',
+      regionId: 'us-east',
+    })
+  ).toHaveLength(13);
 });
 
 it('test convertAlertsToTypeSet method', () => {
@@ -118,7 +137,7 @@ describe('getSchemaWithEntityIdValidation', () => {
   it('should return baseSchema if maxSelectionCount is undefined', () => {
     const schema = getSchemaWithEntityIdValidation({
       ...props,
-      serviceTypeObj: 'unknown',
+      serviceTypeObj: 'firewall',
     });
     expect(schema).toBe(baseSchema);
   });
@@ -213,6 +232,13 @@ describe('getSchemaWithEntityIdValidation', () => {
         'Must be one of avg, sum, min, max, count and no full stop.|Must have at least one rule.|Invalid value.',
     });
   });
+
+  it('test convert secondsToOptions method', () => {
+    expect(convertSecondsToOptions(300)).toEqual('5 min');
+    expect(convertSecondsToOptions(60)).toEqual('1 min');
+    expect(convertSecondsToOptions(3600)).toEqual('1 hr');
+    expect(convertSecondsToOptions(900)).toEqual('15 min');
+  });
 });
 
 describe('useContextualAlertsState', () => {
@@ -282,5 +308,115 @@ describe('useContextualAlertsState', () => {
     });
 
     expect(result.current.hasUnsavedChanges).toBe(true);
+  });
+});
+
+describe('filterRegionByServiceType', () => {
+  const regions = [
+    regionFactory.build({
+      monitors: {
+        alerts: ['Linodes'],
+        metrics: ['Managed Databases'],
+      },
+    }),
+    ...regionFactory.buildList(3, {
+      monitors: {
+        metrics: [],
+        alerts: [],
+      },
+    }),
+    ...regionFactory.buildList(3, {
+      monitors: {
+        alerts: ['Linodes', 'Managed Databases'],
+        metrics: [],
+      },
+    }),
+    regionFactory.build({
+      monitors: undefined,
+    }),
+  ];
+
+  it('should return empty list for linode metrics', () => {
+    const result = filterRegionByServiceType('metrics', regions, 'linode');
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should return 4 regions for linode alerts', () => {
+    expect(filterRegionByServiceType('alerts', regions, 'linode')).toHaveLength(
+      4
+    );
+  });
+
+  it('should return 1 region for dbaas metrics', () => {
+    expect(filterRegionByServiceType('metrics', regions, 'dbaas')).toHaveLength(
+      1
+    );
+  });
+
+  it('should return 3 regions for dbaas alerts', () => {
+    expect(filterRegionByServiceType('alerts', regions, 'dbaas')).toHaveLength(
+      3
+    );
+  });
+
+  it('should return no regions for nodebalancer service type', () => {
+    const result = filterRegionByServiceType('alerts', regions, 'nodebalancer');
+
+    expect(result).toHaveLength(0);
+  });
+});
+
+describe('filterRegionByServiceType', () => {
+  const regions = [
+    regionFactory.build({
+      monitors: {
+        alerts: ['Linodes'],
+        metrics: ['Managed Databases'],
+      },
+    }),
+    ...regionFactory.buildList(3, {
+      monitors: {
+        metrics: [],
+        alerts: [],
+      },
+    }),
+    ...regionFactory.buildList(3, {
+      monitors: {
+        alerts: ['Linodes', 'Managed Databases'],
+        metrics: [],
+      },
+    }),
+    regionFactory.build(),
+  ];
+
+  it('should return empty list for linode metrics', () => {
+    const result = filterRegionByServiceType('metrics', regions, 'linode');
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should return 4 regions for linode alerts', () => {
+    expect(filterRegionByServiceType('alerts', regions, 'linode')).toHaveLength(
+      4
+    );
+  });
+
+  it('should return 1 region for dbaas metrics', () => {
+    expect(filterRegionByServiceType('metrics', regions, 'dbaas')).toHaveLength(
+      1
+    );
+  });
+
+  it('should return 3 regions for dbaas alerts', () => {
+    expect(filterRegionByServiceType('alerts', regions, 'dbaas')).toHaveLength(
+      3
+    );
+  });
+
+  it('should return no regions for firewall service type', () => {
+    const result = filterRegionByServiceType('alerts', regions, 'firewall');
+
+    expect(result).toHaveLength(0);
   });
 });

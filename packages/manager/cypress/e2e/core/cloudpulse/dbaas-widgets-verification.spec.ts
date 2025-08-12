@@ -63,27 +63,18 @@ const flags: Partial<Flags> = {
       dimensionKey: 'LINODE_ID',
       maxResourceSelections: 10,
       serviceType: 'linode',
-      supportedRegionIds: '',
     },
     {
       dimensionKey: 'cluster_id',
       maxResourceSelections: 10,
       serviceType: 'dbaas',
-      supportedRegionIds: 'us-ord',
     },
   ],
 };
 
-const {
-  clusterName,
-  dashboardName,
-  engine,
-  id,
-  metrics,
-  nodeType,
-  serviceType,
-} = widgetDetails.dbaas;
-
+const { clusterName, dashboardName, engine, id, metrics, nodeType } =
+  widgetDetails.dbaas;
+const serviceType = 'dbaas';
 const dashboard = dashboardFactory.build({
   label: dashboardName,
   service_type: serviceType,
@@ -123,6 +114,10 @@ const mockRegion = regionFactory.build({
   capabilities: ['Managed Databases'],
   id: 'us-ord',
   label: 'Chicago, IL',
+  monitors: {
+    metrics: ['Managed Databases'],
+    alerts: [],
+  },
 });
 
 const extendedMockRegion = regionFactory.build({
@@ -243,16 +238,17 @@ describe('Integration Tests for DBaaS Dashboard ', () => {
       .click();
 
     // Select a time duration from the autocomplete input.
-    ui.autocomplete
-      .findByLabel('Time Range')
-      .should('be.visible')
-      .type(timeDurationToSelect);
+    cy.get('[aria-labelledby="start-date"]').as('startDateInput');
+    cy.get('@startDateInput').click();
+    cy.get('@startDateInput').clear();
 
-    ui.autocompletePopper
-      .findByTitle(timeDurationToSelect)
+    ui.button.findByTitle('last day').click();
+
+    // Click the "Apply" button to confirm the end date and time
+    cy.get('[data-qa-buttons="apply"]')
       .should('be.visible')
+      .should('be.enabled')
       .click();
-
     // Select a Database Engine from the autocomplete input.
     ui.autocomplete
       .findByLabel('Database Engine')
@@ -476,8 +472,8 @@ describe('Integration Tests for DBaaS Dashboard ', () => {
           );
         }
         expect(metric[0].name).to.equal(metricData.name);
-        expect(timeRange).to.have.property('unit', 'hr');
-        expect(timeRange).to.have.property('value', 24);
+        expect(timeRange).to.have.property('unit', 'days');
+        expect(timeRange).to.have.property('value', 1);
       });
   });
 

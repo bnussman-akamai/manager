@@ -141,9 +141,9 @@ describe('DateTimeRangePicker', () => {
       const endTimeField = screen.getByLabelText(/End Time/i);
 
       await userEvent.type(startTimeField, '2:00 AM');
-      await userEvent.type(endTimeField, '4:00 PM');
+      await fireEvent.change(endTimeField, { target: { value: '04:00 PM' } });
 
-      expect(startTimeField).toHaveValue('02:00 AM');
+      expect(startTimeField).toHaveValue('2:00 PM');
       expect(endTimeField).toHaveValue('04:00 PM');
     });
 
@@ -161,7 +161,7 @@ describe('DateTimeRangePicker', () => {
       const startTimeField = screen.getByLabelText(/Start Time/i);
 
       await userEvent.type(startTimeField, '12:00 AM');
-      expect(startTimeField).toHaveValue('12:00 AM');
+      expect(startTimeField).toHaveValue('1:00 PM');
 
       const inputElement = screen.getByRole('combobox', { name: 'Timezone' });
       fireEvent.focus(inputElement);
@@ -173,7 +173,39 @@ describe('DateTimeRangePicker', () => {
       await userEvent.click(optionElement);
 
       // Ensure the local time remains the same, but the timezone changes
-      expect(startTimeField).toHaveValue('12:00 AM');
+      expect(startTimeField).toHaveValue('1:00 PM');
+    });
+
+    it('should restore the previous Start Date value when Cancel is clicked after selecting a new date', async () => {
+      renderWithTheme(<DateTimeRangePicker {...defaultProps} />);
+
+      const defaultDateValue = mockDate?.toFormat('yyyy-MM-dd hh:mm a');
+
+      const startDateField = screen.getByRole('textbox', {
+        name: 'Start Date',
+      });
+
+      // Assert initial displayed value
+      expect(startDateField).toHaveDisplayValue(defaultDateValue);
+
+      // Open popover
+      await userEvent.click(startDateField);
+      expect(screen.getByRole('dialog')).toBeVisible();
+
+      // Select preset value
+      const preset = screen.getByRole('button', {
+        name: 'last 7 days',
+      });
+      await userEvent.click(preset);
+
+      // Date should now be updated in the field
+      expect(startDateField).not.toHaveDisplayValue(defaultDateValue);
+
+      // Click Cancel
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      // Expect field to reset to previous value
+      expect(startDateField).toHaveDisplayValue(defaultDateValue);
     });
   });
 });

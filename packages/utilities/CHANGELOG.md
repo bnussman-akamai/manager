@@ -1,3 +1,25 @@
+## [2025-08-12] - v0.7.0
+
+
+### Removed:
+
+- IPAM address from `linodeConfigInterfaceFactoryWithVPC` ([#12574](https://github.com/linode/manager/pull/12574))
+
+### Upcoming Features:
+
+- Update linodeConfigInterfaceFactoryWithVPC and linodeInterfaceFactoryVPC with IPv6 data ([#12305](https://github.com/linode/manager/pull/12305))
+
+## [2025-07-29] - v0.6.0
+
+
+### Removed:
+
+- `isAclpSupportedRegion` helper method ([#12517](https://github.com/linode/manager/pull/12517))
+
+### Upcoming Features:
+
+- Add IPv6 Subnet support ([#12382](https://github.com/linode/manager/pull/12382))
+
 ## [2025-07-01] - v0.5.0
 
 
