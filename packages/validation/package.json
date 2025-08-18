@@ -7,14 +7,17 @@
   "module": "lib/index.js",
   "exports": {
     ".": {
+      "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
       "require": "./lib/index.cjs"
     },
     "./lib": {
+      "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
       "require": "./lib/index.cjs"
     },
     "./lib/*": {
+      "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
       "require": "./lib/index.cjs"
     }
@@ -26,8 +29,8 @@
     "lib"
   ],
   "scripts": {
-    "start": "concurrently --raw \"tsc -w --preserveWatchOutput\" \"tsup --watch\"",
-    "build": "concurrently --raw \"tsc\" \"tsup\"",
+    "start": "tsdown --watch",
+    "build": "tsdown",
     "lint": "eslint . --quiet --ext .js,.ts,.tsx",
     "typecheck": "tsc --noEmit true --emitDeclarationOnly false"
   },
@@ -43,7 +46,7 @@
   "devDependencies": {
     "@linode/tsconfig": "workspace:*",
     "concurrently": "^9.0.1",
-    "tsup": "^8.4.0"
+    "tsdown": "^0.14.1"
   },
   "keywords": [
     "linode",
