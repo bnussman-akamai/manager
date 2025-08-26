@@ -25,9 +25,7 @@ export const linodesCreateTypesMap = new Map<
 
 export const linodesCreateTypes = Array.from(linodesCreateTypesMap.keys());
 
-export const useGetLinodeCreateType = () => {
-  const { pathname } = useLocation() as { pathname: LinkProps['to'] };
-
+export function getLinodeCreateType(pathname: string | undefined) {
   switch (pathname) {
     case '/linodes/create/backups':
       return 'Backups';
@@ -44,4 +42,9 @@ export const useGetLinodeCreateType = () => {
     default:
       return 'OS';
   }
+}
+
+export const useGetLinodeCreateType = () => {
+  const { pathname } = useLocation() as { pathname: LinkProps['to'] };
+  return getLinodeCreateType(pathname);
 };
