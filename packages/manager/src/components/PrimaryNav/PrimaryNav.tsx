@@ -421,6 +421,7 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    isFetched,
     location.pathname,
     location.search,
     productFamilyLinkGroups,
