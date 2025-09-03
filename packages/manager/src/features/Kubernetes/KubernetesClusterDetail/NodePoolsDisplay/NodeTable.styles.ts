@@ -12,6 +12,7 @@ export const NodePoolTableFooter = styled(Box, {
   rowGap: theme.spacingFunction(8),
   paddingTop: theme.spacingFunction(8),
   paddingButtom: theme.spacingFunction(8),
+  flexWrap: 'wrap',
   [theme.breakpoints.down('md')]: {
     alignItems: 'unset',
     flexDirection: 'column',

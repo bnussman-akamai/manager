@@ -66,54 +66,51 @@ export const NodePoolFooter = (props: Props) => {
 
   return (
     <NodePoolTableFooter>
-      <Stack direction="column" width="100%">
-        <Stack
-          alignItems="center"
-          columnGap={{ sm: 2, xs: 1.5 }}
-          direction="row"
-          divider={
-            <Divider flexItem orientation="vertical" sx={{ height: '20px' }} />
-          }
-          flexWrap={{ sm: 'unset', xs: 'wrap' }}
-          rowGap={1}
-        >
+      <Stack
+        alignItems="center"
+        columnGap={{ sm: 2, xs: 1.5 }}
+        direction="row"
+        divider={<Divider orientation="vertical" sx={{ height: '20px' }} />}
+        flexWrap="wrap"
+        rowGap={1}
+        maxWidth="100%"
+      >
+        <Typography sx={{ textWrap: 'nowrap' }}>
+          <b>Pool ID:</b> <CopyTooltip copyableText text={String(poolId)} />
+        </Typography>
+        {clusterTier === 'enterprise' && poolVersion && (
           <Typography sx={{ textWrap: 'nowrap' }}>
-            <b>Pool ID:</b> <CopyTooltip copyableText text={String(poolId)} />
+            <b>Version:</b> {poolVersion}
           </Typography>
-          {clusterTier === 'enterprise' && poolVersion && (
-            <Typography sx={{ textWrap: 'nowrap' }}>
-              <b>Version:</b> {poolVersion}
+        )}
+        {clusterTier === 'enterprise' &&
+          poolFirewallId &&
+          poolFirewallId > 0 && ( // This check handles the current API behavior for a default firewall (0). TODO: remove this once LKE-7686 is fixed.
+            <Typography>
+              <b>Firewall:</b>{' '}
+              <Link to={`/firewalls/${poolFirewallId}/rules`}>
+                {firewall?.label ?? poolFirewallId}
+              </Link>{' '}
+              {firewall?.label && (
+                <span>
+                  (ID:{' '}
+                  <CopyTooltip copyableText text={String(poolFirewallId)} />)
+                </span>
+              )}
             </Typography>
           )}
-          {clusterTier === 'enterprise' &&
-            poolFirewallId &&
-            poolFirewallId > 0 && ( // This check handles the current API behavior for a default firewall (0). TODO: remove this once LKE-7686 is fixed.
-              <Typography>
-                <b>Firewall:</b>{' '}
-                <Link to={`/firewalls/${poolFirewallId}/rules`}>
-                  {firewall?.label ?? poolFirewallId}
-                </Link>{' '}
-                {firewall?.label && (
-                  <span>
-                    (ID:{' '}
-                    <CopyTooltip copyableText text={String(poolFirewallId)} />)
-                  </span>
-                )}
-              </Typography>
-            )}
-          {isDiskEncryptionFeatureEnabled && (
-            <NodePoolEncryptionStatus encryptionStatus={encryptionStatus} />
-          )}
-        </Stack>
-        <TagCell
-          disabled={isLkeClusterRestricted}
-          entity="Node Pool"
-          sx={{ justifyContent: 'flex-end' }}
-          tags={tags}
-          updateTags={updateTags}
-          view="inline"
-        />
+        {isDiskEncryptionFeatureEnabled && (
+          <NodePoolEncryptionStatus encryptionStatus={encryptionStatus} />
+        )}
       </Stack>
+      <TagCell
+        disabled={isLkeClusterRestricted}
+        entity="Node Pool"
+        sx={{ flex: 1, minWidth: '200px', maxWidth: "100%" }}
+        tags={tags}
+        updateTags={updateTags}
+        view="inline"
+      />
     </NodePoolTableFooter>
   );
 };
