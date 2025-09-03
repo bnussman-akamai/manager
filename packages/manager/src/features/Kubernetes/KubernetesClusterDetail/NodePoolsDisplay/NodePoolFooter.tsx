@@ -74,7 +74,8 @@ export const NodePoolFooter = (props: Props) => {
           divider={
             <Divider flexItem orientation="vertical" sx={{ height: '20px' }} />
           }
-          flexWrap={{ sm: 'unset', xs: 'wrap' }}
+          flexWrap="wrap"
+          maxWidth="100%"
           rowGap={1}
         >
           <Typography sx={{ textWrap: 'nowrap' }}>
@@ -108,6 +109,7 @@ export const NodePoolFooter = (props: Props) => {
       </Box>
       <TagCell
         disabled={isLkeClusterRestricted}
+        sx={{ flex: 1, minWidth: '200px', maxWidth: "100%" }}
         tags={tags}
         updateTags={updateTags}
         view="inline"
