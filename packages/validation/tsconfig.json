@@ -1,9 +1,5 @@
 {
   "extends": ["@linode/tsconfig/package"],
-  "compilerOptions": {
-    "outDir": "./lib",
-    "baseUrl": ".",
-  },
   "include": [
     "src"
   ]

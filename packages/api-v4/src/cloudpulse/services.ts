@@ -1,5 +1,4 @@
-import { BETA_API_ROOT as API_ROOT } from 'src/constants';
-
+import { BETA_API_ROOT as API_ROOT } from '../constants';
 import Request, {
   setData,
   setMethod,
@@ -8,6 +7,7 @@ import Request, {
   setXFilter,
 } from '../request';
 
+import type { Filter, Params, ResourcePage } from '../types';
 import type {
   JWEToken,
   JWETokenPayLoad,
@@ -15,7 +15,6 @@ import type {
   Service,
   ServiceTypesList,
 } from './types';
-import type { Filter, Params, ResourcePage } from 'src/types';
 
 export const getMetricDefinitionsByServiceType = (
   serviceType: string,
