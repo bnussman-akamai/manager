@@ -1,5 +1,5 @@
-import type { ObjectStorageEndpointTypes } from 'src/object-storage';
-import type { Region } from 'src/regions';
+import type { ObjectStorageEndpointTypes } from '../object-storage';
+import type { Region } from '../regions';
 /**
  * A Quota is a service used limit that is rated based on service metrics such
  * as vCPUs used, instances or storage size.

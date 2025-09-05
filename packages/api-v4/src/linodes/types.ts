@@ -3,6 +3,7 @@ import type { CloudPulseAlertsPayload } from '../cloudpulse/types';
 import type { IPAddress, IPRange } from '../networking/types';
 import type { LinodePlacementGroupPayload } from '../placement-groups/types';
 import type { Region, RegionSite } from '../regions';
+import type { VPCIP } from '../vpcs';
 import type {
   CreateLinodeInterfaceSchema,
   ModifyLinodeInterfaceSchema,
@@ -10,7 +11,6 @@ import type {
   UpdateLinodeInterfaceSettingsSchema,
   UpgradeToLinodeInterfaceSchema,
 } from '@linode/validation';
-import type { VPCIP } from 'src/vpcs';
 import type { InferType } from 'yup';
 
 export type Hypervisor = 'kvm' | 'zen';

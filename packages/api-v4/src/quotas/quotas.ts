@@ -1,8 +1,8 @@
 import { BETA_API_ROOT } from '../constants';
 import Request, { setMethod, setParams, setURL, setXFilter } from '../request';
 
+import type { Filter, ResourcePage as Page, Params } from '../types';
 import type { Quota, QuotaType, QuotaUsage } from './types';
-import type { Filter, ResourcePage as Page, Params } from 'src/types';
 
 /**
  * getQuota

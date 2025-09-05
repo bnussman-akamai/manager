@@ -14,6 +14,7 @@ import Request, {
   setXFilter,
 } from '../request';
 
+import type { Firewall } from '../firewalls/types';
 import type { Filter, ResourcePage as Page, Params } from '../types';
 import type {
   CreateLinodeInterfacePayload,
@@ -26,7 +27,6 @@ import type {
   UpgradeInterfaceData,
   UpgradeInterfacePayload,
 } from './types';
-import type { Firewall } from 'src/firewalls/types';
 
 // These endpoints refer to the new Linode Interfaces endpoints.
 // For old Configuration Profile interfaces, see config.ts
