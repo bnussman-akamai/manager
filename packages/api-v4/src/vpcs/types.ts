@@ -73,6 +73,7 @@ export interface VPCIP {
   address: null | string;
   address_range: null | string;
   config_id: null | number;
+  database_id: null | number;
   gateway: null | string;
   interface_id: number;
   ipv6_addresses: {
@@ -81,7 +82,7 @@ export interface VPCIP {
   ipv6_is_public: boolean | null;
   ipv6_range: null | string;
   linode_id: null | number;
-  nat_1_1: string;
+  nat_1_1: null | string;
   nodebalancer_id: null | number;
   prefix: null | number;
   region: string;

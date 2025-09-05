@@ -1,5 +1,3 @@
-import type { AccountCapability } from 'src/account';
-
 export type AlertSeverityType = 0 | 1 | 2 | 3;
 export type MetricAggregationType = 'avg' | 'count' | 'max' | 'min' | 'sum';
 export type MetricOperatorType = 'eq' | 'gt' | 'gte' | 'lt' | 'lte';
@@ -366,15 +364,12 @@ export interface DeleteAlertPayload {
   serviceType: CloudPulseServiceType;
 }
 
-export const capabilityServiceTypeMapping: Record<
-  CloudPulseServiceType,
-  AccountCapability
-> = {
+export const capabilityServiceTypeMapping = {
   linode: 'Linodes',
   dbaas: 'Managed Databases',
   nodebalancer: 'NodeBalancers',
   firewall: 'Cloud Firewall',
-};
+} as const;
 
 /**
  * Represents the payload for CloudPulse alerts, included only when the ACLP beta mode is enabled.

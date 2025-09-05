@@ -20,16 +20,14 @@
     }
   },
   "types": "./lib/index.d.ts",
-  "browser": "./lib/index.global.js",
-  "unpkg": "./lib/index.global.js",
   "files": [
     "lib"
   ],
   "scripts": {
-    "start": "concurrently --raw \"tsc -w --preserveWatchOutput\" \"tsup --watch\"",
-    "build": "concurrently --raw \"tsc\" \"tsup\"",
+    "start": "tsdown --watch",
+    "build": "tsdown",
     "lint": "eslint . --quiet --ext .js,.ts,.tsx",
-    "typecheck": "tsc --noEmit true --emitDeclarationOnly false"
+    "typecheck": "tsc"
   },
   "repository": {
     "type": "git",
@@ -43,7 +41,7 @@
   "devDependencies": {
     "@linode/tsconfig": "workspace:*",
     "concurrently": "^9.0.1",
-    "tsup": "^8.4.0"
+    "tsdown": "^0.14.2"
   },
   "keywords": [
     "linode",

@@ -62,10 +62,8 @@ export const NodeRow = React.memo((props: NodeRowProps) => {
     (preferences) => preferences?.maskSensitiveData
   );
 
-  const vpcIpv4: VPCIP = ips?.ipv4?.vpc.find(
-    (ip: VPCIP) => ip.address !== null
-  );
-  const vpcIpv6: VPCIP = ips?.ipv6?.vpc?.find(
+  const vpcIpv4 = ips?.ipv4?.vpc.find((ip: VPCIP) => ip.address !== null);
+  const vpcIpv6 = ips?.ipv6?.vpc?.find(
     (ip: VPCIP) => ip.ipv6_addresses[0].slaac_address !== null
   );
 

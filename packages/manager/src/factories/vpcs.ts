@@ -34,4 +34,5 @@ export const vpcIPFactory = Factory.Sync.makeFactory<VPCIP>({
   subnet_id: Factory.each((i) => i),
   subnet_mask: '192.0.2.3',
   vpc_id: Factory.each((i) => i),
+  database_id: null,
 });

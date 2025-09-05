@@ -236,8 +236,8 @@ describe('LKE-E Node Pools', () => {
     const vpcIPv4 = mockLinodeIPs.ipv4?.vpc?.[0]?.address;
 
     cy.get('[data-qa-node-row]').within(() => {
-      cy.contains('td', vpcIPv6).should('be.visible');
-      cy.contains('td', vpcIPv4).should('be.visible');
+      cy.contains('td', vpcIPv6!).should('be.visible');
+      cy.contains('td', vpcIPv4!).should('be.visible');
     });
   });
 });

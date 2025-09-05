@@ -68,14 +68,19 @@ export const getVPCIPOptions = (
   vpcIps.forEach(({ ipv4 }) => {
     if (ipv4.vpc) {
       const vpcData = ipv4.vpc
-        .filter((vpc) => vpc.address && vpc.subnet_id in subnetLabelMap)
+        .filter(
+          (vpc) =>
+            vpc.linode_id !== null &&
+            vpc.address &&
+            vpc.subnet_id in subnetLabelMap
+        )
         .map((vpc) => {
           const linode: Partial<Linode> = {
-            label: linodeLabelMap[vpc.linode_id],
-            id: vpc.linode_id,
+            label: linodeLabelMap[vpc.linode_id!],
+            id: vpc.linode_id!,
           };
           return {
-            label: vpc.address,
+            label: vpc.address ?? String(vpc.vpc_id),
             linode,
             subnet: {
               id: vpc.subnet_id,
