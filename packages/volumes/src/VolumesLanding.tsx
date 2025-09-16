@@ -39,7 +39,7 @@ export const VolumesLanding = () => {
   const navigate = useNavigate();
 
   const search = useSearch({
-    from: '/volumes/',
+    from: '/',
     shouldThrow: false,
   });
   const { data: permissions } = usePermissions('account', ['create_volume']);
@@ -153,7 +153,7 @@ export const VolumesLanding = () => {
         disabledCreateButton={!canCreateVolume}
         docsLink="https://techdocs.akamai.com/cloud-computing/docs/block-storage"
         entity="Volume"
-        onButtonClick={() => navigate({ to: '/volumes/create' })}
+        onButtonClick={() => navigate({ to: '/create' })}
         title="Volumes"
       />
       <DebouncedSearchTextField

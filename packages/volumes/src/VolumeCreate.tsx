@@ -21,7 +21,7 @@ import {
 import { isNilOrEmpty, maybeCastToNumber } from '@linode/utilities';
 import { doesRegionSupportFeature } from '@linode/utilities';
 import { CreateVolumeSchema } from '@linode/validation/lib/volumes.schema';
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from '@linode/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -64,7 +64,7 @@ import { SizeField } from './VolumeDrawers/VolumeDrawer/SizeField';
 
 import type { APIError, Region, VolumeEncryption } from '@linode/api-v4';
 import type { Linode } from '@linode/api-v4/lib/linodes/types';
-import type { Theme } from '@mui/material/styles';
+import type { Theme } from '@linode/ui';
 
 const useStyles = makeStyles()((theme: Theme) => ({
   agreement: {

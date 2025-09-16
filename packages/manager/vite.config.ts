@@ -1,3 +1,4 @@
+import { federation } from '@module-federation/vite';
 import react from '@vitejs/plugin-react-swc';
 import { URL } from 'url';
 import svgr from 'vite-plugin-svgr';
@@ -13,7 +14,27 @@ export default defineConfig({
     outDir: 'build',
   },
   envPrefix: 'REACT_APP_',
-  plugins: [react(), svgr({ exportAsDefault: true }), urlCanParsePolyfill()],
+  plugins: [
+    federation({
+      name: 'host',
+      remotes: {
+        volumes: {
+          type: 'module',
+          name: 'volumes',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          entryGlobalName: 'volumes',
+        },
+      },
+      shared: {
+        react: { singleton: true, },
+        'react-dom': { singleton: true },
+      },
+      filename: 'remoteEntry.js',
+    }),
+    react(),
+    svgr({ exportAsDefault: true }),
+    urlCanParsePolyfill(),
+  ],
   resolve: {
     alias: {
       src: `${DIRNAME}/src`,
