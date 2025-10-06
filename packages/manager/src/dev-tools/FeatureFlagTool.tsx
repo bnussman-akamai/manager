@@ -52,7 +52,6 @@ const options: { flag: keyof Flags; label: string }[] = [
     flag: 'databaseRestrictPlanResize',
     label: 'Database Restrict Premium Plan Resize',
   },
-  { flag: 'apicliButtonCopy', label: 'APICLI Button Copy' },
   { flag: 'iam', label: 'Identity and Access Beta' },
   { flag: 'iamDelegation', label: 'IAM Delegation (Parent/Child)' },
   { flag: 'iamRbacPrimaryNavChanges', label: 'IAM Primary Nav Changes' },

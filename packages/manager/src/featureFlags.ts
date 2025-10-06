@@ -153,7 +153,6 @@ export interface Flags {
   aclpReadEndpoint: string;
   aclpResourceTypeMap: CloudPulseResourceTypeMapFlag[];
   aclpServices: Partial<AclpServices>;
-  apicliButtonCopy: string;
   apiMaintenance: APIMaintenance;
   apl: boolean;
   aplGeneralAvailability: boolean;
@@ -162,11 +161,9 @@ export interface Flags {
   cloudManagerDesignUpdatesBanner: DesignUpdatesBannerFlag;
   cloudNat: CloudNatFlag;
   databaseAdvancedConfig: boolean;
-  databaseBeta: boolean;
   databasePremium: boolean;
   databaseResize: boolean;
   databaseRestrictPlanResize: boolean;
-  databases: boolean;
   databaseVpc: boolean;
   databaseVpcBeta: boolean;
   dbaasV2: BetaFeatureFlag;
