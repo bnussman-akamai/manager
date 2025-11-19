@@ -1,7 +1,7 @@
 import { useTypeQuery } from '@linode/queries';
 import { Tooltip, TooltipIcon, Typography } from '@linode/ui';
 import { Hidden } from '@linode/ui';
-import { formatStorageUnits, getFormattedStatus } from '@linode/utilities';
+import { formatStorageUnits } from '@linode/utilities';
 import { useTheme } from '@mui/material/styles';
 import * as React from 'react';
 
@@ -13,13 +13,8 @@ import { TableCell } from 'src/components/TableCell';
 import { TableRow } from 'src/components/TableRow';
 import { statusTooltipIcons } from 'src/features/Linodes/LinodeEntityDetailHeaderMaintenancePolicy.utils';
 import { LinodeActionMenu } from 'src/features/Linodes/LinodesLanding/LinodeActionMenu/LinodeActionMenu';
-import {
-  getProgressOrDefault,
-  linodeInTransition,
-  transitionText,
-} from 'src/features/Linodes/transitions';
+import { useLinodeStatus } from 'src/features/Linodes/transitions';
 import { notificationCenterContext as _notificationContext } from 'src/features/NotificationCenter/NotificationCenterContext';
-import { useInProgressEvents } from 'src/queries/events/events';
 
 import { LinodeMaintenanceText } from '../../LinodeMaintenanceText';
 import { IPAddress } from '../IPAddress';
@@ -56,15 +51,9 @@ export const LinodeRow = (props: Props) => {
 
   const { data: linodeType } = useTypeQuery(type ?? '', type !== null);
 
-  const { data: events } = useInProgressEvents();
-
-  const recentEvent = events?.find(
-    (e) => e.entity?.type === 'linode' && e.entity.id === id
-  );
+  const linodeStatus = useLinodeStatus({ id, status });
 
   const isBareMetalInstance = linodeType?.class === 'metal';
-
-  const isTransitioning = linodeInTransition(status, recentEvent);
 
   const maintenanceStartTime = maintenance?.start_time || maintenance?.when;
 
@@ -104,15 +93,16 @@ export const LinodeRow = (props: Props) => {
         statusCell
       >
         <StatusIcon status={iconStatus} />
-        {!isTransitioning && getFormattedStatus(status)}
-        {isTransitioning && (
+        { linodeStatus.inProgressEvent ? (
           <StyledButton onClick={notificationContext.openMenu}>
             <ProgressDisplay
-              progress={getProgressOrDefault(recentEvent)}
+              progress={linodeStatus.inProgressEvent.percent_complete ?? 0}
               sx={{ display: 'inline-block' }}
-              text={transitionText(status, id, recentEvent)}
+              text={linodeStatus.status}
             />
           </StyledButton>
+        ) : (
+          linodeStatus.status
         )}
         {isInProgress && maintenanceStartTime && (
           <TooltipIcon

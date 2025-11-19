@@ -6,22 +6,9 @@ import {
   isPrimaryEntity,
   isSecondaryEntity,
 } from 'src/queries/events/event.helpers';
+import { useInProgressEvents } from 'src/queries/events/events';
 
-import type { Event, EventAction } from '@linode/api-v4/lib/account';
-
-export const transitionStatus = [
-  'booting',
-  'shutting_down',
-  'rebooting',
-  'provisioning',
-  'deleting',
-  'migrating',
-  'resizing',
-  'rebuilding',
-  'restoring',
-  'cloning',
-  'edit_mode',
-];
+import type { Event, EventAction, Linode, LinodeStatus } from '@linode/api-v4';
 
 const transitionActionMap: Partial<Record<EventAction, string>> = {
   backups_restore: 'Backups Restore',
@@ -36,30 +23,11 @@ const transitionActionMap: Partial<Record<EventAction, string>> = {
   linode_snapshot: 'Snapshot',
 };
 
-export const linodeInTransition = (
-  status: string,
-  recentEvent?: Event
-): boolean => {
-  if (transitionStatus.includes(status)) {
-    return true;
-  }
-
-  return (
-    recentEvent !== undefined &&
-    Object.prototype.hasOwnProperty.call(
-      transitionActionMap,
-      recentEvent.action
-    ) &&
-    recentEvent.percent_complete !== null &&
-    recentEvent.percent_complete < 100
-  );
-};
-
-export const transitionText = (
-  status: string,
+export const getLinodeStatus = (
+  status: LinodeStatus,
   linodeId: number,
   recentEvent?: Event
-): string | undefined => {
+): string => {
   if (recentEvent?.action === 'linode_clone') {
     if (isPrimaryEntity(recentEvent, linodeId)) {
       return 'Cloning';
@@ -69,12 +37,58 @@ export const transitionText = (
     }
   }
 
-  if (recentEvent && transitionActionMap[recentEvent.action]) {
-    return transitionActionMap[recentEvent.action];
+  if (
+    recentEvent &&
+    !eventsWithSecondaryStatus.includes(recentEvent.action) &&
+    transitionActionMap[recentEvent.action]
+  ) {
+    return transitionActionMap[recentEvent.action]!;
   }
 
   return getFormattedStatus(status);
 };
+
+export const getLinodeSecondaryStatus = (
+  linodeId: number,
+  recentEvent?: Event
+): null | string => {
+  if (recentEvent?.action === 'linode_clone') {
+    if (isPrimaryEntity(recentEvent, linodeId)) {
+      return 'Cloning';
+    }
+    if (isSecondaryEntity(recentEvent, linodeId)) {
+      return 'Creating';
+    }
+  }
+
+  if (
+    recentEvent &&
+    eventsWithSecondaryStatus.includes(recentEvent.action) &&
+    transitionActionMap[recentEvent.action]
+  ) {
+    return transitionActionMap[recentEvent.action]!;
+  }
+
+  return null;
+};
+
+export function useLinodeStatus(linode: Pick<Linode, 'id' | 'status'>) {
+  const { data: events } = useInProgressEvents();
+
+  const inProgressEvent = events
+    ?.filter(isInProgressEvent)
+    .findLast(
+      (event) =>
+        event.entity &&
+        event.entity.type === 'linode' &&
+        event.entity.id === linode.id
+    );
+
+  const status = getLinodeStatus(linode.status, linode.id, inProgressEvent);
+  const secondaryStatus = getLinodeSecondaryStatus(linode.id, inProgressEvent);
+
+  return { status, inProgressEvent, secondaryStatus };
+}
 
 // Given a list of Events, returns a set of all Linode IDs that are involved in an in-progress event.
 export const linodesInTransition = (events: Event[]) => {
@@ -93,14 +107,6 @@ export const linodesInTransition = (events: Event[]) => {
 
   return set;
 };
-
-// Return the progress of an event if one is given, otherwise return a default
-// of 100. This is useful in the situation where a Linode has recently completed
-// an in-progress event, but we don't have the updated status from the API  yet.
-// In this case it doesn't have a recentEvent attached (since it has completed),
-// but its status is still briefly in transition, so give it a progress of 100.
-export const getProgressOrDefault = (event?: Event, defaultProgress = 0) =>
-  event?.percent_complete ?? defaultProgress;
 
 // Linodes have a literal "status" given by the API (linode.status). There are
 // states the Linode can be in which aren't entirely communicated with the

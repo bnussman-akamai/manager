@@ -19,15 +19,11 @@ import { usePermissions } from '../IAM/hooks/usePermissions';
 import { LinodeEntityDetailBody } from './LinodeEntityDetailBody';
 import { LinodeEntityDetailFooter } from './LinodeEntityDetailFooter';
 import { LinodeEntityDetailHeader } from './LinodeEntityDetailHeader';
-import {
-  transitionText as _transitionText,
-  getProgressOrDefault,
-  isEventWithSecondaryLinodeStatus,
-} from './transitions';
 
 import type { LinodeHandlers } from './LinodesLanding/LinodesLanding';
 import type { TypographyProps } from '@linode/ui';
 import type { LinodeWithMaintenance } from 'src/utilities/linodes';
+import { useLinodeStatus } from './transitions';
 
 interface LinodeEntityDetailProps {
   id: number;
@@ -44,12 +40,6 @@ export const LinodeEntityDetail = (props: Props) => {
   const { handlers, isSummaryView, linode, variant } = props;
 
   const notificationContext = React.useContext(_notificationContext);
-
-  const { data: events } = useInProgressEvents();
-
-  const recentEvent = events?.find(
-    (event) => event.entity?.id === linode.id && event.entity.type === 'linode'
-  );
 
   const { data: images } = useAllImagesQuery({}, {});
 
@@ -92,14 +82,6 @@ export const LinodeEntityDetail = (props: Props) => {
     regions ?? [],
     linode.region
   );
-
-  let progress;
-  let transitionText;
-
-  if (recentEvent && isEventWithSecondaryLinodeStatus(recentEvent, linode.id)) {
-    progress = getProgressOrDefault(recentEvent);
-    transitionText = _transitionText(linode.status, linode.id, recentEvent);
-  }
 
   const trimmedIPv6 = linode.ipv6?.replace('/128', '') || null;
 
@@ -164,8 +146,6 @@ export const LinodeEntityDetail = (props: Props) => {
             linodeStatus={linode.status}
             maintenance={linode.maintenance ?? null}
             openNotificationMenu={notificationContext.openMenu}
-            progress={progress}
-            transitionText={transitionText}
             type={type ?? null}
             variant={variant}
           />

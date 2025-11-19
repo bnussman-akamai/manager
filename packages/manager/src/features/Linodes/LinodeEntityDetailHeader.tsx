@@ -13,6 +13,7 @@ import { VPC_REBOOT_MESSAGE } from '../VPCs/constants';
 import { StyledLink } from './LinodeEntityDetail.styles';
 import { LinodeEntityDetailHeaderMaintenancePolicy } from './LinodeEntityDetailHeaderMaintenancePolicy';
 import { getLinodeIconStatus } from './LinodesLanding/utils';
+import { useLinodeStatus } from './transitions';
 
 import type { LinodeHandlers } from './LinodesLanding/LinodesLanding';
 import type {
@@ -52,8 +53,6 @@ export interface HeaderProps {
   linodeStatus: Linode['status'];
   maintenance: LinodeMaintenance | null;
   openNotificationMenu: () => void;
-  progress?: number;
-  transitionText?: string;
   type: LinodeType | null;
   variant?: TypographyProps['variant'];
 }
@@ -79,13 +78,13 @@ export const LinodeEntityDetailHeader = (
     linodeMaintenancePolicySet,
     maintenance,
     openNotificationMenu,
-    progress,
-    transitionText,
     type,
     variant,
   } = props;
 
   const { isVMHostMaintenanceEnabled } = useVMHostMaintenanceEnabled();
+
+  const { status, inProgressEvent, secondaryStatus } = useLinodeStatus({ id: linodeId, status: linodeStatus });
 
   const isRunning = linodeStatus === 'running';
 
@@ -101,17 +100,7 @@ export const LinodeEntityDetailHeader = (
     [configs, isRunning]
   );
 
-  const formattedStatus = isRebootNeeded
-    ? 'REBOOT NEEDED'
-    : linodeStatus.replace('_', ' ').toUpperCase();
-  const formattedTransitionText = (transitionText ?? '').toUpperCase();
-
-  const hasSecondaryStatus =
-    typeof progress !== 'undefined' &&
-    typeof transitionText !== 'undefined' &&
-    // Kind of a hacky way to avoid "CLONING | CLONING (50%)" until we add logic
-    // to display "Cloning to 'destination-linode'.
-    formattedTransitionText !== formattedStatus;
+  const formattedStatus = isRebootNeeded ? 'REBOOT NEEDED' : status;
 
   const sxBoxFlex = {
     alignItems: 'center',
@@ -163,16 +152,16 @@ export const LinodeEntityDetailHeader = (
             maintenance={maintenance}
           />
         )}
-        {hasSecondaryStatus && (
+        {secondaryStatus && inProgressEvent && (
           <Button
             buttonType="secondary"
             onClick={openNotificationMenu}
             sx={{ minWidth: '64px' }}
           >
             <ProgressDisplay
-              progress={progress ?? 0}
+              progress={inProgressEvent.percent_complete ?? 0}
               sx={{ color: 'primary.main', font: theme.font.bold }}
-              text={formattedTransitionText}
+              text={secondaryStatus}
             />
           </Button>
         )}
