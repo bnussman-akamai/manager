@@ -1,4 +1,4 @@
-import { useLocation, useParams } from '@tanstack/react-router';
+import { Outlet, useLocation, useParams } from '@tanstack/react-router';
 import * as React from 'react';
 
 import { FramelessRoot } from './FramelessRoot';
@@ -9,6 +9,10 @@ export const RootSwitch = () => {
   const params = useParams({
     strict: false,
   });
+
+  if (location.pathname.includes('/oauth/callback')) {
+    return <Outlet />;
+  }
 
   if (location.pathname.includes('/lish/') && params.linodeId && params.type) {
     return <FramelessRoot />;

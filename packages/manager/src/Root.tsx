@@ -6,9 +6,11 @@ import '@fontsource/nunito-sans/700.css';
 import '@fontsource/nunito-sans/800.css';
 import '@fontsource/nunito-sans/400-italic.css';
 import {
+  useAccountSettings,
   useMutatePreferences,
   usePreferences,
   useProfile,
+  useQueryClient,
 } from '@linode/queries';
 import { Box } from '@linode/ui';
 import { useMediaQuery } from '@mui/material';
@@ -37,18 +39,26 @@ import {
 import { TopMenu } from 'src/features/TopMenu/TopMenu';
 
 import { useIsPageScrollable } from './components/PrimaryNav/utils';
+import { SplashScreen } from './components/SplashScreen';
 import { ENABLE_MAINTENANCE_MODE } from './constants';
 import { complianceUpdateContext } from './context/complianceUpdateContext';
 import { sessionExpirationContext } from './context/sessionExpirationContext';
 import { switchAccountSessionContext } from './context/switchAccountSessionContext';
+import { useIsACLPEnabled } from './features/CloudPulse/Utils/utils';
+import { useIsDatabasesEnabled } from './features/Databases/utilities';
+import { useIsPlacementGroupsEnabled } from './features/PlacementGroups/utils';
 import { TOPMENU_HEIGHT } from './features/TopMenu/constants';
 import { GoTo } from './GoTo';
 import { useAdobeAnalytics } from './hooks/useAdobeAnalytics';
+import { useFlags } from './hooks/useFlags';
 import { useGlobalErrors } from './hooks/useGlobalErrors';
+import { useInitialRequests } from './hooks/useInitialRequests';
 import { useNewRelic } from './hooks/useNewRelic';
 import { usePendo } from './hooks/usePendo';
 import { useSessionExpiryToast } from './hooks/useSessionExpiryToast';
 import { useEventsPoller } from './queries/events/events';
+import { router } from './routes';
+import { useSetupFeatureFlags } from './useSetupFeatureFlags';
 
 import type { Theme } from '@mui/material/styles';
 
@@ -151,7 +161,35 @@ export const Root = () => {
     theme.breakpoints.down(960)
   );
 
+  const queryClient = useQueryClient();
+
+  const { data: accountSettings } = useAccountSettings();
+  const { isDatabasesEnabled } = useIsDatabasesEnabled();
+  const { isPlacementGroupsEnabled } = useIsPlacementGroupsEnabled();
+  const { isACLPEnabled } = useIsACLPEnabled();
+  const flags = useFlags();
+
+  // Update the router's context
+  router.update({
+    context: {
+      accountSettings,
+      flags,
+      globalErrors,
+      isACLPEnabled,
+      isDatabasesEnabled,
+      isPlacementGroupsEnabled,
+      profile,
+      queryClient,
+    },
+  });
+
   const { isPageScrollable } = useIsPageScrollable(contentRef);
+  const { isLoading } = useInitialRequests();
+  const { areFeatureFlagsLoading } = useSetupFeatureFlags();
+
+  if (isLoading || areFeatureFlagsLoading) {
+    return <SplashScreen />;
+  }
 
   /**
    * this is the case where the user has successfully completed signup

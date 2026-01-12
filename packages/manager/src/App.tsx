@@ -1,4 +1,5 @@
 import '@reach/tabs/styles.css';
+import { RouterProvider } from '@tanstack/react-router';
 import * as React from 'react';
 
 import {
@@ -8,34 +9,10 @@ import {
 import withFeatureFlagProvider from 'src/containers/withFeatureFlagProvider.container';
 import { ErrorBoundaryFallback } from 'src/features/ErrorBoundary/ErrorBoundaryFallback';
 
-import { SplashScreen } from './components/SplashScreen';
-import { useInitialRequests } from './hooks/useInitialRequests';
-import { Router } from './Router';
-import { useSetupFeatureFlags } from './useSetupFeatureFlags';
+import { router } from './routes';
 
 export const App = withDocumentTitleProvider(
   withFeatureFlagProvider(() => {
-    // Skip all initialization if we're on any authentication callback - just let the router handle it
-    const isAuthCallback =
-      window.location.pathname === '/oauth/callback' ||
-      window.location.pathname === '/admin/callback';
-
-    const { isLoading } = useInitialRequests();
-    const { areFeatureFlagsLoading } = useSetupFeatureFlags();
-
-    if (isAuthCallback) {
-      return (
-        <ErrorBoundaryFallback>
-          <DocumentTitleSegment segment="Akamai Cloud Manager" />
-          <Router />
-        </ErrorBoundaryFallback>
-      );
-    }
-
-    if (isLoading || areFeatureFlagsLoading) {
-      return <SplashScreen />;
-    }
-
     return (
       <ErrorBoundaryFallback>
         {/** Accessibility helper */}
@@ -50,7 +27,7 @@ export const App = withDocumentTitleProvider(
           </span>
         </div>
         <DocumentTitleSegment segment="Akamai Cloud Manager" />
-        <Router />
+        <RouterProvider router={router} />
       </ErrorBoundaryFallback>
     );
   })
