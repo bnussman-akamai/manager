@@ -10,7 +10,10 @@ export const RootSwitch = () => {
     strict: false,
   });
 
-  if (location.pathname.includes('/oauth/callback')) {
+  if (
+    location.pathname === '/oauth/callback' ||
+    location.pathname === '/admin/callback'
+  ) {
     return <Outlet />;
   }
 
