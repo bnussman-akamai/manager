@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useSearch } from '@tanstack/react-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { SplashScreen } from 'src/components/SplashScreen';
 
@@ -19,24 +20,25 @@ export const OAuthCallback = () => {
     from: '/oauth/callback',
   });
 
-  React.useEffect(() => {
-    const authenticate = async () => {
-      try {
-        const { returnTo } = await handleOAuthCallback({
-          params: search,
-        });
+  const { data, error } = useQuery({
+    queryFn: () => handleOAuthCallback({ params: search }),
+    queryKey: ['oauth-callback', search],
+  });
 
-        navigate({ to: returnTo });
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        Sentry.captureException(error);
-        clearStorageAndRedirectToLogout();
-      }
-    };
+  useEffect(() => {
+    if (data) {
+      navigate({ to: data.returnTo });
+    }
+  }, [data]);
 
-    authenticate();
-  }, []);
+  useEffect(() => {
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      Sentry.captureException(error);
+      clearStorageAndRedirectToLogout();
+    }
+  }, [error]);
 
   return <SplashScreen />;
 };
