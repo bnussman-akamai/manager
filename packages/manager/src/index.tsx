@@ -54,6 +54,9 @@ async function loadApp() {
     const root = createRoot(devToolsRootContainer);
 
     root.render(<DevTools queryClient={queryClient} store={store} />);
+
+    const { installDevTools } = await import('compute-ui-dev-tools');
+    installDevTools();
   }
 
   const container = document.getElementById('root');
