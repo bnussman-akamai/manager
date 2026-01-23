@@ -56,7 +56,10 @@ async function loadApp() {
     root.render(<DevTools queryClient={queryClient} store={store} />);
 
     const { installDevTools } = await import('compute-ui-dev-tools');
-    installDevTools();
+    const { handlers } = await import('src/mocks/serverHandlers');
+    await installDevTools({
+      handlerSets: [{ name: 'default', handlers }],
+    });
   }
 
   const container = document.getElementById('root');
