@@ -252,6 +252,12 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export const paysByAkamaiCustomerHandlers = [
+  http.get('*/v4*/account', () => {
+    return HttpResponse.json(accountFactory.build({ billing_source: 'akamai' }));
+  }),
+];
+
 const entityTransfers = [
   http.get('*/account/service-transfers', () => {
     const transfers1 = entityTransferFactory.buildList(10);

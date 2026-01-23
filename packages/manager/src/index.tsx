@@ -55,10 +55,22 @@ async function loadApp() {
 
     root.render(<DevTools queryClient={queryClient} store={store} />);
 
+    // New dev tools
     const { installDevTools } = await import('compute-ui-dev-tools');
-    const { handlers } = await import('src/mocks/serverHandlers');
+    const { handlers, paysByAkamaiCustomerHandlers } = await import('src/mocks/serverHandlers');
+
     await installDevTools({
-      handlerSets: [{ name: 'default', handlers }],
+      handlerSets: [
+        { name: 'default', enabledByDefault: true, handlers },
+        {
+          name: 'pays-via-akamai',
+          enabledByDefault: false,
+          handlers: paysByAkamaiCustomerHandlers,
+        },
+      ],
+      onHandlersChanged() {
+        queryClient.invalidateQueries();
+      },
     });
   }
 
