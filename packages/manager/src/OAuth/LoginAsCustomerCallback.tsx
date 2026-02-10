@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import React, { useEffect } from 'react';
 
@@ -22,28 +22,26 @@ import {
 export const LoginAsCustomerCallback = () => {
   const navigate = useNavigate();
 
-  const { data, error } = useQuery({
-    queryKey: ['login-as-customer-callback'],
-    queryFn: () =>
+  const { mutate } = useMutation({
+    mutationFn: () =>
       handleLoginAsCustomerCallback({
         params: location.hash.substring(1), // substring is called to remove the leading "#" from the hash params
       }),
-  });
-
-  useEffect(() => {
-    if (data) {
+    onSuccess(data) {
       navigate({ to: data.returnTo });
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (error) {
+    },
+    onError(error) {
       // eslint-disable-next-line no-console
       console.error(error);
       Sentry.captureException(error);
       clearStorageAndRedirectToLogout();
-    }
-  }, [error]);
+    },
+  });
+
+  useEffect(() => {
+    mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <SplashScreen />;
 };
