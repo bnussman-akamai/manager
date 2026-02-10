@@ -22,7 +22,7 @@ import { useIsACLPEnabled } from 'src/features/CloudPulse/Utils/utils';
 import { useIsDatabasesEnabled } from 'src/features/Databases/utilities';
 import { useIsACLPLogsEnabled } from 'src/features/Delivery/deliveryUtils';
 import { useIsIAMEnabled } from 'src/features/IAM/hooks/useIsIAMEnabled';
-import { useIsMarketplaceV2Enabled } from 'src/features/Marketplace/utils';
+import { useIsMarketplaceV2Enabled } from 'src/features/Marketplace/shared';
 import { useIsNetworkLoadBalancerEnabled } from 'src/features/NetworkLoadBalancers/utils';
 import { useIsPlacementGroupsEnabled } from 'src/features/PlacementGroups/utils';
 import { useFlags } from 'src/hooks/useFlags';
@@ -119,7 +119,7 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
   const { isPlacementGroupsEnabled } = useIsPlacementGroupsEnabled();
   const { isDatabasesEnabled, isDatabasesV2Beta } = useIsDatabasesEnabled();
 
-  const { isIAMBeta, isIAMEnabled } = useIsIAMEnabled();
+  const { isIAMEnabled } = useIsIAMEnabled();
   const showLimitedAvailabilityBadges = flags.iamLimitedAvailabilityBadges;
 
   const { isNetworkLoadBalancerEnabled } = useIsNetworkLoadBalancerEnabled();
@@ -297,8 +297,7 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
                 display: 'Identity & Access',
                 hide: !isIAMEnabled,
                 to: '/iam',
-                isBeta: isIAMBeta,
-                isNew: !isIAMBeta && showLimitedAvailabilityBadges,
+                isNew: isIAMEnabled && showLimitedAvailabilityBadges,
               },
               {
                 display: 'Quotas',
@@ -352,7 +351,6 @@ export const PrimaryNav = (props: PrimaryNavProps) => {
         isACLPEnabled,
         isACLPLogsBeta,
         isACLPLogsEnabled,
-        isIAMBeta,
         isIAMEnabled,
         isMarketplaceV2FeatureEnabled,
         isNetworkLoadBalancerEnabled,

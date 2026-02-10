@@ -10,7 +10,7 @@ import type { PickPermissions, UserType } from '@linode/api-v4';
 import type { Action } from 'src/components/ActionMenu/ActionMenu';
 
 type UserActionMenuPermissions = PickPermissions<
-  'delete_user' | 'is_account_admin' | 'view_account'
+  'delete_user' | 'is_account_admin' | 'view_user'
 >;
 
 interface Props {
@@ -25,18 +25,18 @@ export const UsersActionMenu = (props: Props) => {
   const { isIAMDelegationEnabled } = useIsIAMDelegationEnabled();
 
   const navigate = useNavigate();
-  const { isChildAccount, isParentAccount, profileUserName } =
+  const { isChildUserType, isParentUserType, profileUserName } =
     useDelegationRole();
 
   const isAccountAdmin = permissions.is_account_admin;
-  const isAccountViewer = permissions.view_account;
+  const canViewUser = permissions.view_user;
   const canDeleteUser = isAccountAdmin || permissions.delete_user;
   const isDelegateUser = userType === 'delegate';
 
   // Determine if the current account is a child account with isIAMDelegationEnabled enabled
   // If so, we need to hide 'View User Details', 'Delete User', 'View Account Delegations' in the menu
   const shouldHideForChildDelegate =
-    isIAMDelegationEnabled && isChildAccount && isDelegateUser;
+    isIAMDelegationEnabled && isChildUserType && isDelegateUser;
 
   const actions: Action[] = [
     {
@@ -47,8 +47,8 @@ export const UsersActionMenu = (props: Props) => {
         });
       },
       hidden: shouldHideForChildDelegate,
-      disabled: !isAccountViewer,
-      tooltip: !isAccountViewer
+      disabled: !canViewUser,
+      tooltip: !canViewUser
         ? 'You do not have permission to view user details.'
         : undefined,
       title: 'View User Details',
@@ -60,8 +60,8 @@ export const UsersActionMenu = (props: Props) => {
           params: { username },
         });
       },
-      disabled: !isAccountViewer,
-      tooltip: !isAccountViewer
+      disabled: !canViewUser,
+      tooltip: !canViewUser
         ? 'You do not have permission to view assigned roles.'
         : undefined,
       title: 'View Assigned Roles',
@@ -73,15 +73,15 @@ export const UsersActionMenu = (props: Props) => {
           params: { username },
         });
       },
-      disabled: !isAccountViewer,
-      tooltip: !isAccountViewer
+      disabled: !canViewUser,
+      tooltip: !canViewUser
         ? 'You do not have permission to view entity access.'
         : undefined,
       title: 'View Entity Access',
     },
     {
       disabled: false,
-      hidden: !isIAMDelegationEnabled || !isParentAccount,
+      hidden: !isIAMDelegationEnabled || !isParentUserType,
       onClick: () => {
         navigate({
           to: '/iam/users/$username/delegations',

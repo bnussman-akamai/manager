@@ -60,6 +60,7 @@ describe('Quota workflow tests', () => {
     const mockQuotas = [
       quotaFactory.build({
         quota_id: `obj-bytes-${selectedDomain}`,
+        quota_type: 'obj-bytes',
         description: randomLabel(50),
         endpoint_type: mockSelectedEndpoint.endpoint_type,
         quota_limit: 10,
@@ -69,6 +70,7 @@ describe('Quota workflow tests', () => {
       }),
       quotaFactory.build({
         quota_id: `obj-buckets-${selectedDomain}`,
+        quota_type: 'obj-buckets',
         description: randomLabel(50),
         endpoint_type: mockSelectedEndpoint.endpoint_type,
         quota_limit: 78,
@@ -78,6 +80,7 @@ describe('Quota workflow tests', () => {
       }),
       quotaFactory.build({
         quota_id: `obj-objects-${selectedDomain}`,
+        quota_type: 'obj-objects',
         description: randomLabel(50),
         endpoint_type: mockSelectedEndpoint.endpoint_type,
         quota_limit: 400,
@@ -100,10 +103,12 @@ describe('Quota workflow tests', () => {
         usage: Math.round(mockQuotas[2].quota_limit * 0.1),
       }),
     ];
+
     cy.wrap(selectedDomain).as('selectedDomain');
     cy.wrap(mockEndpoints).as('mockEndpoints');
     cy.wrap(mockQuotas).as('mockQuotas');
     cy.wrap(mockQuotaUsages).as('mockQuotaUsages');
+
     mockGetObjectStorageQuotaUsages(
       selectedDomain,
       'bytes',
@@ -134,9 +139,12 @@ describe('Quota workflow tests', () => {
         },
       }).as('getFeatureFlags');
     });
+
     it('Quotas and quota usages display properly', function () {
-      cy.visitWithLogin('/account/quotas');
+      cy.visitWithLogin('/quotas');
+
       cy.wait(['@getFeatureFlags', '@getObjectStorageEndpoints']);
+
       // Quotas table placeholder text is shown
       cy.get('[data-testid="table-row-empty"]').should('be.visible');
 
@@ -144,15 +152,19 @@ describe('Quota workflow tests', () => {
       cy.findByPlaceholderText(placeholderText)
         .should('be.visible')
         .should('be.enabled');
+
       ui.autocomplete
         .findByLabel('Object Storage Endpoint')
         .should('be.visible')
         .type(this.selectedDomain);
+
       ui.autocompletePopper
         .findByTitle(this.selectedDomain, { exact: false })
         .should('be.visible')
         .click();
+
       cy.wait(['@getQuotas', '@getQuotaUsages']);
+
       cy.get('table[data-testid="table-endpoint-quotas"]')
         .find('tbody')
         .within(() => {
@@ -200,6 +212,7 @@ describe('Quota workflow tests', () => {
       const updatedQuotas = [
         quotaFactory.build({
           quota_id: `obj-bytes-${updatedDomain}`,
+          quota_type: 'obj-bytes',
           description: randomLabel(50),
           endpoint_type: updatedEndpoint.endpoint_type,
           quota_limit: 20,
@@ -209,6 +222,7 @@ describe('Quota workflow tests', () => {
         }),
         quotaFactory.build({
           quota_id: `obj-buckets-${updatedDomain}`,
+          quota_type: 'obj-buckets',
           description: randomLabel(50),
           endpoint_type: updatedEndpoint.endpoint_type,
           quota_limit: 122,
@@ -218,6 +232,7 @@ describe('Quota workflow tests', () => {
         }),
         quotaFactory.build({
           quota_id: `obj-objects-${updatedDomain}`,
+          quota_type: 'obj-objects',
           description: randomLabel(50),
           endpoint_type: updatedEndpoint.endpoint_type,
           quota_limit: 450,
@@ -332,9 +347,11 @@ describe('Quota workflow tests', () => {
         .should('be.visible')
         .click();
       cy.wait('@getQuotasError');
-      cy.get('[data-qa-error-msg="true"]')
-        .should('be.visible')
-        .should('have.text', errorMsg);
+      cy.get('[data-testid="endpoint-quotas-table-container"]').within(() => {
+        cy.get('[data-qa-error-msg="true"]')
+          .should('be.visible')
+          .should('have.text', errorMsg);
+      });
     });
   });
 
@@ -508,9 +525,12 @@ describe('Quota workflow tests', () => {
         .should('be.visible')
         .click();
       cy.wait('@getQuotasError');
-      cy.get('[data-qa-error-msg="true"]')
-        .should('be.visible')
-        .should('have.text', errorMsg);
+
+      cy.get('[data-testid="endpoint-quotas-table-container"]').within(() => {
+        cy.get('[data-qa-error-msg="true"]')
+          .should('be.visible')
+          .should('have.text', errorMsg);
+      });
     });
 
     // this test executed in context of internal user, using mockApiInternalUser()
