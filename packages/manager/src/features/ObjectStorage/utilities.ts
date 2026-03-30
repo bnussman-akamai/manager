@@ -6,7 +6,7 @@ import type { ObjectStorageEndpoint } from '@linode/api-v4/lib/object-storage';
 import type { FormikProps } from 'formik';
 
 export const generateObjectUrl = (hostname: string, objectName: string) => {
-  return `https://${hostname}/${encodeURIComponent(objectName)}`;
+  return `https://${hostname}/${encodeURI(objectName)}`;
 };
 
 // Objects ending with a / and having a size of 0 are often used to represent
@@ -167,15 +167,6 @@ export const objectACLHelperText: Record<string, string> = {
   'public-read': 'Public Read ACL',
   'public-read-write': 'Public Read/Write ACL',
 };
-
-// @TODO: OBJ Gen2: This should be removed once these regions obtain the `Object Storage` capability.
-export const WHITELISTED_REGIONS = new Set([
-  'gb-lon',
-  'au-mel',
-  'in-bom-2',
-  'de-fra-2',
-  'sg-sin-2',
-]);
 
 /**
  * For OBJ Gen2 users, filter regions based on available Object Storage endpoints.

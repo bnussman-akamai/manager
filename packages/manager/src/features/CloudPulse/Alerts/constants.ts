@@ -1,7 +1,5 @@
 import type { FieldPath } from 'react-hook-form';
 
-import { PORTS_HELPER_TEXT } from '../Utils/constants';
-
 import type { CreateAlertDefinitionForm } from './CreateAlert/types';
 import type {
   AlertDefinitionScope,
@@ -133,7 +131,6 @@ export const alertStatusToIconStatusMap: Record<AlertStatusType, Status> = {
   disabled: 'inactive',
   enabled: 'active',
   failed: 'error',
-  'in progress': 'other',
   provisioning: 'other',
   disabling: 'other',
   enabling: 'other',
@@ -182,7 +179,6 @@ export const alertStatuses: Record<AlertStatusType, string> = {
   disabled: 'Disabled',
   enabled: 'Enabled',
   failed: 'Failed',
-  'in progress': 'In Progress',
   disabling: 'Disabling',
   enabling: 'Enabling',
   provisioning: 'Provisioning',
@@ -254,6 +250,13 @@ export const PORTS_PLACEHOLDER_TEXT = 'e.g., 80,443,3000';
 
 export const PORT_PLACEHOLDER_TEXT = 'e.g., 80';
 
+export const VIP_PLACEHOLDER_TEXT = 'Enter VIP address';
+export const NODE_ID_PLACEHOLDER_TEXT = 'Enter Node ID';
+export const NODE_ID_HELPER_TEXT =
+  'Enter one or more Node IDs separated by commas.';
+export const VIP_HELPER_TEXT =
+  'Enter one or more VIP addresses separated by commas.';
+
 export const CONFIGS_HELPER_TEXT =
   'Enter one or more configuration IDs separated by commas.';
 
@@ -272,27 +275,17 @@ export const CONFIGS_ID_PLACEHOLDER_TEXT = 'e.g., 1234,5678';
 
 export const INTERFACE_ID_ERROR_MESSAGE = 'Enter a valid interface ID number.';
 export const INTERFACE_ID_HELPER_TEXT = 'Enter an interface ID number.';
-export const PLACEHOLDER_TEXT_MAP: Record<string, Record<string, string>> = {
-  port: {
-    in: PORTS_PLACEHOLDER_TEXT,
-    default: PORT_PLACEHOLDER_TEXT,
-  },
-  config_id: {
-    in: CONFIGS_ID_PLACEHOLDER_TEXT,
-    default: CONFIG_ID_PLACEHOLDER_TEXT,
-  },
-};
 
-export const HELPER_TEXT_MAP: Record<string, Record<string, string>> = {
-  port: {
-    in: PORTS_HELPER_TEXT,
-    default: PORT_HELPER_TEXT,
-  },
-  config_id: {
-    in: CONFIGS_HELPER_TEXT,
-    default: CONFIG_ERROR_MESSAGE,
-  },
-};
+export const STATUS_CODE_PLACEHOLDER_TEXT = 'e.g., 200';
+export const STATUS_CODES_PLACEHOLDER_TEXT = 'e.g., 200,403,500';
+
+export const STATUS_CODE_HELPER_TEXT = 'Enter a status code number.';
+export const STATUS_CODES_HELPER_TEXT =
+  'Enter one or more status codes separated by commas.';
+
+export const STATUS_CODE_ERROR_MESSAGE = 'Enter a valid status code number.';
+export const STATUS_CODES_ERROR_MESSAGE =
+  'Enter valid status codes as integers separated by commas.';
 
 export const entityLabelMap = {
   linode: 'Linode',

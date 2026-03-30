@@ -1,5 +1,5 @@
 import { useGetChildAccountsQuery } from '@linode/queries';
-import { CircleProgress, Paper, Stack } from '@linode/ui';
+import { Notice, Paper, Stack } from '@linode/ui';
 import { useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import React from 'react';
@@ -10,6 +10,7 @@ import { useOrderV2 } from 'src/hooks/useOrderV2';
 import { usePaginationV2 } from 'src/hooks/usePaginationV2';
 
 import { useIsIAMDelegationEnabled } from '../hooks/useIsIAMEnabled';
+import { usePermissions } from '../hooks/usePermissions';
 import { AccountDelegationsTable } from './AccountDelegationsTable';
 
 const DELEGATIONS_ROUTE = '/iam/delegations';
@@ -17,6 +18,10 @@ const DELEGATIONS_ROUTE = '/iam/delegations';
 export const AccountDelegations = () => {
   const navigate = useNavigate();
   const { isIAMDelegationEnabled } = useIsIAMDelegationEnabled();
+  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions(
+    'account',
+    ['list_all_child_accounts']
+  );
 
   const { company } = useSearch({
     from: '/iam',
@@ -78,12 +83,18 @@ export const AccountDelegations = () => {
     });
   };
 
-  if (isLoading) {
-    return <CircleProgress />;
+  if (!permissions?.list_all_child_accounts) {
+    return (
+      <Notice variant="error">
+        You do not have permission to view account delegations.
+      </Notice>
+    );
   }
+
   if (!isIAMDelegationEnabled) {
     return null;
   }
+
   return (
     <Paper sx={(theme) => ({ marginTop: theme.tokens.spacing.S16 })}>
       <Stack
@@ -112,7 +123,7 @@ export const AccountDelegations = () => {
         delegations={childAccountsWithDelegates?.data ?? []}
         error={error}
         handleOrderChange={handleOrderChange}
-        isLoading={isLoading}
+        isLoading={isLoading || isPermissionsLoading}
         numCols={numCols}
         order={order}
         orderBy={orderBy}

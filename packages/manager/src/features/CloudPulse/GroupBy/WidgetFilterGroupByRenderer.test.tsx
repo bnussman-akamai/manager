@@ -53,10 +53,12 @@ describe('Widget Group By Renderer', () => {
     });
     renderWithTheme(component);
 
-    const groupByIcon = screen.getByTestId('group-by');
+    const groupByIcon = screen.getByTestId('widget-group-by');
     expect(groupByIcon).toBeInTheDocument();
     expect(groupByIcon).toBeDisabled();
-
+    expect(
+      screen.getByTestId('No dimensions available for grouping')
+    ).toBeVisible();
     await groupByIcon.click();
 
     const drawer = screen.queryByTestId('drawer');
@@ -72,7 +74,7 @@ describe('Widget Group By Renderer', () => {
 
     renderWithTheme(component);
 
-    const groupByIcon = screen.getByTestId('group-by');
+    const groupByIcon = screen.getByTestId('widget-group-by');
 
     await groupByIcon.click();
 
@@ -96,7 +98,7 @@ describe('Widget Group By Renderer', () => {
     });
     renderWithTheme(component);
 
-    const groupByIcon = screen.getByTestId('group-by');
+    const groupByIcon = screen.getByTestId('widget-group-by');
     expect(groupByIcon).toBeEnabled();
 
     const drawer = screen.queryByTestId('drawer');
@@ -113,7 +115,7 @@ describe('Widget Group By Renderer', () => {
     });
     renderWithTheme(component);
 
-    const groupByIcon = screen.getByTestId('group-by');
+    const groupByIcon = screen.getByTestId('widget-group-by');
 
     await groupByIcon.click();
 

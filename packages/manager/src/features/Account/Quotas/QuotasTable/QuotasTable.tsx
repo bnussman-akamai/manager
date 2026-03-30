@@ -48,14 +48,16 @@ export const QuotasTable = (props: QuotasTableProps) => {
     errorMessage: quotasErrorMessage,
     queries: quotaUsageQueries,
     isFetching: isFetchingQuotas,
-  } = useGetQuotas(
-    selectedLocation?.value,
-    selectedService.value,
+  } = useGetQuotas({
+    selectedLocation: selectedLocation?.value,
+    selectedService: selectedService.value,
     collectionName,
-    isGlobalScope ? true : hasSelectedLocation
-  );
+    enabled: isGlobalScope ? true : hasSelectedLocation,
+  });
 
-  if (quotasErrorMessage) {
+  const isNotFoundErrorIgnored = quotasErrorMessage === 'Not found';
+
+  if (quotasErrorMessage && !isNotFoundErrorIgnored) {
     return <ErrorState errorText={quotasErrorMessage} />;
   }
 
@@ -91,16 +93,22 @@ export const QuotasTable = (props: QuotasTableProps) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {hasSelectedLocation && isFetchingQuotas ? (
+          {isFetchingQuotas ? (
             <TableRowLoading
               columns={4}
-              rows={3}
+              rows={isGlobalScope ? 1 : 3}
               sx={{ height: QUOTA_ROW_MIN_HEIGHT }}
             />
           ) : !isGlobalScope && !hasSelectedLocation ? (
             <TableRowEmpty
               colSpan={4}
               message="Apply filters above to see quotas and current usage."
+              sx={{ height: QUOTA_ROW_MIN_HEIGHT }}
+            />
+          ) : isNotFoundErrorIgnored ? (
+            <TableRowEmpty
+              colSpan={4}
+              message="No quotas to display."
               sx={{ height: QUOTA_ROW_MIN_HEIGHT }}
             />
           ) : quotasWithUsage.length === 0 ? (

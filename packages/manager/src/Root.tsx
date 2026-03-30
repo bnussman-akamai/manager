@@ -46,6 +46,7 @@ import { sessionExpirationContext } from './context/sessionExpirationContext';
 import { switchAccountSessionContext } from './context/switchAccountSessionContext';
 import { useIsACLPEnabled } from './features/CloudPulse/Utils/utils';
 import { useIsDatabasesEnabled } from './features/Databases/utilities';
+import { useIsPrivateImageSharingEnabled } from './features/Images/utils';
 import { useIsPlacementGroupsEnabled } from './features/PlacementGroups/utils';
 import { TOPMENU_HEIGHT } from './features/TopMenu/constants';
 import { GoTo } from './GoTo';
@@ -166,6 +167,7 @@ export const Root = () => {
   const { data: accountSettings } = useAccountSettings();
   const { isDatabasesEnabled } = useIsDatabasesEnabled();
   const { isPlacementGroupsEnabled } = useIsPlacementGroupsEnabled();
+  const { isPrivateImageSharingEnabled } = useIsPrivateImageSharingEnabled();
   const { isACLPEnabled } = useIsACLPEnabled();
   const flags = useFlags();
 
@@ -176,6 +178,7 @@ export const Root = () => {
       flags,
       globalErrors,
       isACLPEnabled,
+      isPrivateImageSharingEnabled,
       isDatabasesEnabled,
       isPlacementGroupsEnabled,
       profile,

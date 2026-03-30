@@ -21,10 +21,6 @@ import {
   linodeStatsFactory,
   linodeTransferFactory,
   linodeTypeFactory,
-  marketplaceCategoryFactory,
-  marketplacePartnersFactory,
-  marketplaceProductFactory,
-  marketplaceTypeFactory,
   nodeBalancerConfigFactory,
   nodeBalancerConfigNodeFactory,
   nodeBalancerFactory,
@@ -89,6 +85,8 @@ import {
   lkeEnterpriseTypeFactory,
   lkeHighAvailabilityTypeFactory,
   lkeStandardAvailabilityTypeFactory,
+  logsAlertMetricCriteria,
+  logsMetricCriteria,
   longviewActivePlanFactory,
   longviewClientFactory,
   longviewSubscriptionFactory,
@@ -102,6 +100,7 @@ import {
   mysqlConfigResponse,
   networkLoadBalancerFactory,
   networkLoadBalancerListenerFactory,
+  networkLoadBalancerMetricCriteria,
   networkLoadBalancerNodeFactory,
   nodeBalancerTypeFactory,
   nodePoolFactory,
@@ -127,6 +126,7 @@ import {
   serviceTypesFactory,
   stackScriptFactory,
   staticObjects,
+  streamFactory,
   subnetFactory,
   supportReplyFactory,
   supportTicketFactory,
@@ -148,6 +148,8 @@ import type { PathParams } from 'msw';
 
 const getRandomWholeNumber = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1) + min);
+
+import { QuotaResourceMetrics } from '@linode/api-v4';
 
 import { accountEntityFactory } from 'src/factories/accountEntities';
 import { accountRolesFactory } from 'src/factories/accountRoles';
@@ -217,23 +219,85 @@ const makeMockDatabase = (params: PathParams): Database => {
     db.ssl_connection = true;
   }
 
-  if (db.engine === 'postgresql') {
-    db.connection_pool_port = 100;
-  }
-
   const database = databaseFactory.build(db);
 
-  if (database.platform !== 'rdbms-default') {
-    delete database.private_network;
-  }
+  // Mock a database cluster with a public VPC Configuration
+  database.private_network = {
+    public_access: true,
+    subnet_id: 123,
+    vpc_id: 10,
+  };
 
-  if (database.platform === 'rdbms-default' && !!database.private_network) {
+  if (database.private_network) {
     // When a database is configured with a VPC, the primary and standby hostnames are prepended with 'private-' in the backend
     database.hosts = {
       primary: 'private-db-mysql-primary-0.b.linodeb.net',
       standby: 'private-db-mysql-standby-0.b.linodeb.net',
+      /**
+       * The contents of the hosts.endpoints vary based off whether the VPC has public access or not.
+       * If private_network public_access is true, the endpoints should return both public and private addresses.
+       * If private_network public_access is false, the endpoints should only return private addresses.
+       */
+      endpoints: [
+        {
+          role: 'primary',
+          address: 'public-db-mysql-primary-0.b.linodeb.net',
+          port: 3306,
+          public_access: true,
+        },
+        {
+          role: 'primary',
+          address: 'private-db-mysql-primary-0.b.linodeb.net',
+          port: 3306,
+          public_access: false,
+        },
+        {
+          role: 'standby',
+          address: 'public-replica-db-mysql-standby-0.b.linodeb.net',
+          port: 3306,
+          public_access: true,
+        },
+        {
+          role: 'standby',
+          address: 'private-replica-db-mysql-standby-0.b.linodeb.net',
+          port: 3306,
+          public_access: false,
+        },
+        {
+          role: 'primary-connection-pool',
+          address: 'public-db-mysql-primary-0.b.linodeb.net',
+          port: 15848,
+          public_access: true,
+        },
+        {
+          role: 'primary-connection-pool',
+          address: 'private-db-mysql-primary-0.b.linodeb.net',
+          port: 15848,
+          public_access: false,
+        },
+      ],
     };
   }
+
+  // Uncomment the lines below to mock a database cluster without a VPC configuration
+  // database.private_network = null;
+  // database.hosts = {
+  //   primary: 'db-mysql-primary-0.b.linodeb.net',
+  //   endpoints: [
+  //     {
+  //       role: 'primary',
+  //       address: 'db-mysql-primary-0.b.linodeb.net',
+  //       port: 3306,
+  //       public_access: true,
+  //     },
+  //     {
+  //       role: 'primary-connection-pool',
+  //       address: 'public-db-mysql-primary-0.b.linodeb.net',
+  //       port: 15848,
+  //       public_access: true,
+  //     },
+  //   ],
+  // };
 
   return database;
 };
@@ -697,36 +761,6 @@ const netLoadBalancers = [
 ];
 
 const marketplace = [
-  http.get('*/v4beta/marketplace/products', () => {
-    const marketplaceProduct = marketplaceProductFactory.buildList(10);
-    return HttpResponse.json(makeResourcePage([...marketplaceProduct]));
-  }),
-  http.get('*/v4beta/marketplace/products/:productId/details', () => {
-    const marketplaceProductDetail = marketplaceProductFactory.build({
-      details: {
-        overview: {
-          description:
-            'This is a detailed description of the marketplace product.',
-        },
-        pricing: 'Pricing information goes here.',
-        documentation: 'Documentation link or information goes here.',
-        support: 'Support information goes here.',
-      },
-    });
-    return HttpResponse.json(marketplaceProductDetail);
-  }),
-  http.get('*/v4beta/marketplace/categories', () => {
-    const marketplaceCategory = marketplaceCategoryFactory.buildList(10);
-    return HttpResponse.json(makeResourcePage([...marketplaceCategory]));
-  }),
-  http.get('*/v4beta/marketplace/types', () => {
-    const marketplaceType = marketplaceTypeFactory.buildList(100);
-    return HttpResponse.json(makeResourcePage([...marketplaceType]));
-  }),
-  http.get('*/v4beta/marketplace/partners', () => {
-    const marketplacePartner = marketplacePartnersFactory.buildList(100);
-    return HttpResponse.json(makeResourcePage([...marketplacePartner]));
-  }),
   http.post('*/v4beta/marketplace/referral', async () => {
     await sleep(2000);
     return HttpResponse.json({});
@@ -892,6 +926,23 @@ export const handlers = [
       return HttpResponse.json(makeResourcePage(images));
     }
 
+    if (filter?.includes('shared')) {
+      const images = imageFactory.buildList(5, {
+        capabilities: ['cloud-init'],
+        image_sharing: {
+          shared_by: {
+            sharegroup_id: 1,
+            sharegroup_label: 'test-sharegroup',
+            sharegroup_uuid: '123e4567-a12b-12d3-a456-123456789101',
+            source_image_id: 100,
+          },
+        },
+        regions: [],
+        type: 'shared',
+      });
+      return HttpResponse.json(makeResourcePage(images));
+    }
+
     return HttpResponse.json(makeResourcePage([]));
   }),
   http.post<any, UpdateImageRegionsPayload>(
@@ -1018,19 +1069,24 @@ export const handlers = [
     ];
     const aclpSupportedRegionLinodes = [
       linodeFactory.build({
-        label: 'aclp-supported-region-linode-1',
+        label: 'aclp-supported-region-only-aclp-alerts-linode',
         region: 'us-iad',
         id: 1004,
       }),
       linodeFactory.build({
-        label: 'aclp-supported-region-linode-2',
+        label: 'aclp-supported-region-only-legacy-alerts-linode',
         region: 'us-east',
         id: 1005,
       }),
       linodeFactory.build({
-        label: 'aclp-supported-region-linode-3',
+        label: 'aclp-supported-region-no-alerts-linode',
         region: 'us-iad',
         id: 1006,
+      }),
+      linodeFactory.build({
+        label: 'aclp-supported-region-both-alerts-linode',
+        region: 'us-east',
+        id: 1007,
       }),
     ];
     const linodeFirewall = linodeFactory.build({
@@ -1209,13 +1265,11 @@ export const handlers = [
         }),
       ];
       const linodeAclpSupportedRegionDetails = [
-        /** Whether a Linode is ACLP-subscribed can be determined using the useIsLinodeAclpSubscribed hook. */
-
-        // 1. Example: ACLP-subscribed Linode in an ACLP-supported region (mock Linode ID: 1004)
+        // 1. Example: Linode with ACLP alerts in an ACLP-supported region (mock Linode ID: 1004)
         linodeFactory.build({
           id,
           backups: { enabled: false },
-          label: 'aclp-supported-region-linode-1',
+          label: 'aclp-supported-region-only-aclp-alerts-linode',
           region: 'us-iad',
           alerts: {
             user_alerts: [21, 22, 23, 24, 25],
@@ -1227,11 +1281,11 @@ export const handlers = [
             transfer_quota: 0,
           },
         }),
-        // 2. Example: Linode not subscribed to ACLP in an ACLP-supported region (mock Linode ID: 1005)
+        // 2. Example: Linode with only Legacy Alerts in an ACLP-supported region (mock Linode ID: 1005)
         linodeFactory.build({
           id,
           backups: { enabled: false },
-          label: 'aclp-supported-region-linode-2',
+          label: 'aclp-supported-region-only-legacy-alerts-linode',
           region: 'us-east',
           alerts: {
             user_alerts: [],
@@ -1244,13 +1298,10 @@ export const handlers = [
           },
         }),
         // 3. Example: Linode in an ACLP-supported region with NO enabled alerts (mock Linode ID: 1006)
-        // - Whether this Linode is ACLP-subscribed depends on the ACLP release stage:
-        //   a. Beta stage: NOT subscribed to ACLP
-        //   b. GA stage: Subscribed to ACLP
         linodeFactory.build({
           id,
           backups: { enabled: false },
-          label: 'aclp-supported-region-linode-3',
+          label: 'aclp-supported-region-no-alerts-linode',
           region: 'us-iad',
           alerts: {
             user_alerts: [],
@@ -1260,6 +1311,22 @@ export const handlers = [
             network_in: 0,
             network_out: 0,
             transfer_quota: 0,
+          },
+        }),
+        // 4. Example: Linode with both ACLP and Legacy Alerts in an ACLP-supported region (mock Linode ID: 1007)
+        linodeFactory.build({
+          id,
+          backups: { enabled: false },
+          label: 'aclp-supported-region-both-alerts-linode',
+          region: 'us-east',
+          alerts: {
+            user_alerts: [21, 22, 23, 24, 25],
+            system_alerts: [19, 20],
+            cpu: 90,
+            io: 90000,
+            network_in: 0,
+            network_out: 0,
+            transfer_quota: 90,
           },
         }),
       ];
@@ -1297,6 +1364,8 @@ export const handlers = [
           return linodeAclpSupportedRegionDetails[1];
         case 1006:
           return linodeAclpSupportedRegionDetails[2];
+        case 1007:
+          return linodeAclpSupportedRegionDetails[3];
         default:
           return linodeDetail;
       }
@@ -1781,7 +1850,7 @@ export const handlers = [
         endpoint_type: 'E0',
         quota_limit: 1_000_000_000_000_000,
         quota_name: 'Total Capacity',
-        resource_metric: 'byte',
+        resource_metric: QuotaResourceMetrics.BYTE,
         s3_endpoint: 'endpoint1',
       }),
     ];
@@ -3348,13 +3417,14 @@ export const handlers = [
             },
             service_type: serviceType === 'dbaas' ? 'dbaas' : 'linode',
           }),
-          // Mocked 2 alert definitions associated with mock Linode ID '1004' (aclp-supported-region-linode-1)
+          // Mocked 2 alert definitions associated with mock Linode IDs '1004' and '1007'
+          // (aclp-supported-region-only-aclp-alerts-linode & aclp-supported-region-both-alerts-linode)
           ...alertFactory.buildList(2, {
             rule_criteria: {
               rules: alertRulesFactory.buildList(2),
             },
             service_type: serviceType === 'dbaas' ? 'dbaas' : 'linode',
-            entity_ids: ['1004'],
+            entity_ids: ['1004', '1007'],
           }),
           ...alertFactory.buildList(6, {
             service_type: serviceType === 'dbaas' ? 'dbaas' : 'linode',
@@ -3419,7 +3489,7 @@ export const handlers = [
       ...alertFactory.buildList(2, {
         created_by: 'user1',
         service_type: 'linode',
-        status: 'in progress',
+        status: 'provisioning',
         tags: ['tag-1', 'tag-2'],
         type: 'user',
         updated_by: 'user1',
@@ -3492,10 +3562,15 @@ export const handlers = [
           rules: [firewallMetricRulesFactory.build()],
         },
       }),
+      alertFactory.build({
+        id: 494,
+        label: 'Logs-alert',
+        service_type: 'logs',
+        type: 'user',
+      }),
       ...alertFactory.buildList(3, { status: 'enabling', type: 'user' }),
       ...alertFactory.buildList(3, { status: 'disabling', type: 'user' }),
       ...alertFactory.buildList(3, { status: 'provisioning', type: 'user' }),
-      ...alertFactory.buildList(3, { status: 'in progress', type: 'user' }),
     ];
     return HttpResponse.json(makeResourcePage(alerts));
   }),
@@ -3595,6 +3670,19 @@ export const handlers = [
           })
         );
       }
+      if (params.id === '494' && params.serviceType === 'logs') {
+        return HttpResponse.json(
+          alertFactory.build({
+            id: 494,
+            label: 'Logs-alert',
+            service_type: 'logs',
+            type: 'user',
+            rule_criteria: {
+              rules: [logsAlertMetricCriteria.build()],
+            },
+          })
+        );
+      }
       if (params.id !== undefined) {
         return HttpResponse.json(
           alertFactory.build({
@@ -3613,7 +3701,6 @@ export const handlers = [
             status: pickRandom([
               'enabled',
               'disabled',
-              'in progress',
               'enabling',
               'disabling',
               'provisioning',
@@ -3861,6 +3948,18 @@ export const handlers = [
             scope: ['entity', 'account', 'region'],
           }),
         }),
+        serviceTypesFactory.build({
+          label: 'Network Load Balancers',
+          service_type: 'netloadbalancer',
+          regions: 'us-iad,us-east,eu-west',
+          alert: serviceAlertFactory.build({ scope: ['entity'] }),
+        }),
+        serviceTypesFactory.build({
+          label: 'Logs',
+          service_type: 'logs',
+          regions: undefined,
+          alert: serviceAlertFactory.build({ scope: ['entity'] }),
+        }),
       ],
     };
 
@@ -3876,6 +3975,8 @@ export const handlers = [
       objectstorage: 'Object Storage',
       blockstorage: 'Volumes',
       lke: 'LKE Enterprise',
+      netloadbalancer: 'Network Load Balancers',
+      logs: 'Logs',
     };
     const response = serviceTypesFactory.build({
       service_type: `${serviceType}`,
@@ -3999,6 +4100,26 @@ export const handlers = [
       );
     }
 
+    if (params.serviceType === 'netloadbalancer') {
+      response.data.push(
+        dashboardFactory.build({
+          id: 5,
+          service_type: 'netloadbalancer',
+          label: 'Network Load Balancer',
+        })
+      );
+    }
+
+    if (params.serviceType === 'logs') {
+      response.data.push(
+        dashboardFactory.build({
+          id: 11,
+          service_type: 'logs',
+          label: 'Log Delivery Status',
+        })
+      );
+    }
+
     return HttpResponse.json(response);
   }),
   http.get(
@@ -4073,31 +4194,6 @@ export const handlers = [
               {
                 dimension_label: 'device',
                 label: 'Device name',
-                values: ['lo', 'eth0'],
-              },
-              {
-                dimension_label: 'direction',
-                label: 'Direction of network transfer',
-                values: ['transmit', 'receive'],
-              },
-              {
-                dimension_label: 'LINODE_ID',
-                label: 'Linode ID',
-                values: null,
-              },
-            ],
-            label: 'Network Traffic',
-            metric: 'system_network_io_by_resource',
-            metric_type: 'counter',
-            scrape_interval: '30s',
-            unit: 'byte',
-          },
-          {
-            available_aggregate_functions: ['min', 'max', 'avg', 'sum'],
-            dimensions: [
-              {
-                dimension_label: 'device',
-                label: 'Device name',
                 values: ['loop0', 'sda', 'sdb'],
               },
               {
@@ -4135,6 +4231,11 @@ export const handlers = [
                 label: 'Protocol',
                 dimension_label: 'protocol',
                 values: ['ipv4', 'ipv6'],
+              },
+              {
+                label: 'Test Dimension',
+                dimension_label: 'test',
+                values: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
               },
             ],
           },
@@ -4287,6 +4388,12 @@ export const handlers = [
       if (params.serviceType === 'blockstorage') {
         return HttpResponse.json({ data: blockStorageMetricRules });
       }
+      if (params.serviceType === 'netloadbalancer') {
+        return HttpResponse.json({ data: networkLoadBalancerMetricCriteria });
+      }
+      if (params.serviceType === 'logs') {
+        return HttpResponse.json({ data: logsMetricCriteria });
+      }
       return HttpResponse.json(response);
     }
   ),
@@ -4424,6 +4531,86 @@ export const handlers = [
     } else if (id === '10') {
       serviceType = 'objectstorage';
       dashboardLabel = 'Endpoint Dashboard';
+    } else if (id === '5') {
+      widgets = [
+        {
+          metric: 'nlb_ingress_traffic',
+          unit: 'Bps',
+          label: 'Ingress Traffic Rate',
+          color: 'default',
+          size: 12,
+          chart_type: 'line',
+          y_label: 'nlb_ingress_traffic',
+          aggregate_function: 'sum',
+        },
+        {
+          metric: 'nlb_ingress_packets',
+          unit: 'packets/s',
+          label: 'Ingress Packets Rate',
+          color: 'default',
+          size: 12,
+          chart_type: 'line',
+          y_label: 'nlb_ingress_packets',
+          aggregate_function: 'sum',
+        },
+        {
+          metric: 'nlb_backend_ingress_traffic',
+          unit: 'Bps',
+          label: 'Ingress Traffic Rate Per backend',
+          color: 'default',
+          size: 12,
+          chart_type: 'line',
+          y_label: 'nlb_backend_ingress_traffic',
+          aggregate_function: 'sum',
+        },
+        {
+          metric: 'nlb_backend_ingress_packets',
+          unit: 'packets/s',
+          label: 'Ingress Packets Rate Per backend',
+          color: 'default',
+          size: 12,
+          chart_type: 'line',
+          y_label: 'nlb_backend_ingress_packets',
+          aggregate_function: 'sum',
+        },
+      ];
+      serviceType = 'netloadbalancer';
+      dashboardLabel = 'Network Load Balancer';
+    } else if (id === '11') {
+      serviceType = 'logs';
+      dashboardLabel = 'Log Delivery Status';
+      widgets = [
+        {
+          metric: 'success_upload_count',
+          unit: 'Count',
+          label: 'Success Upload',
+          color: 'default',
+          size: 6,
+          chart_type: 'area',
+          y_label: 'success_upload_count',
+          aggregate_function: 'sum',
+        },
+        {
+          metric: 'error_upload_count',
+          unit: 'Count',
+          label: 'Error Upload',
+          color: 'default',
+          size: 6,
+          chart_type: 'area',
+          y_label: 'error_upload_count',
+          aggregate_function: 'sum',
+        },
+        {
+          metric: 'error_upload_rate',
+          unit: '%',
+          label: 'Error Rate',
+          color: 'default',
+          size: 12,
+          chart_type: 'area',
+          y_label: 'error_upload_rate',
+          aggregate_function: 'avg',
+        },
+      ];
     } else {
       serviceType = 'linode';
       dashboardLabel = 'Linode Service I/O Statistics';
@@ -4644,6 +4831,9 @@ export const handlers = [
         'Content-Type': 'application/javascript',
       },
     });
+  }),
+  http.get('*/monitor/streams', () => {
+    return HttpResponse.json(makeResourcePage(streamFactory.buildList(10)));
   }),
   ...entityTransfers,
   ...statusPage,

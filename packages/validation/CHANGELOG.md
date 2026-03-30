@@ -1,3 +1,33 @@
+## [2026-03-31] - v0.84.0
+
+
+### Upcoming Features:
+
+- Simplify `UpdateLinodeAlertsSchema` to support simultaneous legacy and ACLP alerting ([#13455](https://github.com/linode/manager/pull/13455))
+- Delivery Logs: Custom HTTPS validation messages improvements ([#13507](https://github.com/linode/manager/pull/13507))
+
+## [2026-03-16] - v0.83.0
+
+
+### Changed:
+
+- Delivery Logs - additional validation in Endpoint URL and Custom Header Name fields ([#13392](https://github.com/linode/manager/pull/13392))
+
+## [2026-02-25] - v0.82.0
+
+
+### Changed:
+
+- Adjust Custom HTTPS Destination validation ([#13274](https://github.com/linode/manager/pull/13274))
+- Adjust Custom HTTPS Destination validation: certificate details, custom headers, content type ([#13331](https://github.com/linode/manager/pull/13331))
+- Delivery Logs - change destination type detection in updateDestinationSchema ([#13380](https://github.com/linode/manager/pull/13380))
+
+### Upcoming Features:
+
+- Updated validation rules for createDatabaseConnectionPoolSchema ([#13276](https://github.com/linode/manager/pull/13276))
+- Update database connection pool size ([#13304](https://github.com/linode/manager/pull/13304))
+- Update the validation schema to match the API ([#13368](https://github.com/linode/manager/pull/13368))
+
 ## [2026-01-26] - v0.81.0
 
 

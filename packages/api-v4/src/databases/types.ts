@@ -32,7 +32,6 @@ export interface DatabaseEngine {
 export type DatabaseStatus =
   | 'active'
   | 'degraded'
-  | 'failed'
   | 'migrated'
   | 'migrating'
   | 'provisioning'
@@ -90,7 +89,21 @@ export interface DatabaseCredentials {
   username: string;
 }
 
+export type HostEndpointRole =
+  | 'primary'
+  | 'primary-connection-pool'
+  | 'standby'
+  | 'standby-connection-pool';
+
+export interface HostEndpoint {
+  address: string;
+  port: number;
+  public_access: boolean;
+  role: HostEndpointRole;
+}
+
 interface DatabaseHosts {
+  endpoints: HostEndpoint[];
   primary: string;
   secondary?: string;
   standby?: string;
@@ -106,7 +119,6 @@ type MemberType = 'failover' | 'primary';
 export interface DatabaseInstance {
   allow_list: string[];
   cluster_size: ClusterSize;
-  connection_pool_port: null | number;
   connection_strings: ConnectionStrings[];
   created: string;
   /** @Deprecated used by rdbms-legacy only, rdbms-default always encrypts */

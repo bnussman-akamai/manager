@@ -9,8 +9,10 @@ import type {
   Firewall,
   KubernetesCluster,
   Linode,
+  NetworkLoadBalancer,
   NodeBalancer,
   ObjectStorageBucket,
+  Stream,
   Volume,
 } from '@linode/api-v4';
 import type { QueryFunction, QueryKey } from '@tanstack/react-query';
@@ -64,8 +66,10 @@ export type QueryFunctionType =
   | Firewall[]
   | KubernetesCluster[]
   | Linode[]
+  | NetworkLoadBalancer[]
   | NodeBalancer[]
   | ObjectStorageBucket[]
+  | Stream[]
   | Volume[];
 /**
  * The non array types of QueryFunctionType like DatabaseEngine|DatabaseType

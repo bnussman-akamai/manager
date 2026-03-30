@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { accountFactory } from 'src/factories';
+import { accountFactory, objectStorageBucketFactory } from 'src/factories';
 import { http, HttpResponse, server } from 'src/mocks/testServer';
 import { renderWithThemeAndHookFormContext } from 'src/utilities/testHelpers';
 
@@ -14,11 +14,49 @@ import { DestinationCreate } from './DestinationCreate';
 import type { CreateDestinationPayload } from '@linode/api-v4';
 import type { Flags } from 'src/featureFlags';
 
+const mockBuckets = [
+  objectStorageBucketFactory.build({
+    hostname: 'bucket-with-hostname.us-east-1.linodeobjects.com',
+    label: 'bucket-with-hostname',
+    region: 'us-east',
+  }),
+  objectStorageBucketFactory.build({
+    hostname: 'bucket-with-s3-endpoint.eu-central-1.linodeobjects.com',
+    label: 'bucket-with-s3-endpoint',
+    region: 'eu-central',
+    s3_endpoint: 'eu-central-1.linodeobjects.com',
+  }),
+];
+
+const queryMocks = vi.hoisted(() => ({
+  useObjectStorageBuckets: vi.fn().mockReturnValue({
+    data: undefined,
+    error: null,
+    isPending: true,
+  }),
+}));
+
+vi.mock('src/queries/object-storage/queries', async () => {
+  const actual = await vi.importActual('src/queries/object-storage/queries');
+  return {
+    ...actual,
+    useObjectStorageBuckets: queryMocks.useObjectStorageBuckets,
+  };
+});
+
 const testConnectionButtonText = 'Test Connection';
 const createDestinationButtonText = 'Create Destination';
 const addCustomHeaderButtonText = 'Add Custom Header';
 
 describe('DestinationCreate', () => {
+  beforeEach(() => {
+    queryMocks.useObjectStorageBuckets.mockReturnValue({
+      data: { buckets: mockBuckets },
+      error: null,
+      isPending: false,
+    });
+  });
+
   const renderDestinationCreate = (
     flags: Partial<Flags>,
     defaultValues?: Partial<CreateDestinationPayload>
@@ -64,17 +102,30 @@ describe('DestinationCreate', () => {
         expect(destinationNameInput).toHaveValue('Test Destination');
       });
 
-      it('should render Host input and allow to type text', async () => {
+      it('should render Endpoint input as disabled in bucket_from_account mode', () => {
         renderDestinationCreate(flags);
 
-        const hostInput = screen.getByLabelText('Host');
-        await userEvent.type(hostInput, 'test-host.com');
-
-        expect(hostInput).toHaveValue('test-host.com');
+        const endpointInput = screen.getByLabelText('Endpoint');
+        expect(endpointInput).toBeDisabled();
       });
 
-      it('should render Bucket input and allow to type text', async () => {
+      it('should render Endpoint input and allow to type text in manual mode', async () => {
         renderDestinationCreate(flags);
+
+        const manualRadio = screen.getByLabelText('Enter Bucket manually');
+        await userEvent.click(manualRadio);
+
+        const endpointInput = screen.getByLabelText('Endpoint');
+        await userEvent.type(endpointInput, 'test-host.com');
+
+        expect(endpointInput).toHaveValue('test-host.com');
+      });
+
+      it('should render Bucket input and allow to type text in manual mode', async () => {
+        renderDestinationCreate(flags);
+
+        const manualRadio = screen.getByLabelText('Enter Bucket manually');
+        await userEvent.click(manualRadio);
 
         const bucketInput = screen.getByLabelText('Bucket');
         await userEvent.type(bucketInput, 'test-bucket');
@@ -103,7 +154,9 @@ describe('DestinationCreate', () => {
       it('should render Log Path Prefix input and allow to type text', async () => {
         renderDestinationCreate(flags);
 
-        const logPathPrefixInput = screen.getByLabelText('Log Path Prefix (optional)');
+        const logPathPrefixInput = screen.getByLabelText(
+          'Log Path Prefix (optional)'
+        );
         await userEvent.type(logPathPrefixInput, 'test-path');
 
         expect(logPathPrefixInput).toHaveValue('test-path');
@@ -130,7 +183,9 @@ describe('DestinationCreate', () => {
           expect(samplePath).toBeInTheDocument();
         });
         // Type the test value inside the input
-        const logPathPrefixInput = screen.getByLabelText('Log Path Prefix (optional)');
+        const logPathPrefixInput = screen.getByLabelText(
+          'Log Path Prefix (optional)'
+        );
 
         await userEvent.type(logPathPrefixInput, 'test');
         // sample path should be created based on *log path* value
@@ -151,13 +206,117 @@ describe('DestinationCreate', () => {
         );
       });
 
+      describe('Bucket selection behavior', () => {
+        it('should default to "Select Bucket associated with the account" radio in create mode', () => {
+          renderDestinationCreate(flags);
+
+          const bucketFromAccountRadio = screen.getByLabelText(
+            'Select Bucket associated with the account'
+          );
+          expect(bucketFromAccountRadio).toBeChecked();
+        });
+
+        it('should disable the Endpoint field when "Select Bucket associated with the account" is selected', () => {
+          renderDestinationCreate(flags);
+
+          const endpointInput = screen.getByLabelText('Endpoint');
+          expect(endpointInput).toBeDisabled();
+        });
+
+        it('should enable the Endpoint field when "Enter Bucket manually" is selected', async () => {
+          renderDestinationCreate(flags);
+
+          const manualRadio = screen.getByLabelText('Enter Bucket manually');
+          await userEvent.click(manualRadio);
+
+          const endpointInput = screen.getByLabelText('Endpoint');
+          expect(endpointInput).toBeEnabled();
+        });
+
+        it('should clear Bucket and Endpoint when switching to "Select Bucket associated with the account"', async () => {
+          renderDestinationCreate(flags);
+
+          // Switch to manual mode and fill in values
+          const manualRadio = screen.getByLabelText('Enter Bucket manually');
+          await userEvent.click(manualRadio);
+
+          const bucketInput = screen.getByLabelText('Bucket');
+          await userEvent.type(bucketInput, 'my-manual-bucket');
+          expect(bucketInput).toHaveValue('my-manual-bucket');
+
+          const endpointInput = screen.getByLabelText('Endpoint');
+          await userEvent.type(endpointInput, 'my-endpoint.com');
+          expect(endpointInput).toHaveValue('my-endpoint.com');
+
+          // Switch back to bucket_from_account
+          const bucketFromAccountRadio = screen.getByLabelText(
+            'Select Bucket associated with the account'
+          );
+          await userEvent.click(bucketFromAccountRadio);
+
+          // Both fields should be cleared
+          const bucketAutocomplete = screen.getByLabelText('Bucket');
+          expect(bucketAutocomplete).toHaveValue('');
+          expect(screen.getByLabelText('Endpoint')).toHaveValue('');
+        });
+
+        it('should set Bucket and Endpoint from hostname when selecting a bucket without s3_endpoint', async () => {
+          renderDestinationCreate(flags);
+
+          // Open the Bucket Autocomplete and select a bucket with only hostname
+          const bucketAutocomplete = screen.getByLabelText('Bucket');
+          await userEvent.click(bucketAutocomplete);
+
+          const bucketOption = await screen.findByText('bucket-with-hostname');
+          await userEvent.click(bucketOption);
+
+          // Bucket should display the selected bucket label
+          await waitFor(() => {
+            expect(bucketAutocomplete).toHaveValue('bucket-with-hostname');
+          });
+
+          // Endpoint should be auto-filled with the bucket's hostname
+          expect(screen.getByLabelText('Endpoint')).toHaveValue(
+            'bucket-with-hostname.us-east-1.linodeobjects.com'
+          );
+        });
+
+        it('should set Bucket and Endpoint from s3_endpoint when selecting a bucket with s3_endpoint', async () => {
+          renderDestinationCreate(flags);
+
+          // Open the Bucket Autocomplete and select a bucket with s3_endpoint
+          const bucketAutocomplete = screen.getByLabelText('Bucket');
+          await userEvent.click(bucketAutocomplete);
+
+          const bucketOption = await screen.findByText(
+            'bucket-with-s3-endpoint'
+          );
+          await userEvent.click(bucketOption);
+
+          // Bucket should display the selected bucket label
+          await waitFor(() => {
+            expect(bucketAutocomplete).toHaveValue('bucket-with-s3-endpoint');
+          });
+
+          // Endpoint should be auto-filled with the bucket's s3_endpoint (takes priority over hostname)
+          expect(screen.getByLabelText('Endpoint')).toHaveValue(
+            'eu-central-1.linodeobjects.com'
+          );
+        });
+      });
+
       describe('given Test Connection and Create Destination buttons', () => {
         const fillOutAkamaiObjectStorageForm = async () => {
           const destinationNameInput =
             screen.getByLabelText('Destination Name');
           await userEvent.type(destinationNameInput, 'Test');
-          const hostInput = screen.getByLabelText('Host');
-          await userEvent.type(hostInput, 'test');
+
+          // Switch to manual bucket entry to allow typing
+          const manualRadio = screen.getByLabelText('Enter Bucket manually');
+          await userEvent.click(manualRadio);
+
+          const endpointInput = screen.getByLabelText('Endpoint');
+          await userEvent.type(endpointInput, 'test');
           const bucketInput = screen.getByLabelText('Bucket');
           await userEvent.type(bucketInput, 'test');
           const accessKeyIDInput = screen.getByLabelText('Access Key ID');
@@ -165,7 +324,9 @@ describe('DestinationCreate', () => {
           const secretAccessKeyInput =
             screen.getByLabelText('Secret Access Key');
           await userEvent.type(secretAccessKeyInput, 'Test');
-          const logPathPrefixInput = screen.getByLabelText('Log Path Prefix (optional)');
+          const logPathPrefixInput = screen.getByLabelText(
+            'Log Path Prefix (optional)'
+          );
           await userEvent.type(logPathPrefixInput, 'Test');
         };
 
@@ -293,8 +454,9 @@ describe('DestinationCreate', () => {
       it('should render Authentication autocomplete with None selected and allow to select Basic', async () => {
         await selectCustomHttpsDestinationType();
 
-        const authenticationAutocomplete =
-          screen.getByLabelText('Authentication');
+        const authenticationAutocomplete = screen.getByLabelText(
+          'Authentication Type'
+        );
 
         expect(authenticationAutocomplete).toHaveValue('None');
 
@@ -309,8 +471,9 @@ describe('DestinationCreate', () => {
         it('should render Username input and allow to type text', async () => {
           await selectCustomHttpsDestinationType();
 
-          const authenticationAutocomplete =
-            screen.getByLabelText('Authentication');
+          const authenticationAutocomplete = screen.getByLabelText(
+            'Authentication Type'
+          );
           await userEvent.click(authenticationAutocomplete);
           const basicAuthentication = await screen.findByText('Basic');
           await userEvent.click(basicAuthentication);
@@ -324,8 +487,9 @@ describe('DestinationCreate', () => {
         it('should render Password input and allow to type text', async () => {
           await selectCustomHttpsDestinationType();
 
-          const authenticationAutocomplete =
-            screen.getByLabelText('Authentication');
+          const authenticationAutocomplete = screen.getByLabelText(
+            'Authentication Type'
+          );
           await userEvent.click(authenticationAutocomplete);
           const basicAuthentication = await screen.findByText('Basic');
           await userEvent.click(basicAuthentication);
@@ -346,7 +510,7 @@ describe('DestinationCreate', () => {
         expect(endpointUrlInput).toHaveValue('https://test-endpoint.com');
       });
 
-      describe('Client Certificate fields', () => {
+      describe('Client Certificate Authentication fields', () => {
         it('should render TLS Hostname input and allow to type text', async () => {
           await selectCustomHttpsDestinationType();
 
@@ -378,10 +542,10 @@ describe('DestinationCreate', () => {
           expect(clientCertificateInput).toHaveValue('test-client-certificate');
         });
 
-        it('should render Client Key input and allow to type text', async () => {
+        it('should render Client Private Key input and allow to type text', async () => {
           await selectCustomHttpsDestinationType();
 
-          const clientKeyInput = screen.getByLabelText('Client Key');
+          const clientKeyInput = screen.getByLabelText('Client Private Key');
           await userEvent.type(clientKeyInput, 'test-client-key');
 
           expect(clientKeyInput).toHaveValue('test-client-key');

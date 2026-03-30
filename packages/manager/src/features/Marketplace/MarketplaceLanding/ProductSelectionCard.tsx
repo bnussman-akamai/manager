@@ -5,6 +5,7 @@ import React from 'react';
 
 import { SelectionCard } from 'src/components/SelectionCard/SelectionCard';
 
+import { formatTrademarkSymbols } from '../shared';
 import { PRODUCT_CARD_GRID_SIZE, PRODUCT_CARD_STYLES } from './styles';
 
 export interface ProductCardData {
@@ -71,7 +72,7 @@ export const ProductSelectionCard = React.memo(
             fontSize: theme.tokens.font.FontSize.Xxxs, // Must come after font
           })}
         >
-          {companyName}
+          {formatTrademarkSymbols(companyName)}
         </Typography>,
         // Description
         <Typography
@@ -87,27 +88,22 @@ export const ProductSelectionCard = React.memo(
           {truncate(description, 200)}
         </Typography>,
         // Type chip (as last element with absolute positioning at bottom)
-        ...(type
-          ? [
-              <Box
-                key="category"
-                sx={(theme) => ({
-                  bottom: theme.spacingFunction(16),
-                  left: theme.spacingFunction(20),
-                  position: 'absolute',
-                })}
-              >
-                <Chip
-                  label={type}
-                  sx={(theme) => ({
-                    backgroundColor:
-                      theme.tokens.alias.Background.Informativesubtle,
-                    fontSize: theme.tokens.font.FontSize.Xxxs,
-                  })}
-                />
-              </Box>,
-            ]
-          : []),
+        <Box
+          key="type"
+          sx={(theme) => ({
+            bottom: theme.spacingFunction(16),
+            left: theme.spacingFunction(20),
+            position: 'absolute',
+          })}
+        >
+          <Chip
+            label={type}
+            sx={(theme) => ({
+              backgroundColor: theme.tokens.alias.Background.Informativesubtle,
+              fontSize: theme.tokens.font.FontSize.Xxxs,
+            })}
+          />
+        </Box>,
       ],
       [companyName, description, type]
     );
@@ -162,11 +158,13 @@ export const ProductSelectionCard = React.memo(
 
     return (
       <SelectionCard
+        data-pendo-id={`Cloud Marketplace-${productName}`}
         disabled={disabled}
         gridSize={PRODUCT_CARD_GRID_SIZE}
-        heading={productName}
+        heading={formatTrademarkSymbols(productName)}
         onClick={onClick}
         renderIcon={renderHeader}
+        role="button"
         subheadings={subheadings}
         sxCardBase={PRODUCT_CARD_STYLES.cardBase}
         sxCardBaseIcon={PRODUCT_CARD_STYLES.cardBaseIcon}

@@ -48,6 +48,10 @@ export interface EnhancedAutocompleteProps<
   noMarginTop?: boolean;
   /** Element to show when the Autocomplete search yields no results. */
   noOptionsText?: JSX.Element | string;
+  /** Handler called when the Select All option is clicked. */
+  onSelectAllClick?: (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+  ) => void;
   placeholder?: string;
   renderInput?: (_params: AutocompleteRenderInputParams) => React.ReactNode;
   /** Label for the "select all" option. */
@@ -96,6 +100,7 @@ export const Autocomplete = <
     keepSearchEnabledOnMobile = false,
     onBlur,
     onChange,
+    onSelectAllClick,
     options,
     placeholder,
     renderInput,
@@ -191,10 +196,30 @@ export const Autocomplete = <
         const isSelectAllOption = option === selectAllOption;
         const ListItem = isSelectAllOption ? StyledListItem : 'li';
 
+        // If this is the Select All option, add a click handler
+        const handleClick = (
+          event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+        ) => {
+          if (isSelectAllOption && onSelectAllClick) {
+            onSelectAllClick(event);
+          }
+          if (props.onClick) {
+            props.onClick(event);
+          }
+        };
+
         return renderOption ? (
           renderOption(props, option, state, ownerState)
         ) : (
-          <ListItem {...props} data-qa-option key={props.key}>
+          <ListItem
+            {...props}
+            data-pendo-id={
+              rest.getOptionLabel ? rest.getOptionLabel(option) : option.label
+            }
+            data-qa-option
+            key={props.key}
+            onClick={isSelectAllOption ? handleClick : props.onClick}
+          >
             <>
               <Box
                 sx={{

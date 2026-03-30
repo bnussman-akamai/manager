@@ -652,3 +652,147 @@ export const firewallNodebalancerMetricCriteria =
       },
     ],
   });
+
+const networkLoadBalancerDimensions: Dimension[] = [
+  {
+    label: 'Port',
+    dimension_label: 'port',
+    values: [],
+  },
+  {
+    label: 'Protocol',
+    dimension_label: 'protocol',
+    values: ['tcp', 'udp'],
+  },
+  {
+    label: 'IP Version',
+    dimension_label: 'ip_version',
+    values: ['v6', 'v4'],
+  },
+  {
+    label: 'VIP',
+    dimension_label: 'ip',
+    values: [],
+  },
+];
+export const networkLoadBalancerMetricCriteria: MetricDefinition[] = [
+  {
+    label: 'Ingress Traffic Rate',
+    metric: 'nlb_ingress_traffic',
+    unit: 'Bps',
+    metric_type: 'gauge',
+    scrape_interval: '60s',
+    is_alertable: true,
+    available_aggregate_functions: ['sum'],
+    dimensions: networkLoadBalancerDimensions,
+  },
+  {
+    label: 'Ingress Packets Rate',
+    metric: 'nlb_ingress_packets',
+    unit: 'packets/s',
+    metric_type: 'gauge',
+    scrape_interval: '60s',
+    is_alertable: true,
+    available_aggregate_functions: ['sum'],
+    dimensions: networkLoadBalancerDimensions,
+  },
+  {
+    label: 'Ingress Traffic Rate Per backend',
+    metric: 'nlb_backend_ingress_traffic',
+    unit: 'Bps',
+    metric_type: 'gauge',
+    scrape_interval: '60s',
+    is_alertable: true,
+    available_aggregate_functions: ['sum'],
+    dimensions: [
+      ...networkLoadBalancerDimensions,
+      {
+        label: 'Node ID',
+        dimension_label: 'node_id',
+        values: [],
+      },
+    ],
+  },
+  {
+    label: 'Ingress Packets Rate Per backend',
+    metric: 'nlb_backend_ingress_packets',
+    unit: 'packets/s',
+    metric_type: 'gauge',
+    scrape_interval: '60s',
+    is_alertable: true,
+    available_aggregate_functions: ['sum'],
+    dimensions: [
+      ...networkLoadBalancerDimensions,
+      {
+        label: 'Node ID',
+        dimension_label: 'node_id',
+        values: [],
+      },
+    ],
+  },
+];
+
+const logsDimensions: Dimension[] = [
+  {
+    label: 'Status Code',
+    dimension_label: 'status_code',
+    values: [],
+  },
+];
+
+export const logsMetricCriteria: MetricDefinition[] = [
+  {
+    label: 'Successful Upload Count',
+    metric: 'success_upload_count',
+    unit: 'Count',
+    scrape_interval: '300s',
+    metric_type: 'gauge',
+    is_alertable: true,
+    available_aggregate_functions: ['sum'],
+    dimensions: logsDimensions,
+  },
+  {
+    label: 'Error Upload Count',
+    metric: 'error_upload_count',
+    unit: 'Count',
+    scrape_interval: '300s',
+    metric_type: 'gauge',
+    is_alertable: true,
+    available_aggregate_functions: ['sum'],
+    dimensions: logsDimensions,
+  },
+  {
+    label: 'Error Upload Rate',
+    metric: 'error_upload_rate',
+    unit: 'Percent',
+    scrape_interval: '300s',
+    metric_type: 'gauge',
+    is_alertable: true,
+    available_aggregate_functions: ['avg'],
+    dimensions: logsDimensions,
+  },
+];
+
+export const logsAlertMetricCriteria =
+  Factory.Sync.makeFactory<AlertDefinitionMetricCriteria>({
+    label: 'Successful Upload Count',
+    metric: 'success_upload_count',
+    unit: 'Count',
+    aggregate_function: 'sum',
+    operator: 'eq',
+    threshold: 1500,
+    dimension_filters: [
+      {
+        label: 'Status Code',
+        dimension_label: 'status_code',
+        operator: 'in',
+        value: '203,402',
+      },
+      {
+        label: 'Status Code',
+        dimension_label: 'status_code',
+        operator: 'eq',
+        value: '503',
+      },
+    ],
+  });

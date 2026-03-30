@@ -19,16 +19,16 @@ const maxLengthMessage = 'Length must be 255 characters or less.';
 const authenticationDetailsSchema = object({
   basic_authentication_user: string()
     .max(maxLength, maxLengthMessage)
-    .required('Username is required for Basic Authentication.'),
+    .required('Username is required for Basic authentication.'),
   basic_authentication_password: string()
     .max(maxLength, maxLengthMessage)
-    .required('Password is required for Basic Authentication.'),
+    .required('Password is required for Basic authentication.'),
 });
 
 const authenticationSchema = object({
   type: string()
     .oneOf(['basic', 'none'])
-    .required('Authentication is required.'),
+    .required('Authentication Type is required.'),
   details: mixed()
     .defined()
     .when('type', {
@@ -39,7 +39,7 @@ const authenticationSchema = object({
           .nullable()
           .test(
             'null-or-undefined',
-            'For none authentication details should be `null` or `undefined`.',
+            'Username and password must be empty when authentication type is None.',
             (value) => !value,
           ),
     }) as Schema<InferType<typeof authenticationDetailsSchema> | undefined>,
@@ -56,20 +56,15 @@ const clientCertificateDetailsSchema = object({
 }).test(
   'all-or-nothing-cert-details',
   'If any certificate detail is provided, all are required.',
-  function (value, context) {
+  function (value) {
     if (!value) {
       return true;
     }
 
-    const {
-      client_ca_certificate,
-      client_certificate,
-      client_private_key,
-      tls_hostname,
-    } = value;
+    const { client_ca_certificate, client_certificate, client_private_key } =
+      value;
 
     const fields = [
-      tls_hostname,
       client_ca_certificate,
       client_certificate,
       client_private_key,
@@ -82,39 +77,30 @@ const clientCertificateDetailsSchema = object({
     }
 
     const errors: ValidationError[] = [];
-    if (!hasValue(tls_hostname)) {
-      errors.push(
-        context.createError({
-          path: `${this.path}.tls_hostname`,
-          message:
-            'TLS Hostname is required when other Client Certificate details are provided.',
-        }),
-      );
-    }
     if (!hasValue(client_ca_certificate)) {
       errors.push(
-        context.createError({
+        this.createError({
           path: `${this.path}.client_ca_certificate`,
           message:
-            'CA Certificate is required when other Client Certificate details are provided.',
+            'CA Certificate is required when other client certificate details are provided.',
         }),
       );
     }
     if (!hasValue(client_certificate)) {
       errors.push(
-        context.createError({
+        this.createError({
           path: `${this.path}.client_certificate`,
           message:
-            'Client Certificate is required when other Client Certificate details are provided.',
+            'Client Certificate is required when other client certificate details are provided.',
         }),
       );
     }
     if (!hasValue(client_private_key)) {
       errors.push(
-        context.createError({
+        this.createError({
           path: `${this.path}.client_private_key`,
           message:
-            'Client Key is required when other Client Certificate details are provided.',
+            'Client Private Key is required when other client certificate details are provided.',
         }),
       );
     }
@@ -123,14 +109,40 @@ const clientCertificateDetailsSchema = object({
   },
 );
 
+const forbiddenCustomHeaderNames = [
+  'content-type',
+  'encoding',
+  'authorization',
+  'host',
+  'akamai',
+];
+
 const customHeaderSchema = object({
   name: string()
     .max(maxLength, maxLengthMessage)
-    .required('Custom Header Name is required.'),
+    .required('Custom Header name is required.')
+    .test(
+      'non-empty-name',
+      'Custom Header name cannot be empty or whitespace only.',
+      (value) => hasValue(value),
+    )
+    .test(
+      'forbidden-custom-header-name',
+      'This Custom Header name cannot be used.',
+      (value) =>
+        !forbiddenCustomHeaderNames.includes(value.trim().toLowerCase()),
+    ),
   value: string()
     .max(maxLength, maxLengthMessage)
-    .required('Custom Header Value is required'),
+    .required('Custom Header value is required.')
+    .test(
+      'non-empty-value',
+      'Custom Header value cannot be empty or whitespace only.',
+      (value) => hasValue(value),
+    ),
 });
+
+const urlRgx = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/\S*)?$/;
 
 const customHTTPSDetailsSchema = object({
   authentication: authenticationSchema.required(),
@@ -139,11 +151,49 @@ const customHTTPSDetailsSchema = object({
     .oneOf(['application/json', 'application/json; charset=utf-8'])
     .nullable()
     .optional(),
-  custom_headers: array().of(customHeaderSchema).min(1).optional(),
+  custom_headers: array()
+    .of(customHeaderSchema)
+    .min(1)
+    .optional()
+    .test(
+      'unique-header-names',
+      'Custom Header names must be unique.',
+      function (headers) {
+        if (!headers || headers.length === 0) {
+          return true;
+        }
+
+        const seenNames = new Set<string>();
+        const errors: ValidationError[] = [];
+
+        headers.forEach((header, index) => {
+          const trimmedName = header?.name?.trim().toLowerCase();
+          if (!trimmedName) {
+            return;
+          }
+
+          if (seenNames.has(trimmedName)) {
+            errors.push(
+              this.createError({
+                path: `${this.path}[${index}].name`,
+                message: 'Custom Header name must be unique.',
+              }),
+            );
+          } else {
+            seenNames.add(trimmedName);
+          }
+        });
+
+        return errors.length === 0 || new ValidationError(errors);
+      },
+    ),
   data_compression: string().oneOf(['gzip', 'None']).required(),
   endpoint_url: string()
     .max(maxLength, maxLengthMessage)
-    .required('Endpoint URL is required.'),
+    .required('Endpoint URL is required.')
+    .test('is-valid-url', 'Endpoint URL must be a valid URL.', (value) =>
+      urlRgx.test(value),
+    ),
 });
 
 const hostRgx =
@@ -153,10 +203,10 @@ const hostRgx =
 const akamaiObjectStorageDetailsBaseSchema = object({
   host: string()
     .max(maxLength, maxLengthMessage)
-    .required('Host is required.')
+    .required('Endpoint is required.')
     .test(
       'host-must-match-with-bucket-name-if-provided',
-      'Bucket name provided as a part of the host must be the same as the bucket.',
+      'Bucket name in the endpoint must match the name in the Bucket field.',
       (value, ctx) => {
         if (ctx.parent.bucket_name) {
           const groups = hostRgx.exec(value)?.groups;
@@ -181,7 +231,7 @@ const akamaiObjectStorageDetailsBaseSchema = object({
     .max(63, 'Bucket name must be between 3 and 63 characters.')
     .test(
       'bucket-name-same-in-host-if-provided',
-      'Bucket must match the bucket name used in the host prefix.',
+      'Bucket must match the bucket name in the Endpoint prefix.',
       (value, ctx) => {
         if (ctx.parent.host) {
           const groups = hostRgx.exec(ctx.parent.host)?.groups;
@@ -248,7 +298,7 @@ export const updateDestinationSchema = createDestinationSchema
           'Object contains unknown fields for Akamai Object Storage Details.',
         );
       }
-      if ('client_certificate_details' in value) {
+      if ('endpoint_url' in value) {
         return customHTTPSDetailsSchema.noUnknown(
           'Object contains unknown fields for Custom HTTPS Details.',
         );
@@ -298,7 +348,7 @@ const detailsShouldNotExistOrBeNull = (schema: MixedSchema) =>
 
 const streamSchemaBase = object({
   label: string()
-    .min(3, 'Stream name must have at least 3 characters')
+    .min(3, 'Stream name must have at least 3 characters.')
     .max(maxLength, maxLengthMessage)
     .required('Stream name is required.'),
   status: mixed<'active' | 'inactive' | 'provisioning'>().oneOf([
@@ -338,7 +388,7 @@ export const updateStreamSchema = streamSchemaBase
       return detailsShouldNotExistOrBeNull(mixed());
     }),
   })
-  .noUnknown('Object contains unknown fields');
+  .noUnknown('Object contains unknown fields.');
 
 export const streamAndDestinationFormSchema = object({
   stream: streamSchemaBase.shape({
@@ -349,7 +399,7 @@ export const streamAndDestinationFormSchema = object({
       otherwise: (schema) =>
         schema
           .nullable()
-          .equals([null], 'Details must be null for audit_logs type'),
+          .equals([null], 'Details must be null for audit_logs type.'),
     }) as Schema<InferType<typeof streamDetailsSchema> | null>,
   }),
   destination: destinationFormSchema.defined().when('stream.destinations', {

@@ -37,6 +37,7 @@ import { objectStorageRouteTree } from './objectStorage';
 import { placementGroupsRouteTree } from './placementGroups';
 import { profileRouteTree } from './profile';
 import { quotasRouteTree } from './quotas';
+import { reservedIpsRouteTree } from './reservedIps';
 import { rootRoute } from './root';
 import { searchRouteTree } from './search';
 import { serviceTransfersRouteTree } from './serviceTransfers';
@@ -88,6 +89,7 @@ export const routeTree = rootRoute.addChildren([
   placementGroupsRouteTree,
   profileRouteTree,
   quotasRouteTree,
+  reservedIpsRouteTree,
   searchRouteTree,
   serviceTransfersRouteTree,
   settingsRouteTree,
@@ -106,6 +108,7 @@ export const router = createRouter({
     isACLPEnabled: false,
     isDatabasesEnabled: false,
     isPlacementGroupsEnabled: false,
+    isPrivateImageSharingEnabled: false,
     profile: undefined,
     queryClient: new QueryClient(),
   },
@@ -121,5 +124,8 @@ declare module '@tanstack/react-router' {
   interface Register {
     // This infers the type of our router and registers it across the entire project
     router: typeof router;
+  }
+  interface HistoryState {
+    surveyLink?: string;
   }
 }

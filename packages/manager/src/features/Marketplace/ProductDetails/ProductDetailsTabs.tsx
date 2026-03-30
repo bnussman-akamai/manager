@@ -7,6 +7,7 @@ import { Tab } from 'src/components/Tabs/Tab';
 import { TabList } from 'src/components/Tabs/TabList';
 import { TabPanels } from 'src/components/Tabs/TabPanels';
 import { Tabs } from 'src/components/Tabs/Tabs';
+import { allowedHTMLAttr, allowedHTMLTagsFlexible } from 'src/constants';
 
 import {
   ContentSection,
@@ -36,7 +37,21 @@ interface TabConfig {
 const MarkdownContentRenderer = ({ content }: { content: string }) => {
   return (
     <StyledTabContent>
-      <Markdown textOrMarkdown={content} />
+      <Markdown
+        openLinksInNewTab
+        sanitizeOptions={{
+          ALLOWED_ATTR: [
+            ...allowedHTMLAttr,
+            'target',
+            'rel',
+            'src',
+            'alt',
+            'style',
+          ],
+          ALLOWED_TAGS: [...allowedHTMLTagsFlexible, 'img', 'sup'],
+        }}
+        textOrMarkdown={content}
+      />
     </StyledTabContent>
   );
 };
@@ -86,7 +101,7 @@ export const ProductDetailsTabs = ({ details }: Props) => {
   if (pricing) {
     tabs.push({
       content: (
-        <ContentSection>
+        <ContentSection sx={{ maxWidth: '800px' }}>
           <MarkdownContentRenderer content={pricing} />
         </ContentSection>
       ),
@@ -99,7 +114,7 @@ export const ProductDetailsTabs = ({ details }: Props) => {
   if (documentation) {
     tabs.push({
       content: (
-        <ContentSection>
+        <ContentSection sx={{ maxWidth: '800px' }}>
           <MarkdownContentRenderer content={documentation} />
         </ContentSection>
       ),
@@ -112,7 +127,7 @@ export const ProductDetailsTabs = ({ details }: Props) => {
   if (support) {
     tabs.push({
       content: (
-        <ContentSection>
+        <ContentSection sx={{ maxWidth: '800px' }}>
           <MarkdownContentRenderer content={support} />
         </ContentSection>
       ),

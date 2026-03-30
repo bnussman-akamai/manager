@@ -17,7 +17,6 @@ import { Factory } from '@linode/utilities';
 export const possibleStatuses: DatabaseStatus[] = [
   'active',
   'degraded',
-  'failed',
   'migrating',
   'migrated',
   'provisioning',
@@ -161,7 +160,6 @@ export const databaseInstanceFactory =
         ? ([1, 3][i % 2] as ClusterSize)
         : ([1, 2, 3][i % 3] as ClusterSize)
     ),
-    connection_pool_port: null,
     connection_strings: [],
     created: '2021-12-09T17:15:12',
     encrypted: false,
@@ -174,10 +172,26 @@ export const databaseInstanceFactory =
         ? {
             primary: 'db-mysql-primary-0.b.linodeb.net',
             secondary: 'db-mysql-secondary-0.b.linodeb.net',
+            endpoints: [
+              {
+                address: 'public-db-mysql-primary-0.b.linodeb.net',
+                role: 'primary',
+                public_access: true,
+                port: 3306,
+              },
+            ],
           }
         : {
             primary: 'db-mysql-primary-0.b.linodeb.net',
             standby: 'db-mysql-secondary-0.b.linodeb.net',
+            endpoints: [
+              {
+                address: 'public-db-mysql-primary-0.b.linodeb.net',
+                role: 'primary',
+                public_access: true,
+                port: 3306,
+              },
+            ],
           }
     ),
     id: Factory.each((i) => i),
@@ -186,9 +200,7 @@ export const databaseInstanceFactory =
     members: {
       '2.2.2.2': 'primary',
     },
-    platform: Factory.each((i) =>
-      adb10(i) ? 'rdbms-legacy' : 'rdbms-default'
-    ),
+    platform: 'rdbms-default',
     region: Factory.each((i) => possibleRegions[i % possibleRegions.length]),
     status: Factory.each((i) => possibleStatuses[i % possibleStatuses.length]),
     type: Factory.each((i) => possibleTypes[i % possibleTypes.length]),
@@ -213,7 +225,6 @@ export const databaseInstanceFactory =
 export const databaseFactory = Factory.Sync.makeFactory<Database>({
   allow_list: [...IPv4List],
   cluster_size: Factory.each(() => pickRandom([1, 3])),
-  connection_pool_port: null,
   connection_strings: [
     {
       driver: 'python',
@@ -231,10 +242,26 @@ export const databaseFactory = Factory.Sync.makeFactory<Database>({
       ? {
           primary: 'db-mysql-primary-0.b.linodeb.net',
           secondary: 'db-mysql-secondary-0.b.linodeb.net',
+          endpoints: [
+            {
+              address: 'public-db-mysql-primary-0.b.linodeb.net',
+              role: 'primary',
+              public_access: true,
+              port: 3306,
+            },
+          ],
         }
       : {
           primary: 'db-mysql-primary-0.b.linodeb.net',
           standby: 'db-mysql-secondary-0.b.linodeb.net',
+          endpoints: [
+            {
+              address: 'public-db-mysql-primary-0.b.linodeb.net',
+              role: 'primary',
+              public_access: true,
+              port: 3306,
+            },
+          ],
         }
   ),
   id: Factory.each((i) => i),
@@ -243,7 +270,7 @@ export const databaseFactory = Factory.Sync.makeFactory<Database>({
     '2.2.2.2': 'primary',
   },
   oldest_restore_time: '2024-09-15T17:15:12',
-  platform: Factory.each((i) => (adb10(i) ? 'rdbms-legacy' : 'rdbms-default')),
+  platform: 'rdbms-default',
   private_network: null,
   port: 3306,
   region: 'us-east',
@@ -384,13 +411,6 @@ export const mysqlConfigResponse = {
       type: 'boolean',
     },
   },
-  service_log: {
-    description:
-      'Store logs for the service so that they are available in the HTTP API and console.',
-    example: true,
-    requires_restart: false,
-    type: ['boolean', 'null'],
-  },
 };
 
 export const postgresConfigResponse = {
@@ -465,6 +485,7 @@ export const postgresConfigResponse = {
     description:
       'Synchronous replication type. Note that the service plan also needs to support synchronous replication.',
     enum: ['quorum', 'off'],
+    example: 'quorum',
     requires_restart: false,
     default: 'off',
     type: 'string',

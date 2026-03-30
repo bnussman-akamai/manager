@@ -1,15 +1,23 @@
 import { useDatabaseCredentialsQuery } from '@linode/queries';
 import { Box, CircleProgress, TooltipIcon, Typography } from '@linode/ui';
 import { Button } from 'akamai-cds-react-components';
+import { enqueueSnackbar } from 'notistack';
 import * as React from 'react';
 
 import { CopyTooltip } from 'src/components/CopyTooltip/CopyTooltip';
 import { Link } from 'src/components/Link';
 import { DB_ROOT_USERNAME } from 'src/constants';
+import {
+  CLUSTER_PROVISIONING_TEXT,
+  CREDENTIALS_ERROR_TEXT,
+  DISABLE_CREDENTIAL_STATES,
+  DISABLED_PASSWORD_BUTTON_TEXT,
+} from 'src/features/Databases/constants';
 import { useFlags } from 'src/hooks/useFlags';
 
 import { isDefaultDatabase } from '../../utilities';
 import { ConnectionDetailsHostRows } from '../ConnectionDetailsHostRows';
+import { ConnectionDetailsHostRows2 } from '../ConnectionDetailsHostRows2';
 import { ConnectionDetailsRow } from '../ConnectionDetailsRow';
 import { ServiceURI } from '../ServiceURI';
 import { StyledGridContainer } from './DatabaseSummaryClusterConfiguration.style';
@@ -57,15 +65,17 @@ export const DatabaseSummaryConnectionDetails = (props: Props) => {
 
   const handleShowPasswordClick = () => {
     setShowPassword((showCredentials) => !showCredentials);
+    getDatabaseCredentials();
   };
 
   React.useEffect(() => {
-    if (showCredentials && !credentials) {
-      getDatabaseCredentials();
+    if (showCredentials && credentialsError) {
+      setShowPassword(false);
+      enqueueSnackbar(CREDENTIALS_ERROR_TEXT, { variant: 'error' });
     }
-  }, [credentials, getDatabaseCredentials, showCredentials]);
+  }, [showCredentials, credentialsError]);
 
-  const disableShowBtn = ['failed', 'provisioning'].includes(database.status);
+  const disableShowBtn = DISABLE_CREDENTIAL_STATES.includes(database.status);
 
   const credentialsBtn = (handleClick: () => void, btnText: string) => {
     return (
@@ -88,11 +98,6 @@ export const DatabaseSummaryConnectionDetails = (props: Props) => {
         <div className={classes.progressCtn}>
           <CircleProgress noPadding size="xs" />
         </div>
-      ) : credentialsError ? (
-        <>
-          <span className={classes.error}>Error retrieving credentials.</span>
-          {credentialsBtn(() => getDatabaseCredentials(), 'Retry')}
-        </>
       ) : (
         credentialsBtn(
           handleShowPasswordClick,
@@ -105,8 +110,8 @@ export const DatabaseSummaryConnectionDetails = (props: Props) => {
           sxTooltipIcon={sxTooltipIcon}
           text={
             database.status === 'provisioning'
-              ? 'Your Database Cluster is currently provisioning.'
-              : 'Your root password is unavailable when your Database Cluster has failed.'
+              ? CLUSTER_PROVISIONING_TEXT
+              : DISABLED_PASSWORD_BUTTON_TEXT
           }
         />
       )}
@@ -116,15 +121,30 @@ export const DatabaseSummaryConnectionDetails = (props: Props) => {
     </>
   );
 
+  const hasPublicVPC = hasVPC && database.private_network?.public_access;
+  const showServiceURIs = flags.hostnameEndpoints && flags.databasePgBouncer;
+
   return (
     <>
       <Typography className={classes.header} variant="h3">
         Connection Details
       </Typography>
       <StyledGridContainer container size={{ lg: 10, md: 10 }} spacing={0}>
-        {flags.databasePgBouncer && (
-          <ConnectionDetailsRow isSummaryTab label="Service URI">
+        {showServiceURIs && (
+          <ConnectionDetailsRow
+            isSummaryTab
+            label={`${hasPublicVPC ? 'Public Service URI' : 'Service URI'} `}
+          >
             <ServiceURI database={database} isGeneralServiceURI />
+          </ConnectionDetailsRow>
+        )}
+        {showServiceURIs && hasPublicVPC && (
+          <ConnectionDetailsRow isSummaryTab label="Private Service URI">
+            <ServiceURI
+              database={database}
+              isGeneralServiceURI
+              showPrivateVPC={true}
+            />
           </ConnectionDetailsRow>
         )}
         <ConnectionDetailsRow isSummaryTab label="Username">
@@ -136,7 +156,11 @@ export const DatabaseSummaryConnectionDetails = (props: Props) => {
         <ConnectionDetailsRow isSummaryTab label="Database name">
           {isLegacy ? database.engine : 'defaultdb'}
         </ConnectionDetailsRow>
-        <ConnectionDetailsHostRows database={database} isSummaryTab />
+        {flags.hostnameEndpoints ? (
+          <ConnectionDetailsHostRows2 database={database} isSummaryTab />
+        ) : (
+          <ConnectionDetailsHostRows database={database} isSummaryTab />
+        )}
         <ConnectionDetailsRow isSummaryTab label="Port">
           {database.port}
         </ConnectionDetailsRow>

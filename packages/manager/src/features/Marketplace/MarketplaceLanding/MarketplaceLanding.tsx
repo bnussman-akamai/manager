@@ -4,6 +4,7 @@ import {
   Box,
   ErrorState,
   LinkButton,
+  SelectedIcon,
   Stack,
   Typography,
 } from '@linode/ui';
@@ -13,13 +14,16 @@ import * as React from 'react';
 
 import EmptyStateCloud from 'src/assets/icons/empty-state-cloud.svg';
 import { DebouncedSearchTextField } from 'src/components/DebouncedSearchTextField';
+import { DocumentTitleSegment } from 'src/components/DocumentTitle';
 import { LandingHeader } from 'src/components/LandingHeader';
 
 import { PRODUCTS } from '../products';
+import { marketplaceContainerStyles } from '../shared';
 import { CategorySection } from './CategorySection';
 import { filterProducts } from './utils';
 
 import type { Category, Product, Type } from '../shared';
+import type { AutocompleteRenderOptionState } from '@mui/material';
 
 export const MarketplaceLanding = () => {
   const navigate = useNavigate();
@@ -87,6 +91,34 @@ export const MarketplaceLanding = () => {
     updateSearchParam('query', searchString || undefined);
   };
 
+  const renderAutocompleteOption = React.useCallback(
+    (prefix: string) =>
+      (
+        props: React.HTMLAttributes<HTMLLIElement> & { key: string },
+        option: { label: string },
+        state: AutocompleteRenderOptionState
+      ) => {
+        const { key, ...rest } = props;
+        return (
+          <li
+            {...rest}
+            data-pendo-id={`Cloud Marketplace Catalog-${option.label}`}
+            key={`${prefix}-${key}`}
+          >
+            <Box
+              sx={{
+                flexGrow: 1,
+              }}
+            >
+              {option.label}
+            </Box>
+            <SelectedIcon visible={state.selected} />
+          </li>
+        );
+      },
+    []
+  );
+
   // Filter products here based on category, search and type filters. If no filters are set, shows all available products.
   const filteredProducts = React.useMemo(
     () =>
@@ -144,20 +176,8 @@ export const MarketplaceLanding = () => {
   const showEmptyState = filteredProducts.length === 0;
 
   return (
-    <Box
-      sx={(theme) => ({
-        px: {
-          sm: theme.spacingFunction(16),
-          xs: theme.spacingFunction(12),
-        },
-        // Adjust Breadcrumb's marginLeft on screens < md to keep it aligned with the Products
-        '& [data-qa-entity-header]': {
-          [theme.breakpoints.down('md')]: {
-            marginLeft: `-${theme.spacingFunction(8)}`,
-          },
-        },
-      })}
-    >
+    <Box sx={marketplaceContainerStyles}>
+      <DocumentTitleSegment segment="Cloud Marketplace - Catalog" />
       <LandingHeader
         breadcrumbProps={{
           crumbOverrides: [
@@ -179,7 +199,7 @@ export const MarketplaceLanding = () => {
         }}
       />
       <Grid container mb={3} spacing={2}>
-        <Grid size={{ xs: 12, sm: 12, md: 7 }}>
+        <Grid size={{ xs: 12, sm: 12, md: 6 }}>
           <DebouncedSearchTextField
             clearable
             debounceTime={250}
@@ -198,15 +218,24 @@ export const MarketplaceLanding = () => {
             value={searchQuery ?? ''}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             data-pendo-id="Cloud Marketplace Catalog-Category"
             label="Category"
+            noOptionsText="No categories match your search"
             onChange={(_, selected) =>
               updateSearchParam('category', selected?.label)
             }
             options={categoryOptions}
             placeholder="Category"
+            renderOption={renderAutocompleteOption('category')}
+            slotProps={{
+              listbox: {
+                sx: {
+                  maxHeight: '50vh',
+                },
+              },
+            }}
             textFieldProps={{
               hideLabel: true,
             }}
@@ -215,15 +244,17 @@ export const MarketplaceLanding = () => {
             }
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             data-pendo-id="Cloud Marketplace Catalog-Type"
             label="Type"
+            noOptionsText="No types match your search"
             onChange={(_, selected) =>
               updateSearchParam('type', selected?.label)
             }
             options={typeOptions}
             placeholder="Type"
+            renderOption={renderAutocompleteOption('type')}
             textFieldProps={{
               hideLabel: true,
             }}

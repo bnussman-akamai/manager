@@ -1,3 +1,28 @@
+## [2026-03-31] - v0.23.0
+
+
+### Changed:
+
+- Keep previous data in streams and destinations paginated queries ([#13489](https://github.com/linode/manager/pull/13489))
+
+### Upcoming Features:
+
+- Implement share groups queries ([#13506](https://github.com/linode/manager/pull/13506))
+
+## [2026-03-16] - v0.22.0
+
+
+### Fixed:
+
+- IAM: fix useGetChildAccountsQuery ([#13419](https://github.com/linode/manager/pull/13419))
+
+## [2026-02-25] - v0.21.0
+
+
+### Tech Stories:
+
+- Clean up unused marketplace v2 queries ([#13396](https://github.com/linode/manager/pull/13396))
+
 ## [2026-01-26] - v0.20.0
 
 

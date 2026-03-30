@@ -2,14 +2,13 @@ import { Typography, useTheme } from '@linode/ui';
 import * as React from 'react';
 
 import { BarPercent } from 'src/components/BarPercent';
-import {
-  convertResourceMetric,
-  pluralizeMetric,
-} from 'src/features/Account/Quotas/utils';
+import { convertResourceMetric } from 'src/features/Account/Quotas/utils';
+
+import type { QuotaResourceMetrics } from '@linode/api-v4';
 
 interface Props {
   limit: number;
-  resourceMetric: string;
+  resourceMetric: QuotaResourceMetrics;
   usage: number;
 }
 
@@ -18,7 +17,7 @@ export const QuotaUsageBar = ({ limit, usage, resourceMetric }: Props) => {
 
   const { convertedUsage, convertedLimit, convertedResourceMetric } =
     convertResourceMetric({
-      initialResourceMetric: pluralizeMetric(limit, resourceMetric),
+      initialResourceMetric: resourceMetric,
       initialUsage: usage,
       initialLimit: limit,
     });
@@ -28,7 +27,8 @@ export const QuotaUsageBar = ({ limit, usage, resourceMetric }: Props) => {
     const convertedLimitString = convertedLimit.toLocaleString();
 
     // Special case to display storage usage
-    if (convertedUsage === 0 && convertedResourceMetric === 'TB') {
+    if (convertedUsage === 0 && usage > 0) {
+      // assumes that the minimum converted non-zero value is expressed with an accuracy of 2 decimal places
       convertedUsageString = '<0.01';
     }
 

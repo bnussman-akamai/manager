@@ -9,19 +9,12 @@ import { TableRow } from 'src/components/TableRow/TableRow';
 import { useFlags } from 'src/hooks/useFlags';
 import { useIsAkamaiAccount } from 'src/hooks/useIsAkamaiAccount';
 
-import {
-  convertResourceMetric,
-  getQuotaError,
-  pluralizeMetric,
-} from '../utils';
+import { convertResourceMetric, getQuotaError } from '../utils';
 
+import type { QuotaWithUsage } from '../utils';
 import type { Quota, QuotaUsage } from '@linode/api-v4';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { Action } from 'src/components/ActionMenu/ActionMenu';
-
-interface QuotaWithUsage extends Quota {
-  usage?: QuotaUsage;
-}
 
 interface QuotasTableRowProps {
   hasUsage: boolean;
@@ -61,10 +54,7 @@ export const QuotasTableRow = (props: QuotasTableRowProps) => {
       isAkamaiAccount);
 
   const { convertedLimit, convertedResourceMetric } = convertResourceMetric({
-    initialResourceMetric: pluralizeMetric(
-      quota.quota_limit,
-      quota.resource_metric
-    ),
+    initialResourceMetric: quota.resource_metric,
     initialUsage: quota.usage?.usage ?? 0,
     initialLimit: quota.quota_limit,
   });
@@ -141,16 +131,13 @@ export const QuotasTableRow = (props: QuotasTableRowProps) => {
           )}
         </Box>
       </TableCell>
-      {hasUsage ? (
-        <TableCell sx={{ paddingRight: 0, textAlign: 'right' }}>
-          <ActionMenu
-            actionsList={[requestIncreaseAction]}
-            ariaLabel={`Action menu for quota ${quota.quota_name}`}
-          />
-        </TableCell>
-      ) : (
-        <TableCell />
-      )}
+
+      <TableCell sx={{ paddingRight: 0, textAlign: 'right' }}>
+        <ActionMenu
+          actionsList={[requestIncreaseAction]}
+          ariaLabel={`Action menu for quota ${quota.quota_name}`}
+        />
+      </TableCell>
     </TableRow>
   );
 };

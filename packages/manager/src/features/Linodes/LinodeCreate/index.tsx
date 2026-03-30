@@ -5,7 +5,7 @@ import {
   useMutateAccountAgreements,
   useProfile,
 } from '@linode/queries';
-import { CircleProgress, Notice, Stack } from '@linode/ui';
+import { CircleProgress, Notice, Stack, Typography } from '@linode/ui';
 import { scrollErrorIntoView } from '@linode/utilities';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -19,6 +19,7 @@ import React, { useEffect, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 
+import { DismissibleBanner } from 'src/components/DismissibleBanner/DismissibleBanner';
 import { DocumentTitleSegment } from 'src/components/DocumentTitle';
 import { LandingHeader } from 'src/components/LandingHeader';
 import { TabPanels } from 'src/components/Tabs/TabPanels';
@@ -45,6 +46,7 @@ import {
   useIsLinodeCloneFirewallEnabled,
   useIsLinodeInterfacesEnabled,
 } from 'src/utilities/linodes';
+import { sanitizeHTML } from 'src/utilities/sanitizeHTML';
 
 import { Actions } from './Actions';
 import { AdditionalOptions } from './AdditionalOptions/AdditionalOptions';
@@ -65,6 +67,7 @@ import { UserData } from './UserData/UserData';
 import {
   captureLinodeCreateAnalyticsEvent,
   defaultValues,
+  EMPTY_ACLP_ALERTS,
   getLinodeCreatePayload,
   useHandleLinodeCreateAnalyticsFormError,
 } from './utilities';
@@ -88,10 +91,10 @@ export const LinodeCreate = () => {
   const { isVMHostMaintenanceEnabled } = useVMHostMaintenanceEnabled();
   const linodeCreateType = useGetLinodeCreateType();
 
-  const { aclpServices } = useFlags();
+  const { aclpServices, linodeCreateBanner } = useFlags();
 
   // In Create flow, alerts always default to 'legacy' mode
-  const [isAclpAlertsBetaCreateFlow, setIsAclpAlertsBetaCreateFlow] =
+  const [isAclpAlertsModeCreateFlow, setIsAclpAlertsModeCreateFlow] =
     React.useState<boolean>(false);
 
   const queryClient = useQueryClient();
@@ -111,6 +114,20 @@ export const LinodeCreate = () => {
     shouldFocusError: false, // We handle this ourselves with `scrollErrorIntoView`
   });
 
+  const handleAlertsModeChange = React.useCallback(
+    (isAclpMode: boolean) => {
+      // Reset alerts to empty defaults when entering ACLP mode so that
+      // previously selected alerts don't persist across mode toggles. While in
+      // legacy mode the alerts field is ignored by the payload builder, so
+      // there is no need to clear it when switching back to legacy mode.
+      if (isAclpMode) {
+        form.setValue('alerts', EMPTY_ACLP_ALERTS);
+      }
+      setIsAclpAlertsModeCreateFlow(isAclpMode);
+    },
+    [form]
+  );
+
   const navigate = useNavigate();
   const { mutateAsync: createLinode } = useCreateLinodeMutation();
   const { mutateAsync: cloneLinode } = useCloneLinodeMutation();
@@ -127,7 +144,7 @@ export const LinodeCreate = () => {
       to: '/linodes/create/os',
     },
     {
-      title: 'Marketplace',
+      title: 'Quick Deploy Apps',
       to: '/linodes/create/marketplace',
     },
     {
@@ -166,8 +183,8 @@ export const LinodeCreate = () => {
     const payload = getLinodeCreatePayload(values, {
       isDualStackEnabled,
       isShowingNewNetworkingUI: isLinodeInterfacesEnabled,
-      isAclpIntegration: aclpServices?.linode?.alerts?.enabled,
-      isAclpAlertsPreferenceBeta: isAclpAlertsBetaCreateFlow,
+      isAclpAlertsEnabled: aclpServices?.linode?.alerts?.enabled,
+      isAclpAlertsMode: isAclpAlertsModeCreateFlow,
     });
 
     try {
@@ -246,6 +263,26 @@ export const LinodeCreate = () => {
   return (
     <FormProvider {...form}>
       <DocumentTitleSegment segment="Create a Linode" />
+      {linodeCreateBanner?.enabled && (
+        <DismissibleBanner
+          preferenceKey="linode-create-banner"
+          spacingBottom={8}
+          variant="info"
+          {...(linodeCreateBanner?.enabled && {
+            'data-pendo-id': linodeCreateBanner?.pendo_id,
+          })}
+        >
+          <Typography
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHTML({
+                sanitizingTier: 'flexible',
+                allowMoreAttrs: ['target'],
+                text: linodeCreateBanner?.message ?? '',
+              }),
+            }}
+          />
+        </DismissibleBanner>
+      )}
       <LandingHeader
         breadcrumbProps={{
           labelTitle: linodeCreateType,
@@ -297,15 +334,15 @@ export const LinodeCreate = () => {
             <Networking />
           )}
           <AdditionalOptions
-            isAlertsBetaMode={isAclpAlertsBetaCreateFlow}
-            onAlertsModeChange={setIsAclpAlertsBetaCreateFlow}
+            isAclpAlertsMode={isAclpAlertsModeCreateFlow}
+            onAlertsModeChange={handleAlertsModeChange}
           />
           <Addons />
           <EUAgreement />
-          <Summary isAlertsBetaMode={isAclpAlertsBetaCreateFlow} />
+          <Summary isAclpAlertsMode={isAclpAlertsModeCreateFlow} />
           <SMTP />
           {secureVMNoticesEnabled && <FirewallAuthorization />}
-          <Actions isAlertsBetaMode={isAclpAlertsBetaCreateFlow} />
+          <Actions isAclpAlertsMode={isAclpAlertsModeCreateFlow} />
         </Stack>
       </form>
     </FormProvider>

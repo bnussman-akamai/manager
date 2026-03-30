@@ -27,9 +27,13 @@ import { DestinationAkamaiObjectStorageDetailsForm } from 'src/features/Delivery
 import { DestinationCustomHttpsDetailsForm } from 'src/features/Delivery/Shared/DestinationCustomHttpsDetailsForm';
 import { destinationTypeOptions } from 'src/features/Delivery/Shared/types';
 import { DestinationAkamaiObjectStorageDetailsSummary } from 'src/features/Delivery/Streams/StreamForm/Delivery/DestinationAkamaiObjectStorageDetailsSummary';
+import { DestinationCustomHTTPSDetailsSummary } from 'src/features/Delivery/Streams/StreamForm/Delivery/DestinationCustomHTTPSDetailsSummary';
 
 import type {
   AkamaiObjectStorageDetails,
+  AkamaiObjectStorageDetailsExtended,
+  CustomHTTPSDetails,
+  CustomHTTPSDetailsExtended,
   DestinationType,
 } from '@linode/api-v4';
 import type { FormMode } from 'src/features/Delivery/Shared/types';
@@ -53,6 +57,7 @@ const akamaiObjectStorageDetailsControlPaths = {
 
 const customHttpsDetailsControlPaths = {
   authenticationType: 'destination.details.authentication.type',
+  authenticationDetails: 'destination.details.authentication.details',
   basicAuthenticationPassword:
     'destination.details.authentication.details.basic_authentication_password',
   basicAuthenticationUser:
@@ -223,10 +228,13 @@ export const StreamFormDelivery = (props: StreamFormDeliveryProps) => {
                 setValue('stream.destinations', [id]);
                 const selectedDestination = findDestination(id);
                 if (selectedDestination) {
-                  setValue('destination.details', {
-                    ...selectedDestination.details,
-                    access_key_secret: '',
-                  });
+                  setValue(
+                    'destination.details',
+                    selectedDestinationType ===
+                      destinationType.AkamaiObjectStorage
+                      ? (selectedDestination.details as AkamaiObjectStorageDetailsExtended)
+                      : (selectedDestination.details as CustomHTTPSDetailsExtended)
+                  );
                 }
               }
 
@@ -304,14 +312,22 @@ export const StreamFormDelivery = (props: StreamFormDeliveryProps) => {
         </>
       )}
       {isACLPLogsCustomHttpsEnabled &&
-        selectedDestinationType === destinationType.CustomHttps &&
-        creatingNewDestination &&
-        !selectedDestinations?.length && (
-          <DestinationCustomHttpsDetailsForm
-            controlPaths={customHttpsDetailsControlPaths}
-            entity="stream"
-            mode={mode}
-          />
+        selectedDestinationType === destinationType.CustomHttps && (
+          <>
+            {creatingNewDestination && !selectedDestinations?.length && (
+              <DestinationCustomHttpsDetailsForm
+                controlPaths={customHttpsDetailsControlPaths}
+                entity="stream"
+                mode={mode}
+              />
+            )}
+            {selectedDestinations?.[0] && (
+              <DestinationCustomHTTPSDetailsSummary
+                {...(findDestination(selectedDestinations[0])
+                  ?.details as CustomHTTPSDetails)}
+              />
+            )}
+          </>
         )}
     </>
   );
@@ -319,8 +335,15 @@ export const StreamFormDelivery = (props: StreamFormDeliveryProps) => {
   return (
     <Paper>
       <Typography variant="h2">Delivery</Typography>
-      <Typography sx={{ mt: theme.spacingFunction(12) }}>
-        Set the destination for log delivery.
+      <Typography
+        sx={{
+          mt: theme.spacingFunction(12),
+          maxWidth: 440,
+          whiteSpace: 'preserve-spaces',
+        }}
+      >
+        Choose the destination where logs will be delivered. Select a
+        preconfigured destination or create a new one.
       </Typography>
       {isLoading && (
         <Box display="flex" justifyContent="center">

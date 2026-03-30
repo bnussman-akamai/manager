@@ -1,3 +1,62 @@
+## [2026-03-31] - v0.159.0
+
+
+### Removed:
+
+- Old `failed` property from `DatabaseStatus` ([#13505](https://github.com/linode/manager/pull/13505))
+
+### Upcoming Features:
+
+- Replaced `content` with `details` in cloudpulse/types.ts for ACLP-Alerts Notification Channels ([#13495](https://github.com/linode/manager/pull/13495))
+
+## [2026-03-16] - v0.158.0
+
+
+### Added:
+
+- Add `ACLP Logs Datacenter LKE-E` to the Region's `Capability` type ([#13467](https://github.com/linode/manager/pull/13467))
+
+### Changed:
+
+- Export `HostEndpoint` and rename `private_access` to `public_access` ([#13413](https://github.com/linode/manager/pull/13413))
+- Switch delivery endpoints from Beta APIv4 to APIv4 ([#13461](https://github.com/linode/manager/pull/13461))
+- Update  node balancer type for enterprise from premium_40GB to premium_40gb ([#13472](https://github.com/linode/manager/pull/13472))
+
+### Upcoming Features:
+
+- Add `shared` to ImageType ([#13418](https://github.com/linode/manager/pull/13418))
+- Add logs to `CloudPulseServiceType` and `capabilityServiceTypeMapping`  ([#13445](https://github.com/linode/manager/pull/13445))
+
+## [2026-02-25] - v0.157.0
+
+
+### Added:
+
+- New quota properties ([#13177](https://github.com/linode/manager/pull/13177))
+- `Maintenance Policy` to Linode Capabilities ([#13269](https://github.com/linode/manager/pull/13269))
+
+### Changed:
+
+- Adjust Custom HTTPS Destination types ([#13274](https://github.com/linode/manager/pull/13274))
+- Adjust Custom HTTPS Destination types: content type, data compression, custom headers ([#13331](https://github.com/linode/manager/pull/13331))
+- Delivery Logs - adjust DestinationDetailsPayload type for Custom HTTPS destinations ([#13380](https://github.com/linode/manager/pull/13380))
+- New fields in the NodeBalancer details object and NodeBalancerVPC object to align with recent API updates ([#13394](https://github.com/linode/manager/pull/13394))
+
+### Removed:
+
+- The value 'in-progress' from cloudpulse/types.ts ([#13406](https://github.com/linode/manager/pull/13406))
+
+### Tech Stories:
+
+- Clean up unused marketplace v2 apiv4 endpoints ([#13396](https://github.com/linode/manager/pull/13396))
+
+### Upcoming Features:
+
+- RESPROT2- Added lock permissions to IAM types (AccountAdmin and AccountViewer ) ([#13305](https://github.com/linode/manager/pull/13305))
+- Rename the marketplace contact sales POST API route ([#13368](https://github.com/linode/manager/pull/13368))
+- Deprecate connection_pool_port, add endpoints property to DatabaseHosts ([#13386](https://github.com/linode/manager/pull/13386))
+- Update types for network load balancer integration with `CloudPulse Metrics` ([#13387](https://github.com/linode/manager/pull/13387))
+
 ## [2026-01-26] - v0.156.0
 
 

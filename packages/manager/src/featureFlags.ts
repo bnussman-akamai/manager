@@ -95,6 +95,11 @@ interface AclpFlag {
    */
   bypassAccountCapabilities?: boolean;
   /**
+   * This property indicates whether to show the "Download CSV" icon in the alert details page or not
+   */
+  enableCSVDownload?: boolean;
+
+  /**
    * This property indicates whether the feature is enabled
    */
   enabled: boolean;
@@ -129,6 +134,10 @@ interface AclpLogsFlag extends BetaFeatureFlag {
    * This property indicates whether to show Custom HTTPS destination type
    */
   customHttpsEnabled?: boolean;
+  /**
+   * This property indicates whether the feature is new or not
+   */
+  new?: boolean;
 }
 
 interface LkeEnterpriseFlag extends BaseFeatureFlag {
@@ -170,7 +179,9 @@ interface AclpAlerting {
   alertDefinitions: boolean;
   beta: boolean;
   editDisabledStatuses?: AlertStatusType[];
+  maxDimensionFiltersValues?: number;
   maxEmailChannelRecipients?: number;
+  new?: boolean;
   notificationChannels: boolean;
   recentActivity: boolean;
   systemChannelSupportedServices?: CloudPulseServiceType[]; // linode, dbaas, etc.
@@ -237,12 +248,15 @@ export interface Flags {
   gecko2: GeckoFeatureFlag;
   generationalPlansv2: GenerationalPlansFlag;
   gpuv2: GpuV2;
+  hostnameEndpoints: boolean;
   iam: BaseFeatureFlag;
   iamDelegation: BaseFeatureFlag;
   iamLimitedAvailabilityBadges: boolean;
   ipv6Sharing: boolean;
+  kubernetesBlackwellPlans: boolean;
   limitsEvolution: LimitsEvolution;
   linodeCloneFirewall: boolean;
+  linodeCreateBanner: LinodeCreateBanner;
   linodeDiskEncryption: boolean;
   linodeInterfaces: LinodeInterfacesFlag;
   lkeEnterprise2: LkeEnterpriseFlag;
@@ -260,11 +274,13 @@ export interface Flags {
   objectStorageGlobalQuotas: boolean;
   objMultiCluster: boolean;
   objSummaryPage: boolean;
+  placementGroupPolicyUpdate: boolean;
   privateImageSharing: boolean;
   productInformationBanners: ProductInformationBannerFlag[];
   promos: boolean;
   promotionalOffers: PromotionalOffer[];
   referralBannerText: BannerContent;
+  reserveIp: boolean;
   resourceLock: ResourceLockFlag;
   secureVmCopy: SecureVMCopy;
   selfServeBetas: boolean;
@@ -383,6 +399,7 @@ export type ProductInformationBannerLocation =
   | 'NodeBalancers'
   | 'Object Storage'
   | 'Placement Groups'
+  | 'Reserved IPs'
   | 'StackScripts'
   | 'Volumes'
   | 'VPC';
@@ -428,4 +445,9 @@ export type AclpServices = {
 
 interface GenerationalPlansFlag extends BaseFeatureFlag {
   allowedPlans: string[];
+}
+
+interface LinodeCreateBanner extends BaseFeatureFlag {
+  message?: string;
+  pendo_id?: string;
 }

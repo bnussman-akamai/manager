@@ -1,5 +1,5 @@
 import { useDatabaseCredentialsQuery } from '@linode/queries';
-import { Button } from '@linode/ui';
+import { Button, TooltipIcon, Typography } from '@linode/ui';
 import { Grid, styled } from '@mui/material';
 import copy from 'copy-to-clipboard';
 import { enqueueSnackbar } from 'notistack';
@@ -8,25 +8,34 @@ import React, { useState } from 'react';
 import { Code } from 'src/components/Code/Code';
 import { CopyTooltip } from 'src/components/CopyTooltip/CopyTooltip';
 import {
-  StyledGridContainer,
-  StyledLabelTypography,
-  StyledValueGrid,
-} from 'src/features/Databases/DatabaseDetail/DatabaseSummary/DatabaseSummaryClusterConfiguration.style';
+  CLUSTER_PROVISIONING_TEXT,
+  CREDENTIALS_ERROR_TEXT,
+  DISABLE_CREDENTIAL_STATES,
+  DISABLED_PASSWORD_BUTTON_TEXT,
+} from 'src/features/Databases/constants';
+import { StyledValueGrid } from 'src/features/Databases/DatabaseDetail/DatabaseSummary/DatabaseSummaryClusterConfiguration.style';
 
 import type { Database, DatabaseCredentials } from '@linode/api-v4';
 
 interface ServiceURIProps {
   database: Database;
   isGeneralServiceURI?: boolean;
+  showPrivateVPC?: boolean;
 }
 
 export const ServiceURI = (props: ServiceURIProps) => {
-  const { database, isGeneralServiceURI = false } = props;
+  const {
+    database,
+    isGeneralServiceURI = false,
+    showPrivateVPC = false,
+  } = props;
 
   const [hidePassword, setHidePassword] = useState(true);
   const [isCopying, setIsCopying] = useState(false);
   const engine =
     database.engine === 'postgresql' ? 'postgres' : database.engine;
+  const generalSslmode =
+    engine === 'mysql' ? 'ssl-mode=REQUIRED' : 'sslmode=require';
 
   const {
     data: credentials,
@@ -36,6 +45,26 @@ export const ServiceURI = (props: ServiceURIProps) => {
     refetch: getDatabaseCredentials,
   } = useDatabaseCredentialsQuery(database.engine, database.id, !hidePassword);
 
+  const hasVPC = Boolean(database?.private_network?.vpc_id);
+  const hasPublicVPC = hasVPC && database.private_network?.public_access;
+  // If there is a VPC, use VPC public access unless we want to explicitly show private access, otherwise default to public
+  const publicAccess =
+    hasPublicVPC && showPrivateVPC
+      ? false
+      : hasVPC
+        ? database.private_network?.public_access
+        : true;
+
+  const primaryHost = database.hosts?.endpoints.find(
+    (endpoint) =>
+      endpoint.role === 'primary' && endpoint.public_access === publicAccess
+  );
+  const primaryConnectionPoolHost = database.hosts?.endpoints.find(
+    (endpoint) =>
+      endpoint.role === 'primary-connection-pool' &&
+      endpoint.public_access === publicAccess
+  );
+
   const handleCopy = async () => {
     if (!credentials) {
       try {
@@ -43,74 +72,99 @@ export const ServiceURI = (props: ServiceURIProps) => {
         const { data } = await getDatabaseCredentials();
         if (data) {
           // copy with revealed credentials
-          copy(getServiceURIText(isGeneralServiceURI, data));
+          copy(getServiceURIText(data, isGeneralServiceURI));
         } else {
-          enqueueSnackbar(
-            'There was an error retrieving cluster credentials. Please try again.',
-            { variant: 'error' }
-          );
+          enqueueSnackbar(CREDENTIALS_ERROR_TEXT, { variant: 'error' });
         }
         setIsCopying(false);
       } catch {
         setIsCopying(false);
-        enqueueSnackbar(
-          'There was an error retrieving cluster credentials. Please try again.',
-          { variant: 'error' }
-        );
+        enqueueSnackbar(CREDENTIALS_ERROR_TEXT, { variant: 'error' });
       }
     }
   };
 
   const getServiceURIText = (
-    isGeneralServiceURI: boolean,
-    credentials: DatabaseCredentials | undefined
+    credentials: DatabaseCredentials | undefined,
+    isGeneralServiceURI?: boolean
   ) => {
     if (isGeneralServiceURI) {
-      return `${engine}://${credentials?.password}@${database.hosts?.primary}:${database.port}/defaultdb?sslmode=require`;
+      return `${engine}://${credentials?.username}:${credentials?.password}@${primaryHost?.address}:${primaryHost?.port}/defaultdb?${generalSslmode}`;
     }
-    return `postgres://${credentials?.username}:${credentials?.password}@${database.hosts?.primary}:${database.connection_pool_port}/{connection pool label}?sslmode=require`;
-  };
-
-  const getCredentials = (isGeneralServiceURI: boolean) => {
-    return !isGeneralServiceURI
-      ? `${credentials?.username}:${credentials?.password}`
-      : credentials?.password;
+    return `postgres://${credentials?.username}:${credentials?.password}@${primaryConnectionPoolHost?.address}:${primaryConnectionPoolHost?.port}/{connection pool label}?sslmode=require`;
   };
 
   // hide loading state if the user clicks on the copy icon
   const showBtnLoading =
-    !isCopying && (credentialsLoading || credentialsFetching);
+    !hidePassword && !isCopying && (credentialsLoading || credentialsFetching);
 
-  const ErrorButton = (
-    <Button
-      loading={showBtnLoading}
-      onClick={() => getDatabaseCredentials()}
-      sx={(theme) => ({
-        p: 0,
-        color: theme.tokens.alias.Content.Text.Negative,
-        '&:hover, &:focus': {
-          color: theme.tokens.alias.Content.Text.Negative,
-        },
-      })}
-    >
-      {`{error. click to retry}`}
-    </Button>
+  const disablePasswordBtn = DISABLE_CREDENTIAL_STATES.includes(
+    database.status
   );
 
-  const RevealPasswordButton = (
-    <Button
-      loading={showBtnLoading}
-      onClick={() => {
-        setHidePassword(false);
-        getDatabaseCredentials();
-      }}
-      sx={{ p: 0 }}
-    >
-      {`{click to reveal password}`}
-    </Button>
-  );
+  const disabledPasswordTooltipText =
+    database.status === 'provisioning'
+      ? CLUSTER_PROVISIONING_TEXT
+      : DISABLED_PASSWORD_BUTTON_TEXT;
 
-  const ServiceURIJSX = (isGeneralServiceURI: boolean) => (
+  React.useEffect(() => {
+    if (!hidePassword && credentialsError) {
+      setHidePassword(true);
+      enqueueSnackbar(CREDENTIALS_ERROR_TEXT, { variant: 'error' });
+    }
+  }, [credentialsError, hidePassword]);
+
+  const renderPassword = () => {
+    if (hidePassword || credentialsError || !credentials) {
+      return (
+        <Button
+          disabled={disablePasswordBtn}
+          loading={showBtnLoading}
+          onClick={() => {
+            getDatabaseCredentials();
+            setHidePassword(false);
+          }}
+          sx={{
+            p: 0,
+            '& .MuiButton-icon': {
+              margin: 0,
+            },
+          }}
+          tooltipText={disablePasswordBtn ? disabledPasswordTooltipText : ''}
+        >
+          {`{click to reveal password}`}
+        </Button>
+      );
+    }
+
+    return `${credentials?.username}:${credentials?.password}`;
+  };
+
+  if (
+    (isGeneralServiceURI && !primaryHost) ||
+    (engine === 'postgres' && !primaryConnectionPoolHost)
+  ) {
+    return (
+      <Grid display="contents">
+        <StyledValueGrid
+          data-testid="service-uri"
+          size="grow"
+          sx={{
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            p: '0',
+          }}
+          whiteSpace="pre"
+        >
+          <Typography fontStyle="italic">
+            Your Service URI will appear here once it is available.
+          </Typography>
+        </StyledValueGrid>
+      </Grid>
+    );
+  }
+
+  return (
     <Grid display="contents">
       <StyledValueGrid
         data-testid="service-uri"
@@ -118,26 +172,23 @@ export const ServiceURI = (props: ServiceURIProps) => {
         sx={{
           overflowX: 'auto',
           overflowY: 'hidden',
-          p: isGeneralServiceURI ? '0' : null,
+          p: '0',
         }}
         whiteSpace="pre"
       >
         {engine}://
-        {credentialsError
-          ? ErrorButton
-          : hidePassword || (!credentialsError && !credentials)
-            ? RevealPasswordButton
-            : getCredentials(isGeneralServiceURI)}
-        {!isGeneralServiceURI ? (
+        {renderPassword()}
+        {isGeneralServiceURI ? (
           <>
-            @{database.hosts?.primary}:{database.connection_pool_port}/
-            <StyledCode>{'{connection pool label}'}</StyledCode>
-            ?sslmode=require
+            @{primaryHost?.address}:
+            {`${primaryHost?.port}/defaultdb?${generalSslmode}`}
           </>
         ) : (
           <>
-            @{database.hosts?.primary}:
-            {`${database.port}/defaultdb?sslmode=require`}
+            @{primaryConnectionPoolHost?.address}:
+            {primaryConnectionPoolHost?.port}/
+            <StyledCode>{'{connection pool label}'}</StyledCode>
+            ?sslmode=require
           </>
         )}
       </StyledValueGrid>
@@ -148,34 +199,32 @@ export const ServiceURI = (props: ServiceURIProps) => {
       ) : (
         <Grid alignContent="center" size="auto">
           <StyledCopyTooltip
+            disabled={disablePasswordBtn}
+            disabledReason={disabledPasswordTooltipText}
             onClickCallback={handleCopy}
-            text={getServiceURIText(isGeneralServiceURI, credentials)}
+            text={getServiceURIText(credentials, isGeneralServiceURI)}
+          />
+        </Grid>
+      )}
+      {hasPublicVPC && showPrivateVPC && (
+        <Grid>
+          <TooltipIcon
+            status="info"
+            sxTooltipIcon={{
+              marginLeft: '2px',
+              padding: '0px',
+            }}
+            text={
+              'Private endpoints are resolvable only for resources within the VPC Subnet. Public endpoints are resolvable outside the VPC.'
+            }
           />
         </Grid>
       )}
     </Grid>
   );
-
-  if (isGeneralServiceURI) {
-    return ServiceURIJSX(isGeneralServiceURI);
-  }
-
-  return (
-    <StyledGridContainer display="flex">
-      <Grid
-        size={{
-          md: 1.5,
-          xs: 3,
-        }}
-      >
-        <StyledLabelTypography>Service URI</StyledLabelTypography>
-      </Grid>
-      {ServiceURIJSX(isGeneralServiceURI)}
-    </StyledGridContainer>
-  );
 };
 
-const StyledCode = styled(Code, {
+export const StyledCode = styled(Code, {
   label: 'StyledCode',
 })(() => ({
   margin: 0,
